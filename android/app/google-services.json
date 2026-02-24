@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "556853245697",
+    "project_id": "vistoria-cttu",
+    "storage_bucket": "vistoria-cttu.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:556853245697:android:8a89158b979f2616f4cd00",
+        "android_client_info": {
+          "package_name": "com.example.vistoria_cttu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs_wLsC7KO0XQ_DJCo1e3d31ZGbxr9zFA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
