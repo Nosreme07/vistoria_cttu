@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Importante: Pacote do Firebase
+import 'package:vistoria_cttu/pages/home_page.dart';
 import 'firebase_options.dart'; // Importante: Arquivo que o comando mágico criou
 import 'pages/login_page.dart';
 

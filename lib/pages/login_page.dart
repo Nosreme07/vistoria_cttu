@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart'; // Importa a página inicial
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -9,25 +11,71 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
+  final _telefoneController = TextEditingController();
   final _senhaController = TextEditingController();
+  
   bool _ocultarSenha = true;
+  bool _estaCarregando = false; // Controla a bolinha de carregamento
 
-  void _fazerLogin() {
-    // Como ainda não ligamos o Firebase, vamos apenas simular um login simples
-    if (_emailController.text.isNotEmpty && _senhaController.text.isNotEmpty) {
-      // Usamos pushReplacement para que o usuário não consiga voltar para a tela de login pelo botão de voltar do celular
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    } else {
+  // Máscara para o telefone (igual a do cadastro)
+  final telefoneFormatter = MaskTextInputFormatter(
+    mask: '(##) #####-####',
+    filter: {"#": RegExp(r'[0-9]')},
+  );
+
+  Future<void> _fazerLogin() async {
+    if (_telefoneController.text.isEmpty || _senhaController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, preencha e-mail e senha.'),
-          backgroundColor: Colors.redAccent,
-        ),
+        const SnackBar(content: Text('Preencha o telefone e a senha.'), backgroundColor: Colors.redAccent),
       );
+      return;
+    }
+
+    setState(() {
+      _estaCarregando = true;
+    });
+
+    try {
+      // 1. Pega o telefone limpo (só os números)
+      final telefoneLimpo = telefoneFormatter.getUnmaskedText();
+      
+      // 2. Monta aquele e-mail fictício que usamos no cadastro
+      final emailFicticio = "$telefoneLimpo@cttu.com";
+
+      // 3. Tenta fazer o login no Firebase Auth
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailFicticio,
+        password: _senhaController.text,
+      );
+
+      // 4. Se deu certo, vai para a HomePage
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      }
+
+    } on FirebaseAuthException catch (e) {
+      // Trata os erros comuns (senha errada, usuário não existe)
+      String mensagemErro = 'Erro ao fazer login.';
+      if (e.code == 'user-not-found' || e.code == 'invalid-email' || e.code == 'invalid-credential') {
+        mensagemErro = 'Telefone ou senha incorretos.';
+      } else if (e.code == 'wrong-password') {
+        mensagemErro = 'Senha incorreta.';
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(mensagemErro), backgroundColor: Colors.redAccent),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _estaCarregando = false;
+        });
+      }
     }
   }
 
@@ -46,31 +94,22 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Ícone ou Logo do App
                   Icon(Icons.traffic_rounded, size: 80, color: Colors.blue.shade700),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Vistoria CTTU',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
+                  const Text('Vistoria CTTU', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87)),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Faça login para continuar',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
+                  const Text('Faça login para continuar', style: TextStyle(fontSize: 16, color: Colors.grey)),
                   const SizedBox(height: 32),
                   
-                  // Campo E-mail
+                  // Campo de Telefone (Substituiu o E-mail)
                   TextField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
+                    controller: _telefoneController,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [telefoneFormatter],
                     decoration: InputDecoration(
-                      labelText: 'E-mail',
-                      prefixIcon: const Icon(Icons.email_outlined),
+                      labelText: 'Telefone',
+                      hintText: '(81) 99999-9999',
+                      prefixIcon: const Icon(Icons.phone_android_outlined),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
@@ -79,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                   // Campo Senha
                   TextField(
                     controller: _senhaController,
-                    obscureText: _ocultarSenha, // Esconde os caracteres
+                    obscureText: _ocultarSenha,
                     decoration: InputDecoration(
                       labelText: 'Senha',
                       prefixIcon: const Icon(Icons.lock_outline),
@@ -96,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 32),
                   
-                  // Botão de Entrar
+                  // Botão de Entrar (Com animação de carregamento)
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -104,12 +143,12 @@ class _LoginPageState extends State<LoginPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue.shade700,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      onPressed: _fazerLogin,
-                      child: const Text('ENTRAR', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      onPressed: _estaCarregando ? null : _fazerLogin,
+                      child: _estaCarregando
+                          ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : const Text('ENTRAR', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
