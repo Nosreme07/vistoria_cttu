@@ -47,8 +47,7 @@ class _LoginPageState extends State<LoginPage> {
         email: emailFicticio,
         password: _senhaController.text,
       );
-
-      // 4. Se deu certo, vai para a HomePage
+      
       if (mounted) {
         Navigator.pushReplacement(
           context,

@@ -12,28 +12,28 @@ class _CadastroRotasState extends State<CadastroRotas> {
   final _numeroRotaController = TextEditingController();
   bool _estaCarregando = false;
   
-  // Variável para guardar a cor que o usuário tocou
   Color? _corSelecionada; 
 
-  // Nova paleta expandida com 12 cores diferentes
   final List<Color> _paletaExpandida = [
-    Colors.blue,               // Azul
-    Colors.purple,             // Roxo
-    Colors.amber.shade700,     // Amarelo escuro (melhor contraste)
-    Colors.orange,             // Laranja
-    Colors.green,              // Verde
-    Colors.red,                // Vermelho
-    Colors.pink,               // Rosa
-    Colors.teal,               // Verde-água
-    Colors.indigo,             // Azul escuro/Índigo
-    Colors.brown,              // Marrom
-    Colors.cyan.shade700,      // Ciano escuro
-    Colors.deepOrange,         // Laranja escuro / Ferrugem
+    Colors.blue,
+    Colors.purple,
+    Colors.amber.shade700,
+    Colors.orange,
+    Colors.green,
+    Colors.red,
+    Colors.pink,
+    Colors.teal,
+    Colors.indigo,
+    Colors.brown,
+    Colors.cyan.shade700,
+    Colors.deepOrange,
   ];
 
-  void _abrirFormulario() {
-    _numeroRotaController.clear();
-    _corSelecionada = null; 
+  // A função agora aceita parâmetros opcionais. Se vier com dados, é modo Edição!
+  void _abrirFormulario({String? rotaId, String? numeroAtual, Color? corAtual}) {
+    // Se for edição, preenche com os dados antigos. Se for nova, limpa tudo.
+    _numeroRotaController.text = numeroAtual ?? '';
+    _corSelecionada = corAtual; 
 
     showModalBottomSheet(
       context: context,
@@ -52,7 +52,11 @@ class _CadastroRotasState extends State<CadastroRotas> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Cadastrar Nova Rota', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  // Muda o título dependendo se está editando ou criando
+                  Text(
+                    rotaId == null ? 'Cadastrar Nova Rota' : 'Editar Rota', 
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
+                  ),
                   const SizedBox(height: 16),
                   
                   TextField(
@@ -68,11 +72,10 @@ class _CadastroRotasState extends State<CadastroRotas> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Paleta de cores com as 12 opções
                   Wrap(
-                    spacing: 12, // Espaço horizontal
-                    runSpacing: 12, // Espaço vertical
-                    alignment: WrapAlignment.center, // Centraliza as bolinhas
+                    spacing: 12, 
+                    runSpacing: 12, 
+                    alignment: WrapAlignment.center, 
                     children: _paletaExpandida.map((cor) {
                       bool isSelecionada = _corSelecionada == cor;
                       return GestureDetector(
@@ -100,10 +103,10 @@ class _CadastroRotasState extends State<CadastroRotas> {
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      onPressed: _estaCarregando ? null : () => _salvarRota(setModalState),
+                      onPressed: _estaCarregando ? null : () => _salvarRota(setModalState, rotaId),
                       child: _estaCarregando
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Salvar Rota', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          : Text(rotaId == null ? 'Salvar Rota' : 'Atualizar Rota', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -116,7 +119,8 @@ class _CadastroRotasState extends State<CadastroRotas> {
     );
   }
 
-  Future<void> _salvarRota(StateSetter setModalState) async {
+  // Recebe o ID da rota se for uma edição
+  Future<void> _salvarRota(StateSetter setModalState, String? rotaId) async {
     if (_numeroRotaController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Preencha o número da rota!')));
       return;
@@ -129,13 +133,22 @@ class _CadastroRotasState extends State<CadastroRotas> {
     setModalState(() => _estaCarregando = true);
 
     try {
-      // Verifica se a rota já existe
+      // Verifica se o número da rota já existe no banco
       var rotasExistentes = await FirebaseFirestore.instance
           .collection('rotas')
           .where('numero', isEqualTo: _numeroRotaController.text.trim())
           .get();
 
-      if (rotasExistentes.docs.isNotEmpty) {
+      // Se achou uma rota com esse número, precisamos ver se não é a própria rota que estamos editando!
+      bool isDuplicado = false;
+      for (var doc in rotasExistentes.docs) {
+        if (rotaId == null || doc.id != rotaId) {
+          isDuplicado = true; // Achou uma rota DIFERENTE com o MESMO número
+          break;
+        }
+      }
+
+      if (isDuplicado) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Esta rota já está cadastrada!'), backgroundColor: Colors.red));
           setModalState(() => _estaCarregando = false);
@@ -143,16 +156,28 @@ class _CadastroRotasState extends State<CadastroRotas> {
         return;
       }
 
-      // Salva a nova rota
-      await FirebaseFirestore.instance.collection('rotas').add({
+      // Prepara os dados
+      final dadosDaRota = {
         'numero': _numeroRotaController.text.trim(),
         'cor': _corSelecionada!.value,
-        'criado_em': FieldValue.serverTimestamp(),
-      });
+        if (rotaId == null) 'criado_em': FieldValue.serverTimestamp(), // Só coloca a data de criação se for nova
+      };
+
+      // Se for edição (tem ID), faz o UPDATE. Se for nova, faz o ADD.
+      if (rotaId != null) {
+        await FirebaseFirestore.instance.collection('rotas').doc(rotaId).update(dadosDaRota);
+      } else {
+        await FirebaseFirestore.instance.collection('rotas').add(dadosDaRota);
+      }
 
       if (mounted) {
         Navigator.pop(context); 
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rota salva com sucesso!'), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(rotaId == null ? 'Rota salva com sucesso!' : 'Rota atualizada com sucesso!'), 
+            backgroundColor: Colors.green
+          )
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -174,7 +199,6 @@ class _CadastroRotasState extends State<CadastroRotas> {
     return Scaffold(
       appBar: AppBar(title: const Text('Rotas'), backgroundColor: Colors.brown.shade100),
       body: StreamBuilder<QuerySnapshot>(
-        // Tentamos ordenar por número (lembrando que como salvamos String, o 10 vem antes do 2, mas no Firestore podemos corrigir isso depois se for necessário)
         stream: FirebaseFirestore.instance.collection('rotas').orderBy('numero').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -215,9 +239,23 @@ class _CadastroRotasState extends State<CadastroRotas> {
                     'Rota ${data['numero']}', 
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: corDaRota.withOpacity(0.9)),
                   ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                    onPressed: () => _deletarRota(rotaDoc.id),
+                  // Colocamos o Editar e o Excluir juntos dentro de uma Row
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                        onPressed: () => _abrirFormulario(
+                          rotaId: rotaDoc.id,
+                          numeroAtual: data['numero'],
+                          corAtual: corDaRota,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () => _deletarRota(rotaDoc.id),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -226,7 +264,7 @@ class _CadastroRotasState extends State<CadastroRotas> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _abrirFormulario,
+        onPressed: () => _abrirFormulario(), // Sem parâmetros = Criação de nova rota
         backgroundColor: Colors.brown,
         child: const Icon(Icons.add, color: Colors.white),
       ),
