@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'cadastro_page.dart';
+
+// Imports das suas páginas
 import 'login_page.dart'; 
+import 'cadastro_page.dart';
+import 'vistoria/vistoria_page.dart'; 
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -110,10 +113,16 @@ class HomePage extends StatelessWidget {
         style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
       ),
       onPressed: () {
+        // Lógica de navegação baseada no título do botão
         if (title == 'Cadastro') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const CadastroPage()),
+          );
+        } else if (title == 'Vistoria') { // <-- LÓGICA DE NAVEGAÇÃO DA VISTORIA
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const VistoriaPage()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
