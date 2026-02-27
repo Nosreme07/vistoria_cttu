@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'cadastros/cadastro_usuario.dart';
-import 'cadastros/cadastro_veiculo.dart';
-import 'cadastros/cadastro_rotas.dart';
-import 'cadastros/cadastro_falhas.dart';
-import 'cadastros/cadastro_semaforos.dart';
+import 'package:vistoria_cttu/pages/cadastros/cadastro_usuario.dart';
+import 'package:vistoria_cttu/pages/cadastros/cadastro_veiculo.dart';
+import 'package:vistoria_cttu/pages/cadastros/cadastro_rotas.dart';
+import 'package:vistoria_cttu/pages/cadastros/cadastro_falhas.dart';
+import 'package:vistoria_cttu/pages/cadastros/cadastro_semaforos.dart' as semaforo_page;
 
 class CadastroPage extends StatelessWidget {
   const CadastroPage({super.key});
@@ -16,13 +16,12 @@ class CadastroPage extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Colors.blue.shade100,
       ),
-      // Usamos GridView.count para criar uma grade com 2 colunas
       body: GridView.count(
         crossAxisCount: 2,
         padding: const EdgeInsets.all(16.0),
-        crossAxisSpacing: 16, // Espaço horizontal entre os botões
-        mainAxisSpacing: 16, // Espaço vertical entre os botões
-        childAspectRatio: 1.1, // Controla a altura do botão (1.0 = quadrado perfeito)
+        crossAxisSpacing: 16, 
+        mainAxisSpacing: 16, 
+        childAspectRatio: 1.1, 
         children: [
           _buildDashboardButton(
             context,
@@ -50,7 +49,7 @@ class CadastroPage extends StatelessWidget {
             title: 'Semáforos',
             icon: Icons.traffic,
             color: Colors.red,
-            page: const CadastroSemaforos(),
+            page: const semaforo_page.CadastroSemaforos(),
           ),
           _buildDashboardButton(
             context,
@@ -64,9 +63,8 @@ class CadastroPage extends StatelessWidget {
     );
   }
 
-  // Função para desenhar os botões "quadrados" do dashboard
   Widget _buildDashboardButton(BuildContext context, {required String title, required IconData icon, required Color color, required Widget? page}) {
-    return InkWell( // InkWell faz o efeito de "onda" ao tocar
+    return InkWell( 
       onTap: () {
         if (page != null) {
           Navigator.push(context, MaterialPageRoute(builder: (context) => page));
@@ -79,9 +77,9 @@ class CadastroPage extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1), // Fundo clarinho com a cor do botão
+          color: color.withAlpha(25), 
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.3), width: 2), // Bordinha
+          border: Border.all(color: color.withAlpha(76), width: 2), 
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -98,7 +96,7 @@ class CadastroPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: color.withBlue(color.blue + 50), // Dá uma escurecida na cor do texto
+                color: color.withBlue((color.blue + 50 > 255) ? 255 : color.blue + 50), 
               ),
             ),
           ],
