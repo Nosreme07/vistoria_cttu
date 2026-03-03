@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'iniciar_turno_page.dart';
 import 'formulario_rota_page.dart';
+import 'relatorios_page.dart'; // NOVO IMPORT DA TELA DE RELATÓRIOS
 
 class VistoriaPage extends StatelessWidget {
   const VistoriaPage({super.key});
@@ -35,6 +36,16 @@ class VistoriaPage extends StatelessWidget {
               icon: Icons.list_alt,
               color: Colors.orange.shade600,
               page: const FormularioRotaPage(),
+            ),
+            const SizedBox(height: 20),
+            // NOVO BOTÃO DE RELATÓRIOS
+            _buildMenuButton(
+              context: context,
+              title: 'Relatórios Anteriores',
+              subtitle: 'Consulte o histórico de vistorias',
+              icon: Icons.history_edu,
+              color: Colors.blue.shade600,
+              page: const RelatoriosPage(),
             ),
           ],
         ),

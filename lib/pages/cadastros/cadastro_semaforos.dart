@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Necessário para ler o JSON local
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -72,6 +74,47 @@ class _CadastroSemaforosState extends State<CadastroSemaforos> with SingleTicker
       controller.dispose();
     }
     super.dispose();
+  }
+
+  // ==== ENVIAR JSON PARA O FIREBASE (PROVISÓRIO) ====
+  Future<void> _enviarJsonParaNuvem() async {
+    setState(() => _estaCarregando = true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Lendo acervo.json e enviando para a nuvem... Aguarde.'), backgroundColor: Colors.orange)
+    );
+
+    try {
+      // Lê o arquivo configurado no pubspec
+      final String respostaJson = await rootBundle.loadString('assets/acervo.json');
+      final List<dynamic> dadosJson = json.decode(respostaJson);
+
+      // Envia item por item para o Firestore
+      for (var item in dadosJson) {
+        String idSemaforo = item['id'].toString().trim();
+        if (idSemaforo.isNotEmpty) {
+           await FirebaseFirestore.instance
+              .collection('semaforos')
+              .doc(idSemaforo)
+              .set(item as Map<String, dynamic>, SetOptions(merge: true));
+        }
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Nuvem atualizada com sucesso!'), backgroundColor: Colors.green)
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao atualizar nuvem: $e'), backgroundColor: Colors.red)
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _estaCarregando = false);
+      }
+    }
   }
 
   // ==== FORMULÁRIO DINÂMICO ====
@@ -548,7 +591,18 @@ class _CadastroSemaforosState extends State<CadastroSemaforos> with SingleTicker
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Semáforos'), backgroundColor: Colors.teal.shade100),
+      appBar: AppBar(
+        title: const Text('Semáforos'), 
+        backgroundColor: Colors.teal.shade100,
+        actions: [
+          // Botão provisório para enviar o JSON
+          IconButton(
+            icon: const Icon(Icons.cloud_upload, color: Colors.teal),
+            tooltip: 'Atualizar Firebase com JSON local',
+            onPressed: _estaCarregando ? null : _enviarJsonParaNuvem,
+          ),
+        ],
+      ),
       body: TabBarView(
         controller: _tabController,
         children: [
@@ -629,7 +683,7 @@ class _CadastroSemaforosState extends State<CadastroSemaforos> with SingleTicker
                     elevation: 2,
                     margin: const EdgeInsets.only(bottom: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    child: InkWell( // Substitui o ListTile para manter o clique no Card inteiro
+                    child: InkWell(
                       onTap: () => _mostrarDetalhesSemaforo(data),
                       borderRadius: BorderRadius.circular(12),
                       child: Padding(
@@ -637,11 +691,9 @@ class _CadastroSemaforosState extends State<CadastroSemaforos> with SingleTicker
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // LINHA SUPERIOR: Círculo na esquerda e Botões centralizados no resto do espaço
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                // Número do Semáforo (Círculo)
                                 CircleAvatar(
                                   radius: 24,
                                   backgroundColor: Colors.teal.shade700,
@@ -651,11 +703,9 @@ class _CadastroSemaforosState extends State<CadastroSemaforos> with SingleTicker
                                   ),
                                 ),
                                 const SizedBox(width: 16),
-                                
-                                // Botões centralizados na área restante
                                 Expanded(
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Centraliza espaçando igualmente
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: [
                                       IconButton(
                                         icon: const Icon(Icons.picture_as_pdf, color: Colors.orange), 
@@ -686,19 +736,12 @@ class _CadastroSemaforosState extends State<CadastroSemaforos> with SingleTicker
                                 ),
                               ],
                             ),
-                            
-                            const SizedBox(height: 16), // Espaço entre os botões e o endereço
-                            
-                            // LINHA INFERIOR: Endereço de ponta a ponta
+                            const SizedBox(height: 16),
                             Text(
                               data['endereco'] ?? '', 
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold, 
-                                fontSize: 16,
-                                color: Colors.black87
-                              ),
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
                               maxLines: 2,
-                              overflow: TextOverflow.ellipsis, // Coloca "..." se o endereço for muito longo
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
@@ -724,8 +767,6 @@ class _CadastroSemaforosState extends State<CadastroSemaforos> with SingleTicker
         final semaforos = snapshot.data!.docs;
 
         List<Map<String, dynamic>> todosOsSemaforosLista = [];
-        
-        // Novas listas para separar por empresa
         List<Map<String, dynamic>> listaSerttel = [];
         List<Map<String, dynamic>> listaSinalvida = [];
 
@@ -789,7 +830,6 @@ class _CadastroSemaforosState extends State<CadastroSemaforos> with SingleTicker
               ),
               const SizedBox(height: 16),
 
-              // Cards das empresas agora passam a lista de semáforos para o clique
               Row(
                 children: [
                   Expanded(
@@ -840,13 +880,12 @@ class _CadastroSemaforosState extends State<CadastroSemaforos> with SingleTicker
     );
   }
 
-  // Atualizado para receber a função de clique (aoClicar)
   Widget _buildDashCard({required String titulo, required int valor, required IconData icone, required Color cor, required VoidCallback aoClicar}) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: aoClicar, // Chama o modal quando clicado
+        onTap: aoClicar,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -899,7 +938,6 @@ class TelaMapaRota extends StatelessWidget {
             LatLng posicao = LatLng(lat, lng);
             centroDoMapa = posicao;
 
-            // Captura variáveis locais para usar dentro do closure
             final String caminhoIcone = iconeCaminho;
             final Map<String, dynamic> semaforoAtual = semaforo;
 

@@ -75,7 +75,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
 
   Future<Position> _determinarPosicao() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return Future.error('Os serviços de localização estão desativados.');
+    if (!serviceEnabled) return Future.error('Os serviços de localização estão desativados no celular.');
 
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -86,6 +86,106 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
 
     return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
+
+  // ==== GERADOR DE PDF (Reaproveitado para mostrar após encerrar turno) ====
+  Future<void> _gerarEMostrarPDF(List<QueryDocumentSnapshot> vistorias, String rotaNumero) async {
+    if (vistorias.isEmpty) return;
+    
+    try {
+      String nomeVistoriador = 'VISTORIADOR';
+      if (user != null) {
+        try {
+          var docUser = await FirebaseFirestore.instance.collection('usuarios').doc(user!.uid).get();
+          if (docUser.exists && docUser.data() != null) {
+            var data = docUser.data()!;
+            nomeVistoriador = data['nome'] ?? data['nome_completo'] ?? data['usuario'] ?? user!.email?.split('@').first.toUpperCase() ?? 'VISTORIADOR';
+          } else {
+            var query = await FirebaseFirestore.instance.collection('usuarios').where('email', isEqualTo: user!.email).limit(1).get();
+            if (query.docs.isNotEmpty) {
+              var data = query.docs.first.data();
+              nomeVistoriador = data['nome'] ?? data['nome_completo'] ?? data['usuario'] ?? user!.email?.split('@').first.toUpperCase() ?? 'VISTORIADOR';
+            } else {
+              nomeVistoriador = user!.displayName ?? user!.email?.split('@').first.toUpperCase() ?? 'VISTORIADOR';
+            }
+          }
+        } catch (e) {
+          nomeVistoriador = user!.displayName ?? user!.email?.split('@').first.toUpperCase() ?? 'VISTORIADOR';
+        }
+      }
+
+      final pdf = pw.Document();
+      
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4.landscape, 
+          margin: const pw.EdgeInsets.all(24),
+          build: (pw.Context context) {
+            return [
+              pw.Header(level: 0, child: pw.Text('Relatório de Vistorias Concluídas - Rota $rotaNumero', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold))),
+              pw.SizedBox(height: 16),
+              
+              pw.TableHelper.fromTextArray(
+                context: context,
+                headers: ['Semáforo', 'Endereço', 'Início', 'Fim', 'Coordenadas', 'Status', 'Falha', 'Detalhes'],
+                data: vistorias.map((doc) {
+                  var v = doc.data() as Map<String, dynamic>;
+                  String status = v['teve_anormalidade'] == true ? 'COM FALHA' : 'OK';
+                  return [ 
+                    v['semaforo_id']?.toString() ?? '', 
+                    v['semaforo_endereco']?.toString() ?? '', 
+                    v['data_hora_inicio']?.toString() ?? '', 
+                    v['data_hora_fim']?.toString() ?? '', 
+                    v['gps_coordenadas']?.toString() ?? '', 
+                    status, 
+                    v['falha_registrada'] ?? '-', 
+                    v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ') ?? '-' 
+                  ];
+                }).toList(),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 9),
+                headerDecoration: const pw.BoxDecoration(color: PdfColors.teal700),
+                cellAlignment: pw.Alignment.centerLeft,
+                cellStyle: const pw.TextStyle(fontSize: 8),
+                columnWidths: {
+                  0: const pw.FlexColumnWidth(1),   
+                  1: const pw.FlexColumnWidth(2),   
+                  2: const pw.FlexColumnWidth(1.5), 
+                  3: const pw.FlexColumnWidth(1.5), 
+                  4: const pw.FlexColumnWidth(1.5), 
+                  5: const pw.FlexColumnWidth(1),   
+                  6: const pw.FlexColumnWidth(1.5), 
+                  7: const pw.FlexColumnWidth(3),   
+                }
+              ),
+
+              pw.SizedBox(height: 40),
+              
+              pw.Text(
+                'Declaro que as informações contidas neste relatório refletem a realidade das vistorias realizadas em campo e concordo expressamente com os dados aqui registrados.', 
+                textAlign: pw.TextAlign.center,
+                style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)
+              ),
+              pw.SizedBox(height: 60),
+              pw.Center(
+                child: pw.Column(
+                  children: [
+                    pw.Container(width: 300, height: 1, color: PdfColors.black),
+                    pw.SizedBox(height: 8),
+                    pw.Text(nomeVistoriador.toUpperCase(), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
+                    pw.Text('Assinatura do Vistoriador', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+                  ]
+                )
+              )
+            ];
+          }
+        )
+      );
+      // Aqui usamos o Printing para exibir na tela direto!
+      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: 'Vistorias_Concluidas_Rota$rotaNumero.pdf');
+    } catch (e) {
+      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF!'), backgroundColor: Colors.red));
+    }
+  }
+
 
   // ==== FUNÇÃO DE ABRIR VISTORIA NO SEMÁFORO ====
   void _abrirVistoriaSemaforo(Map<String, dynamic> semaforo, String turnoId) {
@@ -349,7 +449,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                     }
 
                                     String dataFormatadaFim = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
-                                    
                                     String resumoChecklist = 'Todos os ${itensChecklist.length} itens do checklist foram verificados e confirmados pelo vistoriador.';
 
                                     await FirebaseFirestore.instance.collection('vistorias').add({
@@ -396,110 +495,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     );
   }
 
-  // ==== EXPORTAÇÕES DA ABA CONCLUÍDOS ====
-  Future<void> _exportarPDFConcluidos(List<QueryDocumentSnapshot> vistorias, String rotaNumero) async {
-    if (vistorias.isEmpty) return;
-    
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Buscando dados e Gerando PDF...'), backgroundColor: Colors.teal));
-    
-    try {
-      // ==== BUSCAR NOME DO VISTORIADOR ====
-      String nomeVistoriador = 'VISTORIADOR';
-      if (user != null) {
-        try {
-          var docUser = await FirebaseFirestore.instance.collection('usuarios').doc(user!.uid).get();
-          if (docUser.exists && docUser.data() != null) {
-            var data = docUser.data()!;
-            nomeVistoriador = data['nome'] ?? data['nome_completo'] ?? data['usuario'] ?? user!.email?.split('@').first.toUpperCase() ?? 'VISTORIADOR';
-          } else {
-            var query = await FirebaseFirestore.instance.collection('usuarios').where('email', isEqualTo: user!.email).limit(1).get();
-            if (query.docs.isNotEmpty) {
-              var data = query.docs.first.data();
-              nomeVistoriador = data['nome'] ?? data['nome_completo'] ?? data['usuario'] ?? user!.email?.split('@').first.toUpperCase() ?? 'VISTORIADOR';
-            } else {
-              nomeVistoriador = user!.displayName ?? user!.email?.split('@').first.toUpperCase() ?? 'VISTORIADOR';
-            }
-          }
-        } catch (e) {
-          nomeVistoriador = user!.displayName ?? user!.email?.split('@').first.toUpperCase() ?? 'VISTORIADOR';
-        }
-      }
-      // ===================================
-
-      final pdf = pw.Document();
-      
-      pdf.addPage(
-        pw.MultiPage(
-          pageFormat: PdfPageFormat.a4.landscape, // FOI PARA PAISAGEM (DEITADO) PARA CABER TUDO!
-          margin: const pw.EdgeInsets.all(24),
-          build: (pw.Context context) {
-            return [
-              pw.Header(level: 0, child: pw.Text('Relatório de Vistorias Concluídas - Rota $rotaNumero', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold))),
-              pw.SizedBox(height: 16),
-              
-              pw.TableHelper.fromTextArray(
-                context: context,
-                // MESMOS DADOS DO EXCEL
-                headers: ['Semáforo', 'Endereço', 'Início', 'Fim', 'Coordenadas', 'Status', 'Falha', 'Detalhes'],
-                data: vistorias.map((doc) {
-                  var v = doc.data() as Map<String, dynamic>;
-                  String status = v['teve_anormalidade'] == true ? 'COM FALHA' : 'OK';
-                  return [ 
-                    v['semaforo_id']?.toString() ?? '', 
-                    v['semaforo_endereco']?.toString() ?? '', 
-                    v['data_hora_inicio']?.toString() ?? '', 
-                    v['data_hora_fim']?.toString() ?? '', 
-                    v['gps_coordenadas']?.toString() ?? '', 
-                    status, 
-                    v['falha_registrada'] ?? '-', 
-                    v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ') ?? '-' 
-                  ];
-                }).toList(),
-                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 9),
-                headerDecoration: const pw.BoxDecoration(color: PdfColors.teal700),
-                cellAlignment: pw.Alignment.centerLeft,
-                cellStyle: const pw.TextStyle(fontSize: 8),
-                // Definindo os tamanhos das colunas para não estourar a folha
-                columnWidths: {
-                  0: const pw.FlexColumnWidth(1),   
-                  1: const pw.FlexColumnWidth(2),   
-                  2: const pw.FlexColumnWidth(1.5), 
-                  3: const pw.FlexColumnWidth(1.5), 
-                  4: const pw.FlexColumnWidth(1.5), 
-                  5: const pw.FlexColumnWidth(1),   
-                  6: const pw.FlexColumnWidth(1.5), 
-                  7: const pw.FlexColumnWidth(3),   
-                }
-              ),
-
-              pw.SizedBox(height: 40),
-              
-              pw.Text(
-                'Declaro que as informações contidas neste relatório refletem a realidade das vistorias realizadas em campo e concordo expressamente com os dados aqui registrados.', 
-                textAlign: pw.TextAlign.center,
-                style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)
-              ),
-              pw.SizedBox(height: 60),
-              pw.Center(
-                child: pw.Column(
-                  children: [
-                    pw.Container(width: 300, height: 1, color: PdfColors.black),
-                    pw.SizedBox(height: 8),
-                    pw.Text(nomeVistoriador.toUpperCase(), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
-                    pw.Text('Assinatura do Vistoriador', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
-                  ]
-                )
-              )
-            ];
-          }
-        )
-      );
-      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: 'Vistorias_Concluidas_Rota$rotaNumero.pdf');
-    } catch (e) {
-      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF!'), backgroundColor: Colors.red));
-    }
-  }
-
+  // ==== EXPORTAÇÃO EXCEL DA ABA CONCLUÍDOS ====
   Future<void> _exportarExcelConcluidos(List<QueryDocumentSnapshot> vistorias, String rotaNumero) async {
     if (vistorias.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando Excel...'), backgroundColor: Colors.green));
@@ -521,7 +517,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     }
   }
 
-  // ==== DETALHES DE UMA VISTORIA CONCLUÍDA ====
   void _mostrarDetalhesVistoria(Map<String, dynamic> vistoria) {
     showModalBottomSheet(
       context: context,
@@ -556,7 +551,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                     _buildInfoRow('Coordenadas GPS', vistoria['gps_coordenadas']),
                     const SizedBox(height: 16),
                     
-                    // CAIXA DE CONFIRMAÇÃO DO CHECKLIST
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(8)),
@@ -627,29 +621,83 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     );
   }
 
-  Future<void> _encerrarTurno(String turnoId, String veiculoId, String rotaId) async {
+  // ==== NOVO: ENCERRAR TURNO COM VALIDAÇÃO DE META, CHECKBOX E PDF ====
+  Future<void> _encerrarTurno(String turnoId, String veiculoId, String rotaId, int falta, List<QueryDocumentSnapshot> vistoriasConcluidas, String rotaNumero) async {
     final kmFinalController = TextEditingController();
     bool carregando = false;
-    bool? confirmou = await showDialog<bool>(
+    bool confirmouTermo = false;
+
+    bool? sucessoEncerramento = await showDialog<bool>(
       context: context, barrierDismissible: false,
       builder: (context) => StatefulBuilder(
         builder: (context, setStateDialog) {
           return AlertDialog(
             title: const Text('Encerrar Expediente', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Para encerrar a rota, informe a quilometragem final:'),
-                const SizedBox(height: 16),
-                TextField(controller: kmFinalController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'KM Final', border: OutlineInputBorder(), prefixIcon: Icon(Icons.speed), suffixText: 'km')),
-              ],
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // AVISO SOBRE A META DO DIA
+                  if (falta > 0)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.red)),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.warning, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text('Atenção! Faltam $falta semáforos para concluir a meta de hoje.', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold))),
+                        ],
+                      ),
+                    )
+                  else
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green)),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.green),
+                          SizedBox(width: 8),
+                          Expanded(child: Text('Parabéns! Você concluiu 100% da meta de hoje.', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold))),
+                        ],
+                      ),
+                    ),
+                  
+                  const SizedBox(height: 16),
+                  const Text('Para liberar a moto e gerar seu relatório PDF, informe a quilometragem final:'),
+                  const SizedBox(height: 12),
+                  TextField(controller: kmFinalController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'KM Final', border: OutlineInputBorder(), prefixIcon: Icon(Icons.speed), suffixText: 'km')),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // CHECKBOX OBRIGATÓRIO PARA O PDF
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    activeColor: Colors.red,
+                    title: const Text('Confirmo que os dados coletados são verdadeiros e concordo em gerar o relatório final do dia.', style: TextStyle(fontSize: 12, color: Colors.blueGrey)),
+                    value: confirmouTermo,
+                    onChanged: (val) {
+                      setStateDialog(() => confirmouTermo = val ?? false);
+                    },
+                  )
+                ],
+              ),
             ),
             actions: [
               if (!carregando) TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
                 onPressed: carregando ? null : () async {
-                  if (kmFinalController.text.isEmpty) return;
+                  if (kmFinalController.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Digite o KM Final!'), backgroundColor: Colors.orange));
+                    return;
+                  }
+                  if (!confirmouTermo) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Você precisa marcar a caixa de confirmação!'), backgroundColor: Colors.orange));
+                    return;
+                  }
                   setStateDialog(() => carregando = true);
                   Navigator.pop(context, true); 
                 },
@@ -661,14 +709,21 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       ),
     );
 
-    if (confirmou == true) {
+    if (sucessoEncerramento == true) {
       try {
         await FirebaseFirestore.instance.collection('turnos').doc(turnoId).update({'status': 'finalizado', 'data_fim': FieldValue.serverTimestamp(), 'km_final': kmFinalController.text.trim()});
         await FirebaseFirestore.instance.collection('veiculos').doc(veiculoId).update({'em_uso': false});
         await FirebaseFirestore.instance.collection('rotas').doc(rotaId).update({'em_uso': false});
-        if (mounted) { Navigator.pop(context); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Turno encerrado com sucesso!'), backgroundColor: Colors.green)); }
+        
+        if (mounted) { 
+          Navigator.pop(context); 
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Turno encerrado! Gerando Relatório PDF...'), backgroundColor: Colors.green)); 
+          
+          // MOSTRA O PDF NA TELA!
+          await _gerarEMostrarPDF(vistoriasConcluidas, rotaNumero);
+        }
       } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao encerrar: $e'), backgroundColor: Colors.red));
       }
     }
   }
@@ -697,7 +752,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
         builder: (context, snapshotTurno) {
           if (snapshotTurno.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
           if (!snapshotTurno.hasData || snapshotTurno.data!.docs.isEmpty) {
-            return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.block, size: 80, color: Colors.red.shade300), const SizedBox(height: 16), const Text('Nenhum turno ativo.', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)), ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Voltar'))]));
+            return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.block, size: 80, color: Colors.red.shade300), const SizedBox(height: 16), const Text('Nenhum turno ativo.', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)), ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Voltar ao Início'))]));
           }
 
           var turnoDoc = snapshotTurno.data!.docs.first;
@@ -722,15 +777,26 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                     return (doc.data() as Map<String, dynamic>)['rota'].toString().replaceFirst(RegExp(r'^0+'), '') == rotaTurnoLimpa;
                   }).toList();
 
-                  int totalSemaforos = todosDaRota.length;
-                  int concluidos = vistoriadosIds.length;
-                  int falta = totalSemaforos - concluidos;
-                  double percentual = totalSemaforos == 0 ? 0.0 : (concluidos / totalSemaforos);
+                  // ==== LÓGICA DE DIAS CORRIDOS (DIAS PARES = GRUPO A / DIAS IMPARES = GRUPO B) ====
+                  DateTime dataBase = DateTime(2024, 1, 1);
+                  int diasPassados = DateTime.now().difference(dataBase).inDays;
+                  String grupoDeHoje = (diasPassados % 2 == 0) ? 'A' : 'B';
+                  // ==============================================================================
 
-                  List<DocumentSnapshot> semaforosPendentes = todosDaRota.where((doc) {
+                  List<DocumentSnapshot> semaforosDoGrupo = todosDaRota.where((doc) {
+                    String grupoDb = ((doc.data() as Map)['grupo'] ?? '').toString().toUpperCase();
+                    return grupoDb == grupoDeHoje;
+                  }).toList();
+
+                  int meta = semaforosDoGrupo.length;
+                  int concluidos = semaforosDoGrupo.where((doc) => vistoriadosIds.contains((doc.data() as Map)['id'].toString())).length;
+                  int falta = meta - concluidos;
+                  double percentual = meta == 0 ? 0.0 : (concluidos / meta);
+
+                  List<DocumentSnapshot> semaforosPendentes = semaforosDoGrupo.where((doc) {
                     var semaforo = doc.data() as Map<String, dynamic>;
                     String id = semaforo['id'].toString();
-                    return !vistoriadosIds.contains(id);
+                    return !vistoriadosIds.contains(id); 
                   }).toList();
 
                   var semaforosFiltradosPesquisa = semaforosPendentes.where((doc) {
@@ -756,14 +822,26 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('Rota $rotaNumero', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
-                                    ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade600, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))), icon: const Icon(Icons.stop_circle, size: 18), label: const Text('Encerrar', style: TextStyle(fontWeight: FontWeight.bold)), onPressed: () => _encerrarTurno(turnoDoc.id, turnoData['veiculo_id'] ?? '', turnoData['rota_id'] ?? '')),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Rota $rotaNumero', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+                                        Text('Seu Grupo de Hoje: $grupoDeHoje', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade800)),
+                                      ],
+                                    ),
+                                    ElevatedButton.icon(
+                                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade600, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))), 
+                                      icon: const Icon(Icons.stop_circle, size: 18), 
+                                      label: const Text('Encerrar', style: TextStyle(fontWeight: FontWeight.bold)), 
+                                      onPressed: () => _encerrarTurno(turnoDoc.id, turnoData['veiculo_id'] ?? '', turnoData['rota_id'] ?? '', falta, vistoriasConcluidas, rotaNumero) // <--- PASSA AS INFOS DA META AQUI
+                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 8),
                                 Row(children: [const Icon(Icons.motorcycle, size: 18, color: Colors.grey), const SizedBox(width: 8), Text('Moto: ${turnoData['placa'] ?? ''}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87))]),
                                 const SizedBox(height: 12),
-                                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Progresso: $concluidos de $totalSemaforos', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo.shade700)), Text('Faltam: $falta', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red.shade700))]),
+
+                                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Progresso: $concluidos de $meta', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo.shade700)), Text('Faltam: $falta', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red.shade700))]),
                                 const SizedBox(height: 6),
                                 ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: percentual, minHeight: 10, backgroundColor: Colors.grey.shade300, color: Colors.green)),
                                 const SizedBox(height: 4),
@@ -777,7 +855,16 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                           ),
                           Expanded(
                             child: semaforosFiltradosPesquisa.isEmpty
-                              ? Center(child: Text(falta == 0 ? '🎉 Rota Finalizada!' : 'Nenhum semáforo encontrado na pesquisa.', style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)))
+                              ? Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(falta == 0 && meta > 0 ? Icons.emoji_events : Icons.search_off, size: 80, color: Colors.grey.shade400),
+                                      const SizedBox(height: 16),
+                                      Text(falta == 0 && meta > 0 ? '🎉 Rota Finalizada!' : 'Nenhum semáforo pendente do Grupo $grupoDeHoje.', style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 16)),
+                                    ],
+                                  )
+                                )
                               : GridView.builder(
                                   padding: const EdgeInsets.all(16),
                                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 1),
@@ -817,7 +904,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white), icon: const Icon(Icons.picture_as_pdf), label: const Text('Exportar PDF'), onPressed: () => _exportarPDFConcluidos(vistoriasConcluidas, rotaNumero)),
+                                ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white), icon: const Icon(Icons.picture_as_pdf), label: const Text('Baixar PDF de Hoje'), onPressed: () => _gerarEMostrarPDF(vistoriasConcluidas, rotaNumero)),
                                 ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white), icon: const Icon(Icons.grid_on), label: const Text('Exportar Excel'), onPressed: () => _exportarExcelConcluidos(vistoriasConcluidas, rotaNumero)),
                               ],
                             ),
