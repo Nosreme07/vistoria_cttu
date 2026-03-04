@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_page.dart'; 
 import 'cadastro_page.dart';
 import 'vistoria/vistoria_page.dart'; 
+import 'acervo_page.dart'; // <-- NOVO IMPORT ADICIONADO
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -119,10 +120,15 @@ class HomePage extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (context) => const CadastroPage()),
           );
-        } else if (title == 'Vistoria') { // <-- LÓGICA DE NAVEGAÇÃO DA VISTORIA
+        } else if (title == 'Vistoria') { 
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const VistoriaPage()),
+          );
+        } else if (title == 'Acervo') { // <-- LÓGICA DE NAVEGAÇÃO DO ACERVO ADICIONADA
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AcervoPage()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
