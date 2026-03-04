@@ -135,11 +135,113 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
     );
   }
 
-  // ==== EXPORTAÇÕES ====
-  Future<void> _exportarPDF(List<Map<String, dynamic>> vistorias, String rotaNumero, {bool isSingle = false}) async {
+  // ==== GERADOR DE PDF DA FICHA INDIVIDUAL (ESTILO PRINT) ====
+  Future<void> _exportarPDFIndividual(Map<String, dynamic> vistoria, String nomeVistoriador) async {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Baixando fotos e gerando PDF...'), backgroundColor: Colors.teal));
+    
+    try {
+      bool temFalha = vistoria['teve_anormalidade'] == true;
+      List<dynamic> urlsFotos = vistoria['fotos'] ?? [];
+      List<pw.ImageProvider> imagensPdf = [];
+
+      for (String url in urlsFotos) {
+        try {
+          final imageBytes = await networkImage(url);
+          imagensPdf.add(imageBytes);
+        } catch (e) {
+          debugPrint('Erro ao baixar imagem pro pdf: $e');
+        }
+      }
+
+      final pdf = pw.Document();
+
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(32),
+          build: (pw.Context context) {
+            return [
+              pw.Row(
+                children: [
+                  pw.Container(
+                    width: 30, height: 30,
+                    decoration: pw.BoxDecoration(shape: pw.BoxShape.circle, color: temFalha ? PdfColors.red : PdfColors.green),
+                  ),
+                  pw.SizedBox(width: 12),
+                  pw.Text('Semáforo Nº ${vistoria['semaforo_id']}', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.blueGrey800)),
+                ]
+              ),
+              pw.Divider(thickness: 2, height: 32),
+              
+              pw.Text('Vistoriador: $nomeVistoriador', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Endereço: ${vistoria['semaforo_endereco']}', style: const pw.TextStyle(fontSize: 12)),
+              pw.Text('Início: ${vistoria['data_hora_inicio']}', style: const pw.TextStyle(fontSize: 12)),
+              pw.Text('Fim: ${vistoria['data_hora_fim']}', style: const pw.TextStyle(fontSize: 12)),
+              pw.Text('Coordenadas GPS: ${vistoria['gps_coordenadas']}', style: const pw.TextStyle(fontSize: 12)),
+              pw.SizedBox(height: 16),
+
+              pw.Container(
+                padding: const pw.EdgeInsets.all(12),
+                width: double.infinity,
+                decoration: pw.BoxDecoration(color: PdfColors.blue50, borderRadius: pw.BorderRadius.circular(8)),
+                child: pw.Text(vistoria['resumo_checklist'] ?? 'Checklist verificado.', style: pw.TextStyle(color: PdfColors.blue800, fontWeight: pw.FontWeight.bold)),
+              ),
+              pw.SizedBox(height: 16),
+
+              pw.Container(
+                padding: const pw.EdgeInsets.all(12),
+                width: double.infinity,
+                decoration: pw.BoxDecoration(
+                  color: temFalha ? PdfColors.red50 : PdfColors.green50, 
+                  border: pw.Border.all(color: temFalha ? PdfColors.red : PdfColors.green),
+                  borderRadius: pw.BorderRadius.circular(8)
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(temFalha ? 'FALHA REGISTRADA:' : 'STATUS:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: temFalha ? PdfColors.red : PdfColors.green)),
+                    pw.Text(vistoria['falha_registrada'] ?? 'Nenhuma', style: const pw.TextStyle(fontSize: 14)),
+                    pw.SizedBox(height: 8),
+                    pw.Text('Detalhes:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: temFalha ? PdfColors.red : PdfColors.green)),
+                    pw.Text(vistoria['detalhes_ocorrencia'] ?? 'Sem detalhes', style: const pw.TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+
+              if (imagensPdf.isNotEmpty) ...[
+                pw.SizedBox(height: 24),
+                pw.Text('Fotos da Ocorrência:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
+                pw.SizedBox(height: 12),
+                pw.Wrap(
+                  spacing: 12, runSpacing: 12,
+                  children: imagensPdf.map((img) => pw.Container(
+                    width: 150, height: 150,
+                    decoration: pw.BoxDecoration(
+                      border: pw.Border.all(color: PdfColors.grey),
+                      borderRadius: pw.BorderRadius.circular(8),
+                      image: pw.DecorationImage(image: img, fit: pw.BoxFit.cover)
+                    ),
+                  )).toList(),
+                )
+              ],
+            ];
+          }
+        )
+      );
+
+      String idStr = vistoria['semaforo_id']?.toString() ?? 'SN';
+      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: 'Ficha_Semaforo_$idStr.pdf');
+      
+    } catch (e) {
+      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF da ficha!'), backgroundColor: Colors.red));
+    }
+  }
+
+  // ==== EXPORTAÇÃO GLOBAL DE PDF (AGORA COM LINKS DE FOTOS) ====
+  Future<void> _exportarPDF(List<Map<String, dynamic>> vistorias, String rotaNumero) async {
     if (vistorias.isEmpty) return;
     
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando PDF...'), backgroundColor: Colors.teal));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando PDF Global...'), backgroundColor: Colors.teal));
     
     try {
       String nomeGestor = 'GESTOR CTTU';
@@ -150,8 +252,8 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
         }
       }
 
-      String titulo = isSingle ? 'Ficha de Vistoria Individual' : 'Relatório de Vistorias';
-      String subtitulo = isSingle ? 'Documento extraído individualmente' : 'Rota: $rotaNumero';
+      String titulo = 'Relatório de Vistorias';
+      String subtitulo = 'Rota: $rotaNumero';
 
       final pdf = pw.Document();
       
@@ -173,31 +275,39 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
               
               pw.TableHelper.fromTextArray(
                 context: context,
-                headers: ['Semáforo', 'Endereço', 'Início', 'Fim', 'Status', 'Falha', 'Detalhes'],
+                headers: ['Semáforo', 'Vistoriador', 'Endereço', 'Início', 'Fim', 'Status', 'Falha', 'Detalhes', 'Fotos (Links)'],
                 data: vistorias.map((v) {
                   String status = v['teve_anormalidade'] == true ? 'COM FALHA' : 'OK';
+                  
+                  List<dynamic> fotos = v['fotos'] ?? [];
+                  String linksFotos = fotos.join('\n\n');
+
                   return [ 
                     v['semaforo_id']?.toString() ?? '', 
+                    v['nome_vistoriador']?.toString() ?? '', 
                     v['semaforo_endereco']?.toString() ?? '', 
                     v['data_hora_inicio']?.toString() ?? '', 
                     v['data_hora_fim']?.toString() ?? '', 
                     status, 
                     v['falha_registrada'] ?? '-', 
-                    v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ') ?? '-' 
+                    v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ') ?? '-',
+                    linksFotos 
                   ];
                 }).toList(),
-                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 9),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8),
                 headerDecoration: const pw.BoxDecoration(color: PdfColors.teal700),
                 cellAlignment: pw.Alignment.centerLeft,
-                cellStyle: const pw.TextStyle(fontSize: 8),
+                cellStyle: const pw.TextStyle(fontSize: 7),
                 columnWidths: {
                   0: const pw.FlexColumnWidth(1),   
-                  1: const pw.FlexColumnWidth(2),   
+                  1: const pw.FlexColumnWidth(1.2), 
                   2: const pw.FlexColumnWidth(1.5), 
-                  3: const pw.FlexColumnWidth(1.5), 
+                  3: const pw.FlexColumnWidth(1), 
                   4: const pw.FlexColumnWidth(1),   
-                  5: const pw.FlexColumnWidth(1.5), 
-                  6: const pw.FlexColumnWidth(3),   
+                  5: const pw.FlexColumnWidth(1), 
+                  6: const pw.FlexColumnWidth(1.2),   
+                  7: const pw.FlexColumnWidth(1.5),
+                  8: const pw.FlexColumnWidth(2), // Coluna para os Links   
                 }
               ),
 
@@ -218,22 +328,29 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
           }
         )
       );
-      String nomeArquivo = isSingle ? 'Vistoria_${vistorias.first['semaforo_id']}.pdf' : 'Relatorio_Rota$rotaNumero.pdf';
+      String nomeArquivo = 'Relatorio_Rota$rotaNumero.pdf';
       await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: nomeArquivo);
     } catch (e) {
       if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF!'), backgroundColor: Colors.red));
     }
   }
 
+  // ==== EXPORTAÇÃO GLOBAL DE EXCEL (AGORA COM LINKS DE FOTOS) ====
   Future<void> _exportarExcel(List<Map<String, dynamic>> vistorias) async {
     if (vistorias.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando Excel...'), backgroundColor: Colors.green));
     try {
       String csv = '\uFEFF'; 
-      csv += 'SEMAFORO;ENDERECO;INICIO;FIM;COORDENADAS;STATUS;FALHA;DETALHES\n';
+      csv += 'SEMAFORO;VISTORIADOR;ENDERECO;INICIO;FIM;COORDENADAS;STATUS;FALHA;DETALHES;FOTOS\n';
+      
       for (var v in vistorias) {
         String status = v['teve_anormalidade'] == true ? 'COM FALHA' : 'OK';
-        csv += '${v['semaforo_id']};${v['semaforo_endereco']};${v['data_hora_inicio']};${v['data_hora_fim']};${v['gps_coordenadas']};$status;${v['falha_registrada']};${v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ')}\n';
+        String vistoriador = v['nome_vistoriador'] ?? '';
+        
+        List<dynamic> fotos = v['fotos'] ?? [];
+        String linksFotos = fotos.join(', ');
+
+        csv += '${v['semaforo_id']};$vistoriador;${v['semaforo_endereco']};${v['data_hora_inicio']};${v['data_hora_fim']};${v['gps_coordenadas']};$status;${v['falha_registrada']};${v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ')};$linksFotos\n';
       }
       final dir = await getTemporaryDirectory();
       final path = '${dir.path}/Relatorio_Vistorias.csv';
@@ -262,6 +379,9 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
       String rotaDesteSemaforo = mapaRotas[idSemaforo] ?? '';
       
       if (_rotaExport == 'Todas' || rotaDesteSemaforo == rotaSelecionadaLimpa) {
+        // BUSCA E INJETA O NOME DO VISTORIADOR ANTES DE MANDAR PRO PDF/EXCEL
+        String uid = data['vistoriador_uid'] ?? '';
+        data['nome_vistoriador'] = await _getNomeVistoriador(uid);
         vistoriasFiltradas.add(data);
       }
     }
@@ -278,8 +398,8 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
     }
   }
 
-  // ==== MODAL DE DETALHES DO CARD (COM BOTÃO PDF INDIVIDUAL) ====
-  void _mostrarDetalhesVistoriaAnterior(Map<String, dynamic> vistoria, String rotaExibicao) {
+  // ==== MODAL DE DETALHES DO CARD (CHAMA O PDF NOVO) ====
+  void _mostrarDetalhesVistoriaAnterior(Map<String, dynamic> vistoria, String rotaExibicao, String nomeVistoriador) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -307,6 +427,8 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
                     ),
                     const Divider(thickness: 2, height: 32),
                     
+                    // NOME DO VISTORIADOR ADICIONADO AQUI NA FICHA
+                    _buildInfoRow('Vistoriador', nomeVistoriador),
                     _buildInfoRow('Endereço', vistoria['semaforo_endereco']),
                     _buildInfoRow('Início', vistoria['data_hora_inicio']),
                     _buildInfoRow('Fim', vistoria['data_hora_fim']),
@@ -362,7 +484,10 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade700, foregroundColor: Colors.white),
                         icon: const Icon(Icons.picture_as_pdf),
                         label: const Text('Exportar PDF Desta Vistoria', style: TextStyle(fontWeight: FontWeight.bold)),
-                        onPressed: () => _exportarPDF([vistoria], rotaExibicao, isSingle: true),
+                        onPressed: () {
+                          // CHAMA A FUNÇÃO DE PDF INDIVIDUAL
+                          _exportarPDFIndividual(vistoria, nomeVistoriador);
+                        },
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -461,7 +586,6 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
                               children: [
                                 Expanded(
                                   flex: 1,
-                                  // Substituí o DropdownButtonFormField por DropdownButton simples + InputDecorator para remover o aviso azul do seu VS Code
                                   child: InputDecorator(
                                     decoration: InputDecoration(labelText: 'Rota', filled: true, fillColor: Colors.white, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4)),
                                     child: DropdownButtonHideUnderline(
@@ -531,7 +655,6 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
                                 
                                 var vistorias = snapshotVistorias.data!.docs;
 
-                                // Puxa o texto do controller direto na hora do render
                                 String textoPesquisa = _semaforoController.text.trim().toLowerCase();
 
                                 if (textoPesquisa.isNotEmpty) {
@@ -562,27 +685,29 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
                                     Color corFundo = temFalha ? Colors.red.shade50 : Colors.green.shade50;
                                     Color corIcone = temFalha ? Colors.red.shade700 : Colors.green.shade700;
 
-                                    return Card(
-                                      color: corFundo, elevation: 1, margin: const EdgeInsets.only(bottom: 8),
-                                      child: ListTile(
-                                        leading: CircleAvatar(backgroundColor: corIcone, child: Text(idSemaforo, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
-                                        title: Text('Semáforo $idSemaforo (Rota $rotaExibicao)', style: TextStyle(fontWeight: FontWeight.bold, color: corIcone)),
-                                        subtitle: FutureBuilder<String>(
-                                          future: _getNomeVistoriador(uidVistoriador),
-                                          builder: (context, snapshotNome) {
-                                            String nome = snapshotNome.data ?? 'Carregando nome...';
-                                            return Column(
+                                    return FutureBuilder<String>(
+                                      future: _getNomeVistoriador(uidVistoriador),
+                                      builder: (context, snapshotNome) {
+                                        String nome = snapshotNome.data ?? 'Carregando...';
+
+                                        return Card(
+                                          color: corFundo, elevation: 1, margin: const EdgeInsets.only(bottom: 8),
+                                          child: ListTile(
+                                            leading: CircleAvatar(backgroundColor: corIcone, child: Text(idSemaforo, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
+                                            title: Text('Semáforo $idSemaforo (Rota $rotaExibicao)', style: TextStyle(fontWeight: FontWeight.bold, color: corIcone)),
+                                            subtitle: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
+                                                Text(vistoria['semaforo_endereco'] ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
                                                 Text('Data: $dataIniciada', style: const TextStyle(fontSize: 12, color: Colors.black54)),
                                                 Text('Vistoriador: $nome', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
                                               ],
-                                            );
-                                          }
-                                        ),
-                                        trailing: Icon(temFalha ? Icons.warning_amber_rounded : Icons.check_circle, color: corIcone),
-                                        onTap: () => _mostrarDetalhesVistoriaAnterior(vistoria, rotaExibicao),
-                                      ),
+                                            ),
+                                            trailing: Icon(temFalha ? Icons.warning_amber_rounded : Icons.check_circle, color: corIcone),
+                                            onTap: () => _mostrarDetalhesVistoriaAnterior(vistoria, rotaExibicao, nome),
+                                          ),
+                                        );
+                                      }
                                     );
                                   },
                                 );
@@ -630,7 +755,6 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
                         
                         const SizedBox(height: 48),
 
-                        // VALIDAÇÃO PARA LIBERAR OS BOTÕES
                         Builder(
                           builder: (context) {
                             bool liberado = _deExport != null && _ateExport != null && _rotaExport != 'Selecione';

@@ -11,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:image/image.dart' as img; 
 
 class FormularioRotaPage extends StatefulWidget {
   const FormularioRotaPage({super.key});
@@ -28,28 +29,10 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
   
   String _textoPesquisaAndamento = '';
   String _textoPesquisaConcluidos = '';
+  String _nomeDoVistoriadorLogado = 'Carregando...';
 
-  final List<String> itensChecklist = [
-    'Funcionamento de botoeiras',
-    'Condições da unidade de energia',
-    'LED parcialmente queimados ou apagado por completo',
-    'Falta total ou parcial de equipamentos ou acessórios',
-    'Condições do medidor de energia',
-    'Condições da caixa do controlador do semáforo',
-    'Caixas porta-focos (grupos focais) danificadas ou fora de posição',
-    'Condição de grupos focais veiculares e de pedestres equipados com sequencial gradativo ou cronômetro digital regressivo',
-    'Lentes queimadas, quebradas, ou sem coloração',
-    'Cobre-Focos danificados',
-    'Condições de dispositivo suspenso de iluminação de faixa de travessia de pedestres',
-    'Cabos partidos ou sem isolamento',
-    'Fiação baixa ou apoiada sobre outras redes',
-    'Semipórticos inclinados ou danificados',
-    'Condições de sinal sonoro (sirene)',
-    'Condição da sinalização horizontal e da vertical associada ao semáforo',
-    'Problemas relacionados com a visibilidade do semáforo e que estejam a uma distância de até 50 metros',
-    'Condição da placa numérica de identificação',
-    'Materiais não pertencentes ao sistema instalados nos semipórticos sem autorização'
-  ];
+  // O texto resumido do checklist
+  final String textoConfirmacaoChecklist = 'Confirmo que verifiquei a integridade física, elétrica e de funcionamento de todos os equipamentos (focos, estruturas, controladores, kit de energia e acessórios), bem como a visibilidade, sinalização associada e ausência de interferências externas.';
 
   @override
   void initState() {
@@ -63,6 +46,8 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     _pesquisaConcluidosController.addListener(() {
       setState(() => _textoPesquisaConcluidos = _pesquisaConcluidosController.text.toLowerCase());
     });
+
+    _buscarNomeUsuario();
   }
 
   @override
@@ -71,6 +56,33 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     _pesquisaAndamentoController.dispose();
     _pesquisaConcluidosController.dispose();
     super.dispose();
+  }
+
+  // BUSCA O NOME DO VISTORIADOR (COM VÁRIAS TENTATIVAS PARA NÃO TRAVAR)
+  Future<void> _buscarNomeUsuario() async {
+    if (user == null) return;
+
+    try {
+      // Tentativa 1: Buscar pelo UID direto
+      var doc = await FirebaseFirestore.instance.collection('usuarios').doc(user!.uid).get();
+      if (doc.exists && doc.data() != null) {
+        if(mounted) setState(() => _nomeDoVistoriadorLogado = doc.data()!['nome'] ?? doc.data()!['nome_completo'] ?? user!.email?.split('@').first.toUpperCase() ?? 'Vistoriador');
+        return;
+      }
+
+      // Tentativa 2: Buscar pelo Email
+      var query = await FirebaseFirestore.instance.collection('usuarios').where('email', isEqualTo: user!.email).limit(1).get();
+      if (query.docs.isNotEmpty) {
+        var data = query.docs.first.data();
+        if(mounted) setState(() => _nomeDoVistoriadorLogado = data['nome'] ?? data['nome_completo'] ?? user!.email?.split('@').first.toUpperCase() ?? 'Vistoriador');
+        return;
+      }
+    } catch (e) {
+      debugPrint('Erro ao buscar nome: $e');
+    }
+    
+    // Tentativa 3: Se o banco falhar, usa o email logado
+    if(mounted) setState(() => _nomeDoVistoriadorLogado = user!.displayName ?? user!.email?.split('@').first.toUpperCase() ?? 'Vistoriador');
   }
 
   Future<Position> _determinarPosicao() async {
@@ -87,32 +99,140 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
-  // ==== GERADOR DE PDF (Reaproveitado para mostrar após encerrar turno) ====
-  Future<void> _gerarEMostrarPDF(List<QueryDocumentSnapshot> vistorias, String rotaNumero) async {
-    if (vistorias.isEmpty) return;
+  // ==== CARIMBO DE FOTOS (USANDO GPS JÁ COLETADO ANTES) ====
+  Future<File> _carimbarFoto(File arquivoOriginal, String semaforoInfo, String dataColetada, String gpsColetado) async {
+    try {
+      String textoCarimbo = 'Semaforo: $semaforoInfo\nData: $dataColetada\nGPS: $gpsColetado';
+
+      final bytes = await arquivoOriginal.readAsBytes();
+      img.Image? imagemDecodificada = img.decodeImage(bytes);
+      
+      if (imagemDecodificada == null) return arquivoOriginal; 
+
+      img.drawString(
+        imagemDecodificada,
+        textoCarimbo,
+        font: img.arial48, // Fonte grande e legível
+        x: 20,
+        y: imagemDecodificada.height - 160, // Afastado do rodapé para não cortar
+        color: img.ColorRgb8(255, 255, 0), // Cor Amarela
+      );
+
+      final novosBytes = img.encodeJpg(imagemDecodificada, quality: 85); 
+      await arquivoOriginal.writeAsBytes(novosBytes);
+
+      return arquivoOriginal;
+    } catch (e) {
+      return arquivoOriginal; // Se houver erro, devolve sem carimbo para não travar
+    }
+  }
+
+  // ==== GERADOR DE PDF DA FICHA INDIVIDUAL ====
+  Future<void> _exportarPDFIndividual(Map<String, dynamic> vistoria) async {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Baixando fotos e gerando PDF...'), backgroundColor: Colors.teal));
     
     try {
-      String nomeVistoriador = 'VISTORIADOR';
-      if (user != null) {
+      bool temFalha = vistoria['teve_anormalidade'] == true;
+      List<dynamic> urlsFotos = vistoria['fotos'] ?? [];
+      List<pw.ImageProvider> imagensPdf = [];
+
+      for (String url in urlsFotos) {
         try {
-          var docUser = await FirebaseFirestore.instance.collection('usuarios').doc(user!.uid).get();
-          if (docUser.exists && docUser.data() != null) {
-            var data = docUser.data()!;
-            nomeVistoriador = data['nome'] ?? data['nome_completo'] ?? data['usuario'] ?? user!.email?.split('@').first.toUpperCase() ?? 'VISTORIADOR';
-          } else {
-            var query = await FirebaseFirestore.instance.collection('usuarios').where('email', isEqualTo: user!.email).limit(1).get();
-            if (query.docs.isNotEmpty) {
-              var data = query.docs.first.data();
-              nomeVistoriador = data['nome'] ?? data['nome_completo'] ?? data['usuario'] ?? user!.email?.split('@').first.toUpperCase() ?? 'VISTORIADOR';
-            } else {
-              nomeVistoriador = user!.displayName ?? user!.email?.split('@').first.toUpperCase() ?? 'VISTORIADOR';
-            }
-          }
+          final imageBytes = await networkImage(url);
+          imagensPdf.add(imageBytes);
         } catch (e) {
-          nomeVistoriador = user!.displayName ?? user!.email?.split('@').first.toUpperCase() ?? 'VISTORIADOR';
+          debugPrint('Erro ao baixar imagem pro pdf: $e');
         }
       }
 
+      final pdf = pw.Document();
+
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(32),
+          build: (pw.Context context) {
+            return [
+              pw.Row(
+                children: [
+                  pw.Container(
+                    width: 30, height: 30,
+                    decoration: pw.BoxDecoration(shape: pw.BoxShape.circle, color: temFalha ? PdfColors.red : PdfColors.green),
+                  ),
+                  pw.SizedBox(width: 12),
+                  pw.Text('Semáforo Nº ${vistoria['semaforo_id']}', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.blueGrey800)),
+                ]
+              ),
+              pw.Divider(thickness: 2, height: 32),
+              
+              pw.Text('Vistoriador: $_nomeDoVistoriadorLogado', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Endereço: ${vistoria['semaforo_endereco']}', style: const pw.TextStyle(fontSize: 12)),
+              pw.Text('Início: ${vistoria['data_hora_inicio']}', style: const pw.TextStyle(fontSize: 12)),
+              pw.Text('Fim: ${vistoria['data_hora_fim']}', style: const pw.TextStyle(fontSize: 12)),
+              pw.Text('Coordenadas GPS: ${vistoria['gps_coordenadas']}', style: const pw.TextStyle(fontSize: 12)),
+              pw.SizedBox(height: 16),
+
+              pw.Container(
+                padding: const pw.EdgeInsets.all(12),
+                width: double.infinity,
+                decoration: pw.BoxDecoration(color: PdfColors.blue50, borderRadius: pw.BorderRadius.circular(8)),
+                child: pw.Text(vistoria['resumo_checklist'] ?? 'Checklist verificado.', style: pw.TextStyle(color: PdfColors.blue800, fontWeight: pw.FontWeight.bold)),
+              ),
+              pw.SizedBox(height: 16),
+
+              pw.Container(
+                padding: const pw.EdgeInsets.all(12),
+                width: double.infinity,
+                decoration: pw.BoxDecoration(
+                  color: temFalha ? PdfColors.red50 : PdfColors.green50, 
+                  border: pw.Border.all(color: temFalha ? PdfColors.red : PdfColors.green),
+                  borderRadius: pw.BorderRadius.circular(8)
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(temFalha ? 'FALHA REGISTRADA:' : 'STATUS:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: temFalha ? PdfColors.red : PdfColors.green)),
+                    pw.Text(vistoria['falha_registrada'] ?? 'Nenhuma', style: const pw.TextStyle(fontSize: 14)),
+                    pw.SizedBox(height: 8),
+                    pw.Text('Detalhes:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: temFalha ? PdfColors.red : PdfColors.green)),
+                    pw.Text(vistoria['detalhes_ocorrencia'] ?? 'Sem detalhes', style: const pw.TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+
+              if (imagensPdf.isNotEmpty) ...[
+                pw.SizedBox(height: 24),
+                pw.Text('Fotos da Ocorrência:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
+                pw.SizedBox(height: 12),
+                pw.Wrap(
+                  spacing: 12, runSpacing: 12,
+                  children: imagensPdf.map((img) => pw.Container(
+                    width: 150, height: 150,
+                    decoration: pw.BoxDecoration(
+                      border: pw.Border.all(color: PdfColors.grey),
+                      borderRadius: pw.BorderRadius.circular(8),
+                      image: pw.DecorationImage(image: img, fit: pw.BoxFit.cover)
+                    ),
+                  )).toList(),
+                )
+              ],
+            ];
+          }
+        )
+      );
+
+      String idStr = vistoria['semaforo_id']?.toString() ?? 'SN';
+      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: 'Ficha_Semaforo_$idStr.pdf');
+      
+    } catch (e) {
+      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF da ficha!'), backgroundColor: Colors.red));
+    }
+  }
+
+  // ==== TABELA GLOBAL DE PDF ====
+  Future<void> _gerarEMostrarPDF(List<QueryDocumentSnapshot> vistorias, String rotaNumero) async {
+    if (vistorias.isEmpty) return;
+    try {
       final pdf = pw.Document();
       
       pdf.addPage(
@@ -126,51 +246,53 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
               
               pw.TableHelper.fromTextArray(
                 context: context,
-                headers: ['Semáforo', 'Endereço', 'Início', 'Fim', 'Coordenadas', 'Status', 'Falha', 'Detalhes'],
+                headers: ['Semáforo', 'Vistoriador', 'Endereço', 'Início', 'Fim', 'Status', 'Falha', 'Detalhes', 'Fotos (Links)'],
                 data: vistorias.map((doc) {
                   var v = doc.data() as Map<String, dynamic>;
                   String status = v['teve_anormalidade'] == true ? 'COM FALHA' : 'OK';
+                  
+                  List<dynamic> fotos = v['fotos'] ?? [];
+                  String linksFotos = fotos.join('\n\n'); 
+
                   return [ 
                     v['semaforo_id']?.toString() ?? '', 
+                    _nomeDoVistoriadorLogado, 
                     v['semaforo_endereco']?.toString() ?? '', 
                     v['data_hora_inicio']?.toString() ?? '', 
                     v['data_hora_fim']?.toString() ?? '', 
-                    v['gps_coordenadas']?.toString() ?? '', 
                     status, 
                     v['falha_registrada'] ?? '-', 
-                    v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ') ?? '-' 
+                    v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ') ?? '-',
+                    linksFotos
                   ];
                 }).toList(),
-                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 9),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8),
                 headerDecoration: const pw.BoxDecoration(color: PdfColors.teal700),
                 cellAlignment: pw.Alignment.centerLeft,
-                cellStyle: const pw.TextStyle(fontSize: 8),
+                cellStyle: const pw.TextStyle(fontSize: 7),
                 columnWidths: {
                   0: const pw.FlexColumnWidth(1),   
-                  1: const pw.FlexColumnWidth(2),   
+                  1: const pw.FlexColumnWidth(1.2), 
                   2: const pw.FlexColumnWidth(1.5), 
-                  3: const pw.FlexColumnWidth(1.5), 
-                  4: const pw.FlexColumnWidth(1.5), 
+                  3: const pw.FlexColumnWidth(1),   
+                  4: const pw.FlexColumnWidth(1),   
                   5: const pw.FlexColumnWidth(1),   
-                  6: const pw.FlexColumnWidth(1.5), 
-                  7: const pw.FlexColumnWidth(3),   
+                  6: const pw.FlexColumnWidth(1.2), 
+                  7: const pw.FlexColumnWidth(1.5), 
+                  8: const pw.FlexColumnWidth(2), 
                 }
               ),
 
               pw.SizedBox(height: 40),
               
-              pw.Text(
-                'Declaro que as informações contidas neste relatório refletem a realidade das vistorias realizadas em campo e concordo expressamente com os dados aqui registrados.', 
-                textAlign: pw.TextAlign.center,
-                style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)
-              ),
+              pw.Text('Declaro que as informações contidas neste relatório refletem a realidade...', textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
               pw.SizedBox(height: 60),
               pw.Center(
                 child: pw.Column(
                   children: [
                     pw.Container(width: 300, height: 1, color: PdfColors.black),
                     pw.SizedBox(height: 8),
-                    pw.Text(nomeVistoriador.toUpperCase(), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
+                    pw.Text(_nomeDoVistoriadorLogado.toUpperCase(), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
                     pw.Text('Assinatura do Vistoriador', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
                   ]
                 )
@@ -179,7 +301,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
           }
         )
       );
-      // Aqui usamos o Printing para exibir na tela direto!
       await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: 'Vistorias_Concluidas_Rota$rotaNumero.pdf');
     } catch (e) {
       if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF!'), backgroundColor: Colors.red));
@@ -187,20 +308,20 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
   }
 
 
-  // ==== FUNÇÃO DE ABRIR VISTORIA NO SEMÁFORO ====
   void _abrirVistoriaSemaforo(Map<String, dynamic> semaforo, String turnoId) {
     bool vistoriaIniciada = false;
     bool salvando = false;
     String dataHoraInicio = '';
     String coordenadas = '';
     
-    List<bool> checkState = List.filled(itensChecklist.length, false);
-    bool todasMarcadas = false; 
+    // Variável única para o checkbox unificado
+    bool checklistConfirmado = false; 
     
     String temAnormalidade = 'Não';
     String? falhaSelecionada;
     List<Map<String, dynamic>> tiposDeFalhaLista = []; 
     List<File> fotos = []; 
+    bool processandoFoto = false; 
     final ImagePicker picker = ImagePicker();
     final TextEditingController detalhesController = TextEditingController();
 
@@ -293,35 +414,18 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                             ),
                             const SizedBox(height: 24),
                             
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('CHECKLIST DE VERIFICAÇÃO', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.indigo)),
-                                TextButton.icon(
-                                  style: TextButton.styleFrom(foregroundColor: Colors.indigo),
-                                  icon: Icon(todasMarcadas ? Icons.check_box_outline_blank : Icons.check_box_outlined),
-                                  label: Text(todasMarcadas ? 'Desmarcar Todos' : 'Marcar Todos', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  onPressed: () {
-                                    setModalState(() {
-                                      todasMarcadas = !todasMarcadas;
-                                      for (int i = 0; i < checkState.length; i++) checkState[i] = todasMarcadas;
-                                    });
-                                  },
-                                )
-                              ],
-                            ),
+                            const Text('CHECKLIST DE VERIFICAÇÃO', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.indigo)),
                             const Divider(thickness: 2),
                             
-                            ...List.generate(itensChecklist.length, (index) {
-                              return CheckboxListTile(
-                                contentPadding: EdgeInsets.zero,
-                                activeColor: Colors.indigo,
-                                controlAffinity: ListTileControlAffinity.leading,
-                                title: Text(itensChecklist[index], style: const TextStyle(fontSize: 14)),
-                                value: checkState[index],
-                                onChanged: (bool? value) => setModalState(() => checkState[index] = value ?? false),
-                              );
-                            }),
+                            // Checkbox Único e Resumido
+                            CheckboxListTile(
+                              contentPadding: EdgeInsets.zero,
+                              activeColor: Colors.indigo,
+                              controlAffinity: ListTileControlAffinity.leading,
+                              title: Text(textoConfirmacaoChecklist, style: const TextStyle(fontSize: 14)),
+                              value: checklistConfirmado,
+                              onChanged: (bool? value) => setModalState(() => checklistConfirmado = value ?? false),
+                            ),
 
                             const SizedBox(height: 24),
                             
@@ -371,6 +475,19 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                               const SizedBox(height: 24),
                               const Text('FOTOS DO PROBLEMA (Obrigatório, Máx. 4)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
                               const SizedBox(height: 12),
+                              
+                              if (processandoFoto)
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 12.0),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                                      SizedBox(width: 12),
+                                      Text('Gravando GPS e Data na foto...', style: TextStyle(color: Colors.blue, fontStyle: FontStyle.italic))
+                                    ],
+                                  ),
+                                ),
+
                               Wrap(
                                 spacing: 12, runSpacing: 12,
                                 children: [
@@ -383,11 +500,25 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                       ]
                                     );
                                   }),
-                                  if (fotos.length < 4)
+                                  if (fotos.length < 4 && !processandoFoto)
                                     InkWell(
                                       onTap: () async {
-                                        final XFile? fotoTirada = await picker.pickImage(source: ImageSource.camera, maxWidth: 800, imageQuality: 50);
-                                        if (fotoTirada != null) setModalState(() => fotos.add(File(fotoTirada.path)));
+                                        final XFile? fotoTirada = await picker.pickImage(source: ImageSource.camera, maxWidth: 1000, imageQuality: 80);
+                                        if (fotoTirada != null) {
+                                          setModalState(() => processandoFoto = true);
+                                          
+                                          File fotoCarimbada = await _carimbarFoto(
+                                            File(fotoTirada.path), 
+                                            semaforo['id'].toString(),
+                                            dataHoraInicio, 
+                                            coordenadas 
+                                          );
+                                          
+                                          setModalState(() {
+                                            fotos.add(fotoCarimbada);
+                                            processandoFoto = false;
+                                          });
+                                        }
                                       },
                                       child: Container(
                                         width: 80, height: 80, decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade400, style: BorderStyle.solid)),
@@ -419,9 +550,10 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                               width: double.infinity, height: 50,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                                onPressed: salvando ? null : () async {
-                                  if (checkState.contains(false)) {
-                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Você precisa marcar todos os itens do checklist como verificados!'), backgroundColor: Colors.red));
+                                onPressed: (salvando || processandoFoto) ? null : () async {
+                                  // NOVA VALIDAÇÃO DO CHECKBOX
+                                  if (!checklistConfirmado) {
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Você precisa marcar a caixa confirmando a verificação do checklist!'), backgroundColor: Colors.red));
                                     return;
                                   }
                                   
@@ -449,7 +581,9 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                     }
 
                                     String dataFormatadaFim = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
-                                    String resumoChecklist = 'Todos os ${itensChecklist.length} itens do checklist foram verificados e confirmados pelo vistoriador.';
+                                    
+                                    // Salvando o novo texto resumido no banco de dados
+                                    String resumoChecklist = textoConfirmacaoChecklist;
 
                                     await FirebaseFirestore.instance.collection('vistorias').add({
                                       'turno_id': turnoId,
@@ -495,18 +629,23 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     );
   }
 
-  // ==== EXPORTAÇÃO EXCEL DA ABA CONCLUÍDOS ====
   Future<void> _exportarExcelConcluidos(List<QueryDocumentSnapshot> vistorias, String rotaNumero) async {
     if (vistorias.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando Excel...'), backgroundColor: Colors.green));
     try {
       String csv = '\uFEFF'; 
-      csv += 'SEMAFORO;ENDERECO;INICIO;FIM;COORDENADAS;STATUS;FALHA;DETALHES\n';
+      csv += 'SEMAFORO;VISTORIADOR;ENDERECO;INICIO;FIM;COORDENADAS;STATUS;FALHA;DETALHES;FOTOS\n';
+      
       for (var doc in vistorias) {
         var v = doc.data() as Map<String, dynamic>;
         String status = v['teve_anormalidade'] == true ? 'COM FALHA' : 'OK';
-        csv += '${v['semaforo_id']};${v['semaforo_endereco']};${v['data_hora_inicio']};${v['data_hora_fim']};${v['gps_coordenadas']};$status;${v['falha_registrada']};${v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ')}\n';
+        
+        List<dynamic> fotos = v['fotos'] ?? [];
+        String linksFotos = fotos.join(', ');
+
+        csv += '${v['semaforo_id']};$_nomeDoVistoriadorLogado;${v['semaforo_endereco']};${v['data_hora_inicio']};${v['data_hora_fim']};${v['gps_coordenadas']};$status;${v['falha_registrada']};${v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ')};$linksFotos\n';
       }
+      
       final dir = await getTemporaryDirectory();
       final path = '${dir.path}/Vistorias_Rota$rotaNumero.csv';
       final file = File(path);
@@ -517,7 +656,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     }
   }
 
-  void _mostrarDetalhesVistoria(Map<String, dynamic> vistoria) {
+  void _mostrarDetalhesVistoria(Map<String, dynamic> vistoria, String rotaDaAba) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -527,7 +666,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
         List<dynamic> fotos = vistoria['fotos'] ?? [];
 
         return DraggableScrollableSheet(
-          initialChildSize: 0.8, minChildSize: 0.5, maxChildSize: 0.95, expand: false,
+          initialChildSize: 0.85, minChildSize: 0.5, maxChildSize: 0.95, expand: false,
           builder: (context, scrollController) {
             return Padding(
               padding: const EdgeInsets.all(24.0),
@@ -545,6 +684,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                     ),
                     const Divider(thickness: 2, height: 32),
                     
+                    _buildInfoRow('Vistoriador', _nomeDoVistoriadorLogado),
                     _buildInfoRow('Endereço', vistoria['semaforo_endereco']),
                     _buildInfoRow('Início', vistoria['data_hora_inicio']),
                     _buildInfoRow('Fim', vistoria['data_hora_fim']),
@@ -593,6 +733,19 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                     ],
                     
                     const SizedBox(height: 32),
+                    
+                    // BOTÃO DE EXPORTAR PDF INDIVIDUAL
+                    SizedBox(
+                      width: double.infinity, height: 50,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade700, foregroundColor: Colors.white),
+                        icon: const Icon(Icons.picture_as_pdf),
+                        label: const Text('Exportar PDF Desta Vistoria', style: TextStyle(fontWeight: FontWeight.bold)),
+                        onPressed: () => _exportarPDFIndividual(vistoria),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
                     SizedBox(
                       width: double.infinity, height: 50,
                       child: ElevatedButton(
@@ -621,7 +774,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     );
   }
 
-  // ==== NOVO: ENCERRAR TURNO COM VALIDAÇÃO DE META, CHECKBOX E PDF ====
   Future<void> _encerrarTurno(String turnoId, String veiculoId, String rotaId, int falta, List<QueryDocumentSnapshot> vistoriasConcluidas, String rotaNumero) async {
     final kmFinalController = TextEditingController();
     bool carregando = false;
@@ -638,7 +790,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // AVISO SOBRE A META DO DIA
                   if (falta > 0)
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -671,7 +822,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                   
                   const SizedBox(height: 16),
                   
-                  // CHECKBOX OBRIGATÓRIO PARA O PDF
                   CheckboxListTile(
                     contentPadding: EdgeInsets.zero,
                     controlAffinity: ListTileControlAffinity.leading,
@@ -718,8 +868,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
         if (mounted) { 
           Navigator.pop(context); 
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Turno encerrado! Gerando Relatório PDF...'), backgroundColor: Colors.green)); 
-          
-          // MOSTRA O PDF NA TELA!
           await _gerarEMostrarPDF(vistoriasConcluidas, rotaNumero);
         }
       } catch (e) {
@@ -777,11 +925,9 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                     return (doc.data() as Map<String, dynamic>)['rota'].toString().replaceFirst(RegExp(r'^0+'), '') == rotaTurnoLimpa;
                   }).toList();
 
-                  // ==== LÓGICA DE DIAS CORRIDOS (DIAS PARES = GRUPO A / DIAS IMPARES = GRUPO B) ====
                   DateTime dataBase = DateTime(2024, 1, 1);
                   int diasPassados = DateTime.now().difference(dataBase).inDays;
                   String grupoDeHoje = (diasPassados % 2 == 0) ? 'A' : 'B';
-                  // ==============================================================================
 
                   List<DocumentSnapshot> semaforosDoGrupo = todosDaRota.where((doc) {
                     String grupoDb = ((doc.data() as Map)['grupo'] ?? '').toString().toUpperCase();
@@ -833,7 +979,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                       style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade600, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))), 
                                       icon: const Icon(Icons.stop_circle, size: 18), 
                                       label: const Text('Encerrar', style: TextStyle(fontWeight: FontWeight.bold)), 
-                                      onPressed: () => _encerrarTurno(turnoDoc.id, turnoData['veiculo_id'] ?? '', turnoData['rota_id'] ?? '', falta, vistoriasConcluidas, rotaNumero) // <--- PASSA AS INFOS DA META AQUI
+                                      onPressed: () => _encerrarTurno(turnoDoc.id, turnoData['veiculo_id'] ?? '', turnoData['rota_id'] ?? '', falta, vistoriasConcluidas, rotaNumero)
                                     ),
                                   ],
                                 ),
@@ -938,7 +1084,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                         title: Text('Semáforo $idSemaforo', style: TextStyle(fontWeight: FontWeight.bold, color: corIcone)),
                                         subtitle: Text(endSemaforo, maxLines: 1, overflow: TextOverflow.ellipsis),
                                         trailing: Icon(temFalha ? Icons.warning_amber_rounded : Icons.check_circle, color: corIcone),
-                                        onTap: () => _mostrarDetalhesVistoria(vistoria),
+                                        onTap: () => _mostrarDetalhesVistoria(vistoria, rotaNumero), 
                                       ),
                                     );
                                   },
