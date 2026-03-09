@@ -22,7 +22,7 @@ class VistoriaPage extends StatelessWidget {
           children: [
             _buildMenuButton(
               context: context,
-              title: 'Iniciar Turno',
+              title: 'Turno',
               subtitle: 'Registre veículo, KM e Rota do dia',
               icon: Icons.play_circle_fill,
               color: Colors.teal.shade600,
@@ -41,7 +41,7 @@ class VistoriaPage extends StatelessWidget {
             // NOVO BOTÃO DE RELATÓRIOS
             _buildMenuButton(
               context: context,
-              title: 'Relatórios Anteriores',
+              title: 'Relatórios',
               subtitle: 'Consulte o histórico de vistorias',
               icon: Icons.history_edu,
               color: Colors.blue.shade600,

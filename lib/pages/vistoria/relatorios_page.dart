@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert'; 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -90,7 +91,6 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
     }
   }
 
-  // ==== SELETOR APENAS DE MÊS E ANO PARA A 3ª ABA ====
   Future<void> _selecionarMesAnoDialog(BuildContext context) async {
     int mesSelecionado = _mesPendencia.month;
     int anoSelecionado = _mesPendencia.year;
@@ -174,6 +174,60 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
     );
   }
 
+  void _abrirFotoTelaCheia(String url) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.black87,
+          insetPadding: const EdgeInsets.all(0),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              InteractiveViewer(
+                panEnabled: true,
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Image.network(url, fit: BoxFit.contain, width: double.infinity, height: double.infinity),
+              ),
+              Positioned(
+                top: 20, right: 20,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white, size: 32),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    );
+  }
+
+  // ==== RODAPÉ FIXO DO PDF ====
+  pw.Widget _buildRodapePDF(pw.Context context, String dataHora) {
+    return pw.Container(
+      alignment: pw.Alignment.bottomCenter,
+      child: pw.Column(
+        mainAxisSize: pw.MainAxisSize.min,
+        children: [
+          pw.Divider(thickness: 1, color: PdfColors.grey400),
+          pw.SizedBox(height: 4),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.SizedBox(width: 50), // Espaçador para manter o texto do meio centralizado
+              pw.Expanded(
+                child: pw.Text('Relatório gerado pelo aplicativo Vistoria CTTU ($dataHora)', textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+              ),
+              pw.SizedBox(width: 50, child: pw.Text('Pág. ${context.pageNumber} / ${context.pagesCount}', textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700))),
+            ]
+          )
+        ]
+      )
+    );
+  }
+
   Future<void> _exportarPDFIndividual(Map<String, dynamic> vistoria, String nomeVistoriador) async {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Baixando fotos e gerando PDF...'), backgroundColor: Colors.teal));
     try {
@@ -190,62 +244,69 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
         }
       }
 
-      final pdf = pw.Document();
-      pdf.addPage(
-        pw.MultiPage(
-          pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.all(32),
-          build: (pw.Context context) {
-            return [
-              pw.Row(
-                children: [
-                  pw.Container(width: 30, height: 30, decoration: pw.BoxDecoration(shape: pw.BoxShape.circle, color: temFalha ? PdfColors.red : PdfColors.green)),
-                  pw.SizedBox(width: 12),
-                  pw.Text('Semáforo Nº ${vistoria['semaforo_id']}', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.blueGrey800)),
-                ]
-              ),
-              pw.Divider(thickness: 2, height: 32),
-              pw.Text('Vistoriador: $nomeVistoriador', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
-              pw.Text('Endereço: ${vistoria['semaforo_endereco']}', style: const pw.TextStyle(fontSize: 12)),
-              pw.Text('Início: ${vistoria['data_hora_inicio']}', style: const pw.TextStyle(fontSize: 12)),
-              pw.Text('Fim: ${vistoria['data_hora_fim']}', style: const pw.TextStyle(fontSize: 12)),
-              pw.Text('Coordenadas GPS: ${vistoria['gps_coordenadas']}', style: const pw.TextStyle(fontSize: 12)),
-              pw.SizedBox(height: 16),
-              pw.Container(
-                padding: const pw.EdgeInsets.all(12), width: double.infinity, decoration: pw.BoxDecoration(color: PdfColors.blue50, borderRadius: pw.BorderRadius.circular(8)),
-                child: pw.Text(vistoria['resumo_checklist'] ?? 'Checklist verificado.', style: pw.TextStyle(color: PdfColors.blue800, fontWeight: pw.FontWeight.bold)),
-              ),
-              pw.SizedBox(height: 16),
-              pw.Container(
-                padding: const pw.EdgeInsets.all(12), width: double.infinity,
-                decoration: pw.BoxDecoration(color: temFalha ? PdfColors.red50 : PdfColors.green50, border: pw.Border.all(color: temFalha ? PdfColors.red : PdfColors.green), borderRadius: pw.BorderRadius.circular(8)),
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(temFalha ? 'FALHA REGISTRADA:' : 'STATUS:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: temFalha ? PdfColors.red : PdfColors.green)),
-                    pw.Text(vistoria['falha_registrada'] ?? 'Nenhuma', style: const pw.TextStyle(fontSize: 14)),
-                    pw.SizedBox(height: 8),
-                    pw.Text('Detalhes:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: temFalha ? PdfColors.red : PdfColors.green)),
-                    pw.Text(vistoria['detalhes_ocorrencia'] ?? 'Sem detalhes', style: const pw.TextStyle(fontSize: 12)),
-                  ],
-                ),
-              ),
-              if (imagensPdf.isNotEmpty) ...[
-                pw.SizedBox(height: 24),
-                pw.Text('Fotos da Ocorrência:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
-                pw.SizedBox(height: 12),
-                pw.Wrap(
-                  spacing: 12, runSpacing: 12,
-                  children: imagensPdf.map((img) => pw.Container(width: 150, height: 150, decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey), borderRadius: pw.BorderRadius.circular(8), image: pw.DecorationImage(image: img, fit: pw.BoxFit.cover)))).toList(),
-                )
-              ],
-              pw.SizedBox(height: 40),
-              pw.Text('Relatório gerado pelo aplicativo Vistoria CTTU.', textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
-            ];
-          }
-        )
+      String dataHoraAtual = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
+
+      await Printing.layoutPdf(
+        name: 'Ficha_Semaforo_${vistoria['semaforo_id']}.pdf',
+        onLayout: (PdfPageFormat format) async {
+          final pdf = pw.Document();
+          
+          pdf.addPage(
+            pw.MultiPage(
+              pageFormat: format, // <- FORMATO DINÂMICO
+              margin: const pw.EdgeInsets.only(left: 32, right: 32, top: 32, bottom: 20),
+              footer: (pw.Context context) => _buildRodapePDF(context, dataHoraAtual),
+              build: (pw.Context context) {
+                return [
+                  pw.Row(
+                    children: [
+                      pw.Container(width: 30, height: 30, decoration: pw.BoxDecoration(shape: pw.BoxShape.circle, color: temFalha ? PdfColors.red : PdfColors.green)),
+                      pw.SizedBox(width: 12),
+                      pw.Text('Semáforo Nº ${vistoria['semaforo_id']}', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.blueGrey800)),
+                    ]
+                  ),
+                  pw.Divider(thickness: 2, height: 32),
+                  pw.Text('Vistoriador: $nomeVistoriador', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('Endereço: ${vistoria['semaforo_endereco']}', style: const pw.TextStyle(fontSize: 12)),
+                  pw.Text('Início: ${vistoria['data_hora_inicio']}', style: const pw.TextStyle(fontSize: 12)),
+                  pw.Text('Fim: ${vistoria['data_hora_fim']}', style: const pw.TextStyle(fontSize: 12)),
+                  pw.Text('Coordenadas GPS: ${vistoria['gps_coordenadas']}', style: const pw.TextStyle(fontSize: 12)),
+                  pw.SizedBox(height: 16),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.all(12), width: double.infinity, decoration: pw.BoxDecoration(color: PdfColors.blue50, borderRadius: pw.BorderRadius.circular(8)),
+                    child: pw.Text(vistoria['resumo_checklist'] ?? 'Checklist verificado.', style: pw.TextStyle(color: PdfColors.blue800, fontWeight: pw.FontWeight.bold)),
+                  ),
+                  pw.SizedBox(height: 16),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.all(12), width: double.infinity,
+                    decoration: pw.BoxDecoration(color: temFalha ? PdfColors.red50 : PdfColors.green50, border: pw.Border.all(color: temFalha ? PdfColors.red : PdfColors.green), borderRadius: pw.BorderRadius.circular(8)),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(temFalha ? 'FALHA REGISTRADA:' : 'STATUS:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: temFalha ? PdfColors.red : PdfColors.green)),
+                        pw.Text(vistoria['falha_registrada'] ?? 'Nenhuma', style: const pw.TextStyle(fontSize: 14)),
+                        pw.SizedBox(height: 8),
+                        pw.Text('Detalhes:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: temFalha ? PdfColors.red : PdfColors.green)),
+                        pw.Text(vistoria['detalhes_ocorrencia'] ?? 'Sem detalhes', style: const pw.TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                  if (imagensPdf.isNotEmpty) ...[
+                    pw.SizedBox(height: 24),
+                    pw.Text('Fotos da Ocorrência:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
+                    pw.SizedBox(height: 12),
+                    pw.Wrap(
+                      spacing: 12, runSpacing: 12,
+                      children: imagensPdf.map((img) => pw.Container(width: 150, height: 150, decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey), borderRadius: pw.BorderRadius.circular(8), image: pw.DecorationImage(image: img, fit: pw.BoxFit.cover)))).toList(),
+                    )
+                  ]
+                ];
+              }
+            )
+          );
+          return pdf.save();
+        }
       );
-      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: 'Ficha_Semaforo_${vistoria['semaforo_id']}.pdf');
     } catch (e) {
       if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF da ficha!'), backgroundColor: Colors.red));
     }
@@ -255,60 +316,51 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
     if (vistorias.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando PDF Global...'), backgroundColor: Colors.teal));
     try {
-      String nomeGestor = 'GESTOR CTTU';
-      if (user != null) {
-        var docUser = await FirebaseFirestore.instance.collection('usuarios').doc(user!.uid).get();
-        if (docUser.exists && docUser.data() != null) nomeGestor = docUser.data()!['nome'] ?? docUser.data()!['nome_completo'] ?? 'GESTOR';
-      }
+      String dataHoraAtual = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
 
-      final pdf = pw.Document();
-      pdf.addPage(
-        pw.MultiPage(
-          pageFormat: PdfPageFormat.a4.landscape, margin: const pw.EdgeInsets.all(24),
-          build: (pw.Context context) {
-            return [
-              pw.Header(level: 0, child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text('Relatório de Vistorias', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-                  pw.SizedBox(height: 4),
-                  pw.Text('Rota: $rotaNumero', style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
-                ]
-              )),
-              pw.SizedBox(height: 16),
-              pw.TableHelper.fromTextArray(
-                context: context,
-                headers: ['Semáforo', 'Vistoriador', 'Endereço', 'Início', 'Fim', 'Status', 'Falha', 'Detalhes', 'Fotos (Links)'],
-                data: vistorias.map((v) {
-                  return [ 
-                    v['semaforo_id']?.toString() ?? '', v['nome_vistoriador']?.toString() ?? '', v['semaforo_endereco']?.toString() ?? '', 
-                    v['data_hora_inicio']?.toString() ?? '', v['data_hora_fim']?.toString() ?? '', v['teve_anormalidade'] == true ? 'COM FALHA' : 'OK', 
-                    v['falha_registrada'] ?? '-', v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ') ?? '-', (v['fotos'] ?? []).join('\n\n')
-                  ];
-                }).toList(),
-                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8),
-                headerDecoration: const pw.BoxDecoration(color: PdfColors.teal700),
-                cellAlignment: pw.Alignment.centerLeft, cellStyle: const pw.TextStyle(fontSize: 7),
-                columnWidths: { 0: const pw.FlexColumnWidth(1), 1: const pw.FlexColumnWidth(1.2), 2: const pw.FlexColumnWidth(1.5), 3: const pw.FlexColumnWidth(1), 4: const pw.FlexColumnWidth(1), 5: const pw.FlexColumnWidth(1), 6: const pw.FlexColumnWidth(1.2), 7: const pw.FlexColumnWidth(1.5), 8: const pw.FlexColumnWidth(2) }
-              ),
-              pw.SizedBox(height: 40),
-              pw.Text('Relatório gerado pelo aplicativo Vistoria CTTU.', textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
-              pw.SizedBox(height: 40),
-              pw.Center(
-                child: pw.Column(
-                  children: [
-                    pw.Container(width: 300, height: 1, color: PdfColors.black),
-                    pw.SizedBox(height: 8),
-                    pw.Text(nomeGestor.toUpperCase(), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
-                    pw.Text('Gerado por (Usuário Logado)', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
-                  ]
-                )
-              )
-            ];
-          }
-        )
+      await Printing.layoutPdf(
+        name: 'Relatorio_Rota$rotaNumero.pdf',
+        onLayout: (PdfPageFormat format) async {
+          final pdf = pw.Document();
+          
+          pdf.addPage(
+            pw.MultiPage(
+              pageFormat: format, // <- FORMATO DINÂMICO
+              margin: const pw.EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 20),
+              footer: (pw.Context context) => _buildRodapePDF(context, dataHoraAtual),
+              build: (pw.Context context) {
+                return [
+                  pw.Header(level: 0, child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text('Relatório de Vistorias', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                      pw.SizedBox(height: 4),
+                      pw.Text('Rota: $rotaNumero', style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
+                    ]
+                  )),
+                  pw.SizedBox(height: 16),
+                  pw.TableHelper.fromTextArray(
+                    context: context,
+                    headers: ['Semáforo', 'Vistoriador', 'Endereço', 'Início', 'Fim', 'Status', 'Falha', 'Detalhes', 'Fotos (Links)'],
+                    data: vistorias.map((v) {
+                      return [ 
+                        v['semaforo_id']?.toString() ?? '', v['nome_vistoriador']?.toString() ?? '', v['semaforo_endereco']?.toString() ?? '', 
+                        v['data_hora_inicio']?.toString() ?? '', v['data_hora_fim']?.toString() ?? '', v['teve_anormalidade'] == true ? 'COM FALHA' : 'OK', 
+                        v['falha_registrada'] ?? '-', v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ') ?? '-', (v['fotos'] ?? []).join('\n\n')
+                      ];
+                    }).toList(),
+                    headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8),
+                    headerDecoration: const pw.BoxDecoration(color: PdfColors.teal700),
+                    cellAlignment: pw.Alignment.centerLeft, cellStyle: const pw.TextStyle(fontSize: 7),
+                    columnWidths: { 0: const pw.FlexColumnWidth(1), 1: const pw.FlexColumnWidth(1.2), 2: const pw.FlexColumnWidth(1.5), 3: const pw.FlexColumnWidth(1), 4: const pw.FlexColumnWidth(1), 5: const pw.FlexColumnWidth(1), 6: const pw.FlexColumnWidth(1.2), 7: const pw.FlexColumnWidth(1.5), 8: const pw.FlexColumnWidth(2) }
+                  ),
+                ];
+              }
+            )
+          );
+          return pdf.save();
+        }
       );
-      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: 'Relatorio_Rota$rotaNumero.pdf');
     } catch (e) {
       if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF!'), backgroundColor: Colors.red));
     }
@@ -325,9 +377,9 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
         csv += '${v['semaforo_id']};${v['nome_vistoriador'] ?? ''};${v['semaforo_endereco']};${v['data_hora_inicio']};${v['data_hora_fim']};${v['gps_coordenadas']};$status;${v['falha_registrada']};${v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ')};${(v['fotos'] ?? []).join(', ')}\n';
       }
       final dir = await getTemporaryDirectory();
-      final path = '${dir.path}/Relatorio_Vistorias.csv';
+      final path = '${dir.path}/Relatorio_Vistorias.xls';
       final file = File(path);
-      await file.writeAsString(csv);
+      await file.writeAsBytes(utf8.encode(csv));
       await Share.shareXFiles([XFile(path)], text: 'Planilha de Vistorias.');
     } catch (e) {
       if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar Excel!'), backgroundColor: Colors.red));
@@ -355,44 +407,51 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
     else await _exportarExcelGlobal(vistoriasFiltradas);
   }
 
-  // ==== EXPORTAÇÕES DA ABA 3 (PENDÊNCIAS) ====
   Future<void> _exportarPendenciasPDF(Map<String, List<Map<String, dynamic>>> pendentesPorRota, Map<String, Map<String, dynamic>> statsPorRota, String mesFiltro) async {
     if (pendentesPorRota.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando PDF de Semáforos não vistoriados...'), backgroundColor: Colors.red));
     try {
-      final pdf = pw.Document();
-      pdf.addPage(
-        pw.MultiPage(
-          pageFormat: PdfPageFormat.a4, margin: const pw.EdgeInsets.all(32),
-          build: (pw.Context context) {
-            return [
-              pw.Header(level: 0, child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text('Relatório de Semáforos Não Vistoriados', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.red800)),
-                  pw.SizedBox(height: 4),
-                  pw.Text('Mês de referência: $mesFiltro', style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
-                ]
-              )),
-              pw.SizedBox(height: 16),
-              pw.TableHelper.fromTextArray(
-                context: context,
-                headers: ['Rota', 'Qtd. Não Vistoriados', 'Semáforos (IDs)'],
-                data: pendentesPorRota.keys.map((rota) {
-                  return [ 'Rota $rota', statsPorRota[rota]!['omitidos'].toString(), pendentesPorRota[rota]!.map((e) => e['id'].toString()).join(', ') ];
-                }).toList(),
-                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
-                headerDecoration: const pw.BoxDecoration(color: PdfColors.red700),
-                cellAlignment: pw.Alignment.centerLeft,
-                columnWidths: { 0: const pw.FlexColumnWidth(1), 1: const pw.FlexColumnWidth(1.5), 2: const pw.FlexColumnWidth(3) }
-              ),
-              pw.SizedBox(height: 40),
-              pw.Text('Relatório gerado pelo aplicativo Vistoria CTTU.', textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
-            ];
-          }
-        )
+      String dataHoraAtual = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
+
+      await Printing.layoutPdf(
+        name: 'Omissões_$mesFiltro.pdf',
+        onLayout: (PdfPageFormat format) async {
+          final pdf = pw.Document();
+          
+          pdf.addPage(
+            pw.MultiPage(
+              pageFormat: format, // <- FORMATO DINÂMICO
+              margin: const pw.EdgeInsets.only(left: 32, right: 32, top: 32, bottom: 20),
+              footer: (pw.Context context) => _buildRodapePDF(context, dataHoraAtual),
+              build: (pw.Context context) {
+                return [
+                  pw.Header(level: 0, child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text('Relatório de Semáforos Não Vistoriados', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.red800)),
+                      pw.SizedBox(height: 4),
+                      pw.Text('Mês de referência: $mesFiltro', style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
+                    ]
+                  )),
+                  pw.SizedBox(height: 16),
+                  pw.TableHelper.fromTextArray(
+                    context: context,
+                    headers: ['Rota', 'Qtd. Não Vistoriados', 'Semáforos (IDs)'],
+                    data: pendentesPorRota.keys.map((rota) {
+                      return [ 'Rota $rota', statsPorRota[rota]!['omitidos'].toString(), pendentesPorRota[rota]!.map((e) => e['id'].toString()).join(', ') ];
+                    }).toList(),
+                    headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+                    headerDecoration: const pw.BoxDecoration(color: PdfColors.red700),
+                    cellAlignment: pw.Alignment.centerLeft,
+                    columnWidths: { 0: const pw.FlexColumnWidth(1), 1: const pw.FlexColumnWidth(1.5), 2: const pw.FlexColumnWidth(3) }
+                  ),
+                ];
+              }
+            )
+          );
+          return pdf.save();
+        }
       );
-      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: 'Omissões_$mesFiltro.pdf');
     } catch (e) {
       if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF de Pendências!'), backgroundColor: Colors.red));
     }
@@ -409,8 +468,8 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
         csv += 'Rota $rota;${statsPorRota[rota]!['omitidos']};${pendentesPorRota[rota]!.map((e) => e['id'].toString()).join(', ')}\n';
       }
       final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/Omissões_${mesFiltro.replaceAll('/', '-')}.csv');
-      await file.writeAsString(csv);
+      final file = File('${dir.path}/Omissões_${mesFiltro.replaceAll('/', '-')}.xls');
+      await file.writeAsBytes(utf8.encode(csv));
       await Share.shareXFiles([XFile(file.path)], text: 'Lista de semáforos não vistoriados - $mesFiltro.');
     } catch (e) {
       if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao exportar Pendências!'), backgroundColor: Colors.red));
@@ -475,7 +534,16 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
                       const SizedBox(height: 24),
                       const Text('Fotos da Ocorrência:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       const SizedBox(height: 12),
-                      Wrap(spacing: 12, runSpacing: 12, children: fotos.map((url) => Container(width: 100, height: 100, decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey), image: DecorationImage(image: NetworkImage(url), fit: BoxFit.cover)))).toList())
+                      Wrap(
+                        spacing: 12, runSpacing: 12, 
+                        children: fotos.map((url) => GestureDetector(
+                          onTap: () => _abrirFotoTelaCheia(url), // ABRIR FOTO EM TELA CHEIA
+                          child: Container(
+                            width: 100, height: 100, 
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey), image: DecorationImage(image: NetworkImage(url), fit: BoxFit.cover))
+                          ),
+                        )).toList()
+                      )
                     ],
                     const SizedBox(height: 32),
                     SizedBox(
@@ -740,7 +808,6 @@ class _RelatoriosPageState extends State<RelatoriosPage> with SingleTickerProvid
                             Set<String> idsVistoriadosNoMes = snapshotVistoriasDoMes.data!.docs.map((doc) => doc['semaforo_id'].toString()).toSet();
                             String rotaFiltro = _rotaPendencia.replaceFirst(RegExp(r'^0+'), '');
 
-                            // Mapeia Semáforos por Rota para criar os Cards detalhados
                             Map<String, List<Map<String, dynamic>>> semaforosAgrupados = {};
                             for (var sem in todosSemaforosData) {
                               String rotaSem = (sem['rota'] ?? '').toString().replaceFirst(RegExp(r'^0+'), '');
