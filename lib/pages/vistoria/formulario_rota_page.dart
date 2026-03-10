@@ -109,7 +109,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
-// ==== ABRIR GPS (COMO CHEGAR) ====
+  // ==== ABRIR GPS (COMO CHEGAR) ====
   Future<void> _abrirGPS(String georeferencia) async {
     if (georeferencia.trim().isEmpty || !georeferencia.contains(' ')) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Semáforo sem coordenadas cadastradas!'), backgroundColor: Colors.orange));
@@ -134,30 +134,90 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     }
   }
 
-  // ==== CARIMBO DE FOTOS ====
+  // ==== CARIMBO DE FOTOS CORRIGIDO ====
   Future<File> _carimbarFoto(File arquivoOriginal, String semaforoInfo, String dataColetada, String gpsColetado) async {
     try {
-      String textoCarimbo = 'Semaforo: $semaforoInfo\nData: $dataColetada\nGPS: $gpsColetado';
       final bytes = await arquivoOriginal.readAsBytes();
       img.Image? imagemDecodificada = img.decodeImage(bytes);
       
       if (imagemDecodificada == null) return arquivoOriginal; 
 
-      img.drawString(
-        imagemDecodificada,
-        textoCarimbo,
-        font: img.arial48,
-        x: 20,
-        y: imagemDecodificada.height - 160, 
-        color: img.ColorRgb8(255, 255, 0), 
-      );
+      // Textos em lista para pular linha corretamente
+      List<String> linhasTexto = [
+        'Semaforo: $semaforoInfo',
+        'Data: $dataColetada',
+        'GPS: $gpsColetado'
+      ];
+
+      final fonteParaCarimbo = img.arial48;
+      
+      // Calcula posição Y considerando 30px de margem do rodapé
+      int yInicial = imagemDecodificada.height - (linhasTexto.length * fonteParaCarimbo.lineHeight) - 30;
+
+      for (int i = 0; i < linhasTexto.length; i++) {
+        String texto = linhasTexto[i];
+        int posY = yInicial + (i * fonteParaCarimbo.lineHeight);
+
+        // Sombra Preta
+        img.drawString(
+          imagemDecodificada, 
+          texto, 
+          font: fonteParaCarimbo, 
+          x: 23, 
+          y: posY + 3, 
+          color: img.ColorRgb8(0, 0, 0)
+        );
+        
+        // Texto Amarelo Principal
+        img.drawString(
+          imagemDecodificada, 
+          texto, 
+          font: fonteParaCarimbo, 
+          x: 20, 
+          y: posY, 
+          color: img.ColorRgb8(255, 255, 0)
+        );
+      }
 
       final novosBytes = img.encodeJpg(imagemDecodificada, quality: 85); 
       await arquivoOriginal.writeAsBytes(novosBytes);
       return arquivoOriginal;
     } catch (e) {
+      debugPrint('Erro ao carimbar foto: $e');
       return arquivoOriginal; 
     }
+  }
+
+  // ==== MOSTRAR IMAGEM EM TELA CHEIA ====
+  void _mostrarImagemExpandida(BuildContext context, ImageProvider imageProvider) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(8),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              InteractiveViewer(
+                panEnabled: true,
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Image(image: imageProvider, fit: BoxFit.contain),
+              ),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: IconButton(
+                  icon: const Icon(Icons.cancel, color: Colors.white, size: 36),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   // ==== GERADOR DE PDF DA FICHA INDIVIDUAL ====
@@ -511,7 +571,15 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                     return Stack(
                                       clipBehavior: Clip.none,
                                       children: [
-                                        Container(width: 80, height: 80, decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade300), image: DecorationImage(image: FileImage(fotos[index]), fit: BoxFit.cover))),
+                                        // GESTURE DETECTOR AQUI PARA AMPLIAR FOTO LOCAL
+                                        GestureDetector(
+                                          onTap: () => _mostrarImagemExpandida(context, FileImage(fotos[index])),
+                                          child: Container(
+                                            width: 80, height: 80, 
+                                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade300), image: DecorationImage(image: FileImage(fotos[index]), fit: BoxFit.cover)),
+                                            child: const Align(alignment: Alignment.bottomLeft, child: Padding(padding: EdgeInsets.all(4.0), child: Icon(Icons.zoom_in, color: Colors.white, size: 20))),
+                                          ),
+                                        ),
                                         Positioned(right: -8, top: -8, child: GestureDetector(onTap: () => setModalState(() => fotos.removeAt(index)), child: const CircleAvatar(radius: 12, backgroundColor: Colors.red, child: Icon(Icons.close, color: Colors.white, size: 16))))
                                       ]
                                     );
@@ -730,9 +798,14 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 12, runSpacing: 12,
-                        children: fotos.map((url) => Container(
-                          width: 100, height: 100,
-                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey), image: DecorationImage(image: NetworkImage(url), fit: BoxFit.cover)),
+                        children: fotos.map((url) => GestureDetector(
+                          // GESTURE DETECTOR AQUI PARA AMPLIAR FOTO DO FIREBASE
+                          onTap: () => _mostrarImagemExpandida(context, NetworkImage(url)),
+                          child: Container(
+                            width: 100, height: 100,
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey), image: DecorationImage(image: NetworkImage(url), fit: BoxFit.cover)),
+                            child: const Align(alignment: Alignment.bottomLeft, child: Padding(padding: EdgeInsets.all(4.0), child: Icon(Icons.zoom_in, color: Colors.white, size: 24))),
+                          ),
                         )).toList(),
                       )
                     ],

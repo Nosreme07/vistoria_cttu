@@ -15,17 +15,24 @@ import 'package:share_plus/share_plus.dart';
 
 // ==== FUNÇÃO GLOBAL PARA ABRIR O GPS ====
 Future<void> _abrirGoogleMaps(String georeferencia, BuildContext context) async {
-  if (georeferencia.trim().isEmpty || !georeferencia.contains(' ')) {
+  if (georeferencia.trim().isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Semáforo sem coordenadas válidas!'), backgroundColor: Colors.orange));
     return;
   }
   
   try {
-    var partes = georeferencia.split(' ');
-    String lat = partes[0].trim();
-    String lng = partes[1].trim();
+    String geoLimpa = georeferencia.replaceAll(',', ' ').trim();
+    
+    List<String> partes = geoLimpa.split(RegExp(r'\s+'));
 
-    final Uri url = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng?q=$lat,$lng');
+    if (partes.length < 2) {
+      throw 'Formato de coordenada inválido.';
+    }
+
+    String lat = partes[0];
+    String lng = partes[1];
+
+    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
     
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Não foi possível abrir o navegador GPS.';

@@ -81,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Colors.blue.shade700,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(32.0),
@@ -93,14 +93,21 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.traffic_rounded, size: 80, color: Colors.blue.shade700),
+                  // ==========================================
+                  // IMAGEM SUBSTITUÍDA AQUI
+                  // ==========================================
+                  Image.asset(
+                    'assets/images/login.png',
+                    height: 150, // Ajuste a altura se achar que ficou muito grande ou pequeno
+                    fit: BoxFit.contain,
+                  ),
                   const SizedBox(height: 16),
                   const Text('Vistoria CTTU', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87)),
                   const SizedBox(height: 8),
                   const Text('Faça login para continuar', style: TextStyle(fontSize: 16, color: Colors.grey)),
                   const SizedBox(height: 32),
                   
-                  // Campo de Telefone (Substituiu o E-mail)
+                  // Campo de Telefone
                   TextField(
                     controller: _telefoneController,
                     keyboardType: TextInputType.phone,
