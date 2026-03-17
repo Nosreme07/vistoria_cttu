@@ -1,5 +1,6 @@
-package com.example.vistoria_cttu
+package br.gov.cttu.vistoria
 
 import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity : FlutterActivity()
+class MainActivity: FlutterActivity() {
+}
