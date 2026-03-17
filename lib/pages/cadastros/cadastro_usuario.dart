@@ -3,6 +3,7 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart'; 
+import 'package:cloud_functions/cloud_functions.dart';
 
 // Importações novas para o PDF
 import 'package:pdf/pdf.dart';
@@ -52,6 +53,57 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  // ==== NOVA FUNÇÃO DE RESET CONECTADA AO CLOUD FUNCTIONS ====
+  Future<void> _resetarSenha123456(String usuarioId, StateSetter setModalState) async {
+    bool confirmacao = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Resetar Senha', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+        content: const Text('Deseja forçar o reset da senha deste usuário para "123456"?\n\nA alteração será imediata no servidor e a senha antiga deixará de funcionar na mesma hora.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Confirmar Reset'),
+          ),
+        ],
+      ),
+    ) ?? false;
+
+    if (!confirmacao) return;
+
+    setModalState(() => _estaCarregando = true);
+
+    try {
+      // 1. Força o Flutter a dar um "F5" na sua sessão atual para evitar bugs de token
+      await FirebaseAuth.instance.currentUser?.getIdToken(true);
+
+      // 2. Chama a função lá do servidor
+      final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('resetarSenha');
+      
+      // 3. Envia os dados COM O FORMATO FORÇADO <String, dynamic>
+      final response = await callable.call(<String, dynamic>{
+        'uid': usuarioId,
+        'senha': '123456',
+        'segredo': 'CTTU@Admin2024', 
+      });
+
+      if (mounted) {
+        Navigator.pop(context); // Fecha o formulário
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('SUCESSO! A senha foi alterada para 123456.'), backgroundColor: Colors.green, duration: Duration(seconds: 4)),
+        );
+      }
+    } on FirebaseFunctionsException catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro no servidor: ${e.message}'), backgroundColor: Colors.red));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido: $e'), backgroundColor: Colors.red));
+    } finally {
+      if (mounted) setModalState(() => _estaCarregando = false);
+    }
   }
 
   void _abrirFormulario({String? usuarioId, String? nomeAtual, String? telefoneAtual, String? perfilAtual, String? empresaAtual}) {
@@ -159,6 +211,26 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
                           : Text(isEdicao ? 'Atualizar Dados' : 'Salvar Usuário', style: const TextStyle(fontSize: 16)),
                       ),
                     ),
+                    
+                    // ==== NOVO BOTÃO DE RESET (Só aparece na edição) ====
+                    if (isEdicao) ...[
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.redAccent,
+                            side: const BorderSide(color: Colors.redAccent),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          icon: const Icon(Icons.lock_reset),
+                          label: const Text('Resetar Senha para 123456', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          onPressed: _estaCarregando ? null : () => _resetarSenha123456(usuarioId, setModalState),
+                        ),
+                      ),
+                    ],
+
                     const SizedBox(height: 24),
                   ],
                 ),

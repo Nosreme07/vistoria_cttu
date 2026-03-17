@@ -109,32 +109,120 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
-  // ==== ABRIR GPS (COMO CHEGAR) ====
-  Future<void> _abrirGPS(String georeferencia) async {
+  // ==== NOVO: MENU DE OPÇÕES DE GPS (WAZE OU MAPS) ====
+  void _mostrarOpcoesGPS(String georeferencia) {
     if (georeferencia.trim().isEmpty || !georeferencia.contains(' ')) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Semáforo sem coordenadas cadastradas!'), backgroundColor: Colors.orange));
       return;
     }
-    
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Como deseja chegar ao semáforo?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade400, 
+                          foregroundColor: Colors.white, 
+                          padding: const EdgeInsets.symmetric(vertical: 16), 
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                        ),
+                        icon: const Icon(Icons.directions_car, size: 28),
+                        label: const Text('Waze', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _abrirAppNavegacao(georeferencia, 'waze');
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green.shade600, 
+                          foregroundColor: Colors.white, 
+                          padding: const EdgeInsets.symmetric(vertical: 16), 
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                        ),
+                        icon: const Icon(Icons.map, size: 28),
+                        label: const Text('Maps', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _abrirAppNavegacao(georeferencia, 'maps');
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
+
+  // Abre o aplicativo escolhido via URL Universal
+  Future<void> _abrirAppNavegacao(String georeferencia, String app) async {
     try {
       var partes = georeferencia.trim().split(RegExp(r'\s+'));
       String lat = partes[0].trim();
       String lng = partes[1].trim();
 
-      final Uri url = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+      Uri url;
+      if (app == 'waze') {
+        url = Uri.parse('https://waze.com/ul?ll=$lat,$lng&navigate=yes');
+      } else {
+        url = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+      }
+
       bool abriu = await launchUrl(url, mode: LaunchMode.externalApplication);
-      
       if (!abriu) {
-        throw 'Não foi possível abrir o navegador GPS.';
+        throw 'Não foi possível abrir o aplicativo.';
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao abrir o mapa do celular.'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao abrir o $app. Verifique se ele está instalado!'), backgroundColor: Colors.red));
       }
     }
   }
 
-  // ==== CARIMBO DE FOTOS CORRIGIDO ====
+  // ==== COMPARTILHA AS FOTOS FÍSICAS E O TEXTO COM O NOME ====
+  Future<void> _enviarOcorrencia(Map<String, dynamic> semaforo, String falha, String detalhes, List<File> fotosLocais) async {
+    String idSemaforo = semaforo['id']?.toString() ?? 'S/N';
+    String endereco = semaforo['endereco'] ?? 'Endereço não cadastrado';
+
+    String mensagem = '🚨 *OCORRÊNCIA REGISTRADA* 🚨\n\n'
+        '*Semáforo:* $idSemaforo\n'
+        '*Endereço:* $endereco\n'
+        '*Vistoriador:* $_nomeDoVistoriadorLogado\n'
+        '*Problema:* $falha\n'
+        '*Detalhes:* ${detalhes.isEmpty ? "Sem detalhes" : detalhes}';
+
+    try {
+      if (fotosLocais.isNotEmpty) {
+        List<XFile> xFiles = fotosLocais.map((f) => XFile(f.path)).toList();
+        await Share.shareXFiles(xFiles, text: mensagem);
+      } else {
+        await Share.share(mensagem);
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao compartilhar a ocorrência.'), backgroundColor: Colors.red));
+    }
+  }
+
+  // ==== CARIMBO DE FOTOS ====
   Future<File> _carimbarFoto(File arquivoOriginal, String semaforoInfo, String dataColetada, String gpsColetado) async {
     try {
       final bytes = await arquivoOriginal.readAsBytes();
@@ -142,7 +230,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       
       if (imagemDecodificada == null) return arquivoOriginal; 
 
-      // Textos em lista para pular linha corretamente
       List<String> linhasTexto = [
         'Semaforo: $semaforoInfo',
         'Data: $dataColetada',
@@ -151,14 +238,12 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
 
       final fonteParaCarimbo = img.arial48;
       
-      // Calcula posição Y considerando 30px de margem do rodapé
       int yInicial = imagemDecodificada.height - (linhasTexto.length * fonteParaCarimbo.lineHeight) - 30;
 
       for (int i = 0; i < linhasTexto.length; i++) {
         String texto = linhasTexto[i];
         int posY = yInicial + (i * fonteParaCarimbo.lineHeight);
 
-        // Sombra Preta
         img.drawString(
           imagemDecodificada, 
           texto, 
@@ -168,7 +253,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
           color: img.ColorRgb8(0, 0, 0)
         );
         
-        // Texto Amarelo Principal
         img.drawString(
           imagemDecodificada, 
           texto, 
@@ -220,6 +304,30 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     );
   }
 
+  // ==== WIDGET DE RODAPÉ DO PDF ====
+  pw.Widget _buildRodapePDF(pw.Context context, String dataHora) {
+    return pw.Container(
+      child: pw.Column(
+        mainAxisSize: pw.MainAxisSize.min,
+        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+        children: [
+          pw.Divider(thickness: 1, color: PdfColors.grey400),
+          pw.SizedBox(height: 4),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.SizedBox(width: 50),
+              pw.Expanded(
+                child: pw.Text('Relatório gerado pelo aplicativo Vistoria CTTU ($dataHora)', textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+              ),
+              pw.SizedBox(width: 50, child: pw.Text('Pág. ${context.pageNumber} / ${context.pagesCount}', textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700))),
+            ]
+          )
+        ]
+      )
+    );
+  }
+
   // ==== GERADOR DE PDF DA FICHA INDIVIDUAL ====
   Future<void> _exportarPDFIndividual(Map<String, dynamic> vistoria, String nomeVistoriador) async {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Baixando fotos e gerando PDF...'), backgroundColor: Colors.teal));
@@ -238,12 +346,15 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
         }
       }
 
+      String dataHoraAtual = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
+
       final pdf = pw.Document();
 
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.all(32),
+          margin: const pw.EdgeInsets.only(left: 32, right: 32, top: 32, bottom: 20),
+          footer: (pw.Context context) => _buildRodapePDF(context, dataHoraAtual),
           build: (pw.Context context) {
             return [
               pw.Row(
@@ -296,6 +407,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
 
       String idStr = vistoria['semaforo_id']?.toString() ?? 'SN';
       await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: 'Ficha_Semaforo_$idStr.pdf');
+      
     } catch (e) {
       if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF da ficha!'), backgroundColor: Colors.red));
     }
@@ -305,10 +417,14 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
   Future<void> _gerarEMostrarPDF(List<QueryDocumentSnapshot> vistorias, String rotaNumero, String nomeVistoriador) async {
     if (vistorias.isEmpty) return;
     try {
+      String dataHoraAtual = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
+
       final pdf = pw.Document();
       pdf.addPage(
         pw.MultiPage(
-          pageFormat: PdfPageFormat.a4.landscape, margin: const pw.EdgeInsets.all(24),
+          pageFormat: PdfPageFormat.a4.landscape, 
+          margin: const pw.EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 20),
+          footer: (pw.Context context) => _buildRodapePDF(context, dataHoraAtual),
           build: (pw.Context context) {
             return [
               pw.Header(level: 0, child: pw.Text('Relatório de Vistorias Concluídas - Rota $rotaNumero', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold))),
@@ -331,19 +447,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                 cellAlignment: pw.Alignment.centerLeft, cellStyle: const pw.TextStyle(fontSize: 7),
                 columnWidths: { 0: const pw.FlexColumnWidth(1), 1: const pw.FlexColumnWidth(1.2), 2: const pw.FlexColumnWidth(1.5), 3: const pw.FlexColumnWidth(1), 4: const pw.FlexColumnWidth(1), 5: const pw.FlexColumnWidth(1), 6: const pw.FlexColumnWidth(1.2), 7: const pw.FlexColumnWidth(1.5), 8: const pw.FlexColumnWidth(2) }
               ),
-              pw.SizedBox(height: 40),
-              pw.Text('Declaro que as informações contidas neste relatório refletem a realidade...', textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
-              pw.SizedBox(height: 60),
-              pw.Center(
-                child: pw.Column(
-                  children: [
-                    pw.Container(width: 300, height: 1, color: PdfColors.black),
-                    pw.SizedBox(height: 8),
-                    pw.Text(nomeVistoriador.toUpperCase(), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
-                    pw.Text('Assinatura do Vistoriador', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
-                  ]
-                )
-              )
             ];
           }
         )
@@ -426,7 +529,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                             const Text('Opções para este semáforo:', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 16)),
                             const SizedBox(height: 24),
                             
-                            // BOTÃO 1: COMO CHEGAR
+                            // BOTÃO 1: COMO CHEGAR COM ESCOLHA
                             SizedBox(
                               width: double.infinity, height: 55,
                               child: ElevatedButton.icon(
@@ -434,7 +537,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                 icon: const Icon(Icons.directions, size: 28),
                                 label: const Text('COMO CHEGAR (GPS)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                 onPressed: () {
-                                  _abrirGPS(geoRefSemaforo);
+                                  _mostrarOpcoesGPS(geoRefSemaforo);
                                 },
                               ),
                             ),
@@ -571,7 +674,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                     return Stack(
                                       clipBehavior: Clip.none,
                                       children: [
-                                        // GESTURE DETECTOR AQUI PARA AMPLIAR FOTO LOCAL
                                         GestureDetector(
                                           onTap: () => _mostrarImagemExpandida(context, FileImage(fotos[index])),
                                           child: Container(
@@ -646,6 +748,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
 
                                   try {
                                     List<String> urlsDasFotos = [];
+                                    
                                     if (fotos.isNotEmpty) {
                                       for (int i = 0; i < fotos.length; i++) {
                                         String nomeArquivo = 'vistoria_${semaforo['id']}_${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
@@ -673,6 +776,11 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                       'fotos': urlsDasFotos, 
                                       'criado_em': FieldValue.serverTimestamp(),
                                     });
+
+                                    // ==== COMPARTILHA PARA O WHATSAPP ====
+                                    if (temAnormalidade == 'Sim') {
+                                      await _enviarOcorrencia(semaforo, falhaSelecionada!, detalhesFinais, fotos);
+                                    }
 
                                     if (mounted) {
                                       Navigator.pop(context);
@@ -799,7 +907,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                       Wrap(
                         spacing: 12, runSpacing: 12,
                         children: fotos.map((url) => GestureDetector(
-                          // GESTURE DETECTOR AQUI PARA AMPLIAR FOTO DO FIREBASE
                           onTap: () => _mostrarImagemExpandida(context, NetworkImage(url)),
                           child: Container(
                             width: 100, height: 100,
@@ -943,7 +1050,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
         await FirebaseFirestore.instance.collection('rotas').doc(rotaId).update({'em_uso': false});
         
         if (mounted) { 
-          // Se for admin e ele encerrou a rota pelo painel, limpa a seleção para voltar pra lista
           if (_isAdmin) {
             setState(() => _turnoSelecionadoAdmin = null);
           }
@@ -956,9 +1062,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     }
   }
 
-  // ===============================================
-  // TELA 1: LISTA DE TODAS AS ROTAS ATIVAS (ADMIN)
-  // ===============================================
   Widget _buildVisaoListaAdmin() {
     return Scaffold(
       appBar: AppBar(
@@ -989,7 +1092,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                 
                 final turnos = snapshot.data!.docs.toList();
                 
-                // Ordena localmente pela data
                 turnos.sort((a, b) {
                   var dataA = a.data() as Map<String, dynamic>;
                   var dataB = b.data() as Map<String, dynamic>;
@@ -1044,7 +1146,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                         ),
                         trailing: const Icon(Icons.arrow_forward_ios, color: Colors.orange),
                         onTap: () {
-                          // Admin selecionou essa rota. A tela vai mudar para o detalhe!
                           setState(() {
                             _turnoSelecionadoAdmin = doc;
                           });
@@ -1061,9 +1162,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     );
   }
 
-  // ===============================================
-  // TELA 2: O FORMULÁRIO COMPLETO (VISTORIADOR / ADMIN)
-  // ===============================================
   Widget _buildVisaoDetalheTurno(DocumentSnapshot turnoDoc) {
     var turnoData = turnoDoc.data() as Map<String, dynamic>;
     String rotaNumero = turnoData['rota_numero'] ?? 'S/N';
@@ -1074,7 +1172,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       appBar: AppBar(
         leading: _isAdmin ? IconButton(
           icon: const Icon(Icons.arrow_back), 
-          onPressed: () => setState(() => _turnoSelecionadoAdmin = null) // Volta pra lista
+          onPressed: () => setState(() => _turnoSelecionadoAdmin = null) 
         ) : null,
         title: Text(_isAdmin ? 'Vistoriando Rota $rotaNumero' : 'Vistoria em Campo', style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.orange.shade300,
@@ -1165,7 +1263,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                               ],
                             ),
                             const SizedBox(height: 8),
-                            // Se for Admin, mostra o nome de quem está fazendo. Se for o Vistoriador, mostra a moto.
                             Row(children: [
                               Icon(_isAdmin ? Icons.person : Icons.motorcycle, size: 18, color: Colors.grey), 
                               const SizedBox(width: 8), 
@@ -1292,17 +1389,14 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     if (user == null) return const Scaffold(body: Center(child: Text('Erro: Usuário não logado.')));
     if (_carregandoPerfil) return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
-    // Se for administrador e não selecionou nenhuma rota, mostra a lista geral de todas
     if (_isAdmin && _turnoSelecionadoAdmin == null) {
       return _buildVisaoListaAdmin();
     }
 
-    // Se for administrador e selecionou uma rota, mostra os detalhes dela passando a variável selecionada
     if (_isAdmin && _turnoSelecionadoAdmin != null) {
       return _buildVisaoDetalheTurno(_turnoSelecionadoAdmin!);
     }
 
-    // Se for Vistoriador normal, escuta os próprios turnos
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('turnos').where('vistoriador_uid', isEqualTo: user!.uid).where('status', isEqualTo: 'ativo').limit(1).snapshots(),
       builder: (context, snapshotTurno) {
@@ -1325,7 +1419,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
           );
         }
 
-        // Encontrou o turno do Vistoriador, renderiza o formulário
         return _buildVisaoDetalheTurno(snapshotTurno.data!.docs.first);
       }
     );

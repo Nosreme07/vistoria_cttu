@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart'; 
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-// NOVOS IMPORTS PARA O PDF NO ACERVO E EXCEL
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -13,16 +12,73 @@ import 'package:printing/printing.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-// ==== FUNÇÃO GLOBAL PARA ABRIR O GPS ====
-Future<void> _abrirGoogleMaps(String georeferencia, BuildContext context) async {
-  if (georeferencia.trim().isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Semáforo sem coordenadas válidas!'), backgroundColor: Colors.orange));
+// ==== FUNÇÃO GLOBAL PARA ABRIR MAPS OU WAZE ====
+void _mostrarOpcoesGPS(BuildContext context, String georeferencia) {
+  if (georeferencia.trim().isEmpty || !georeferencia.contains(' ')) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Semáforo sem coordenadas cadastradas!'), backgroundColor: Colors.orange));
     return;
   }
-  
+
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+    builder: (context) {
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Como deseja chegar ao semáforo?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue.shade400, 
+                        foregroundColor: Colors.white, 
+                        padding: const EdgeInsets.symmetric(vertical: 16), 
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                      ),
+                      icon: const Icon(Icons.directions_car, size: 28),
+                      label: const Text('Waze', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _abrirAppNavegacao(context, georeferencia, 'waze');
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.shade600, 
+                        foregroundColor: Colors.white, 
+                        padding: const EdgeInsets.symmetric(vertical: 16), 
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                      ),
+                      icon: const Icon(Icons.map, size: 28),
+                      label: const Text('Maps', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _abrirAppNavegacao(context, georeferencia, 'maps');
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  );
+}
+
+Future<void> _abrirAppNavegacao(BuildContext context, String georeferencia, String app) async {
   try {
     String geoLimpa = georeferencia.replaceAll(',', ' ').trim();
-    
     List<String> partes = geoLimpa.split(RegExp(r'\s+'));
 
     if (partes.length < 2) {
@@ -32,17 +88,23 @@ Future<void> _abrirGoogleMaps(String georeferencia, BuildContext context) async 
     String lat = partes[0];
     String lng = partes[1];
 
-    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
-    
+    Uri url;
+    if (app == 'waze') {
+      url = Uri.parse('https://waze.com/ul?ll=$lat,$lng&navigate=yes');
+    } else {
+      url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng'); // Se usar a api directions, mude para: http://maps.google.com/maps?daddr=$lat,$lng
+    }
+
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      throw 'Não foi possível abrir o navegador GPS.';
+      throw 'Não foi possível abrir o aplicativo.';
     }
   } catch (e) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao abrir o mapa do celular.'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao abrir o $app. Verifique se ele está instalado!'), backgroundColor: Colors.red));
     }
   }
 }
+
 
 class AcervoPage extends StatefulWidget {
   const AcervoPage({super.key});
@@ -56,10 +118,7 @@ class _AcervoPageState extends State<AcervoPage> with SingleTickerProviderStateM
   final TextEditingController _pesquisaController = TextEditingController();
   String _textoPesquisa = '';
 
-  // Filtros da Aba de Lista Geral
   String _filtroRotaLista = 'Todas';
-
-  // Filtros da Aba de Mapa
   String _filtroRota = 'Todas';
   String _filtroGrupo = 'Todos';
 
@@ -105,7 +164,6 @@ class _AcervoPageState extends State<AcervoPage> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  // ==== FUNÇÃO DE EXPORTAR ACERVO PARA PDF ====
   Future<void> _exportarAcervoPDF(List<Map<String, dynamic>> semaforos) async {
     if (semaforos.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nenhum semáforo para exportar.'), backgroundColor: Colors.orange));
@@ -196,7 +254,6 @@ class _AcervoPageState extends State<AcervoPage> with SingleTickerProviderStateM
     }
   }
 
-  // ==== FUNÇÃO DE EXPORTAR ACERVO PARA EXCEL ====
   Future<void> _exportarAcervoExcel(List<Map<String, dynamic>> semaforos) async {
     if (semaforos.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nenhum semáforo para exportar.'), backgroundColor: Colors.orange));
@@ -211,7 +268,6 @@ class _AcervoPageState extends State<AcervoPage> with SingleTickerProviderStateM
       
       for (var s in semaforos) {
         String id = s['id']?.toString() ?? '';
-        // Substituir ponto e vírgula no endereço para não quebrar a coluna do CSV
         String endereco = s['endereco']?.toString().replaceAll(';', ',') ?? ''; 
         String bairro = s['bairro']?.toString() ?? '';
         String empresa = s['empresa']?.toString() ?? '';
@@ -234,6 +290,8 @@ class _AcervoPageState extends State<AcervoPage> with SingleTickerProviderStateM
   }
 
   void _mostrarFichaTecnica(Map<String, dynamic> data) {
+    String georef = (data['georeferencia'] ?? '').toString();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -254,6 +312,22 @@ class _AcervoPageState extends State<AcervoPage> with SingleTickerProviderStateM
                     )
                   ),
                   const Divider(thickness: 2, height: 32),
+
+                  // BOTÃO DE COMO CHEGAR DENTRO DA FICHA
+                  if (georef.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: SizedBox(
+                        width: double.infinity, height: 50,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade600, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                          icon: const Icon(Icons.directions),
+                          label: const Text('COMO CHEGAR (GPS)', style: TextStyle(fontWeight: FontWeight.bold)),
+                          onPressed: () => _mostrarOpcoesGPS(context, georef),
+                        ),
+                      ),
+                    ),
+
                   Expanded(
                     child: ListView.builder(
                       controller: scrollController,
@@ -348,7 +422,6 @@ class _AcervoPageState extends State<AcervoPage> with SingleTickerProviderStateM
               // ================= ABA 1: LISTA GERAL =================
               Builder(
                 builder: (context) {
-                  // APLICAÇÃO DE FILTROS AQUI EM CIMA PARA O BOTÃO PODER CONTAR OS ITENS
                   var semaforosFiltradosPesquisa = todosSemaforos;
 
                   if (_filtroRotaLista != 'Todas') {
@@ -414,7 +487,6 @@ class _AcervoPageState extends State<AcervoPage> with SingleTickerProviderStateM
                               ],
                             ),
                             const SizedBox(height: 12),
-                            // BOTÕES DE EXPORTAR PDF E EXCEL LADO A LADO
                             Row(
                               children: [
                                 Expanded(
@@ -490,7 +562,7 @@ class _AcervoPageState extends State<AcervoPage> with SingleTickerProviderStateM
                                           IconButton(
                                             icon: Icon(Icons.directions, color: georef.isNotEmpty ? Colors.blue.shade700 : Colors.grey, size: 28),
                                             tooltip: 'Como Chegar',
-                                            onPressed: () => _abrirGoogleMaps(georef, context),
+                                            onPressed: () => _mostrarOpcoesGPS(context, georef),
                                           ),
                                         ],
                                       ),
@@ -637,7 +709,7 @@ class TelaMapaRota extends StatelessWidget {
                           TextButton.icon(
                             icon: const Icon(Icons.directions, color: Colors.blue),
                             label: const Text('Traçar Rota', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
-                            onPressed: () => _abrirGoogleMaps(geoStr, context),
+                            onPressed: () => _mostrarOpcoesGPS(context, geoStr),
                           ),
                           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Fechar', style: TextStyle(color: Colors.grey))),
                         ],
