@@ -102,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
                     fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 16),
-                  const Text('Vistoria CTTU', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87)),
+                  const Text('Vistoria Semafórica', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87)),
                   const SizedBox(height: 8),
                   const Text('Faça login para continuar', style: TextStyle(fontSize: 16, color: Colors.grey)),
                   const SizedBox(height: 32),
