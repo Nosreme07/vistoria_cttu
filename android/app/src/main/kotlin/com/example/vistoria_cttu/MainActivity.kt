@@ -1,4 +1,4 @@
-package br.gov.cttu.vistoria
+package br.org.vistoria.semaforica
 
 import io.flutter.embedding.android.FlutterActivity
 
