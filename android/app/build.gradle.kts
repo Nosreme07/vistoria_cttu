@@ -18,7 +18,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "br.gov.cttu.vistoria" // <--- MUDAMOS O NAMESPACE AQUI
+    namespace = "br.org.vistoria.semaforica" // <--- MUDAMOS O NAMESPACE AQUI
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -33,7 +33,7 @@ android {
 
     defaultConfig {
         // <--- MUDAMOS O APPLICATION ID AQUI PARA SER ACEITO NO GOOGLE PLAY
-        applicationId = "br.gov.cttu.vistoria" 
+        applicationId = "br.org.vistoria.semaforica" 
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
