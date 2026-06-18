@@ -27,6 +27,7 @@ dependencies:
   firebase_storage: ^13.0.6
   url_launcher: ^6.2.1
   cloud_functions: ^6.0.7
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:
@@ -43,10 +44,15 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/images/login.png"
   min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/images/logo.png"
+    background_color: "#FFFFFF"
+    theme_color: "#FFFFFF"
 
 flutter:
   uses-material-design: true
 
   assets:
-    - assets/acervo.json
+    - assets/informacoes_gerais.json
     - assets/images/
