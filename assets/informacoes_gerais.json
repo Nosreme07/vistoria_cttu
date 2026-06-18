@@ -1,8 +1,8 @@
 [
   {
     "SEMÁFORO": "001",
-    "SEMÁFORO COMPARTILHADO": "001",
     "IP DDNS": "s05697.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "001",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -44,8 +44,8 @@
   },
   {
     "SEMÁFORO": "002",
-    "SEMÁFORO COMPARTILHADO": "002",
     "IP DDNS": "s05384.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "002",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -87,8 +87,8 @@
   },
   {
     "SEMÁFORO": "003",
-    "SEMÁFORO COMPARTILHADO": "003",
     "IP DDNS": "s05554.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "003",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -130,8 +130,8 @@
   },
   {
     "SEMÁFORO": "004",
-    "SEMÁFORO COMPARTILHADO": "004",
     "IP DDNS": "s04989.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "004",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -173,8 +173,8 @@
   },
   {
     "SEMÁFORO": "005",
-    "SEMÁFORO COMPARTILHADO": "005",
     "IP DDNS": "s05339.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "005",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -216,8 +216,8 @@
   },
   {
     "SEMÁFORO": "006",
-    "SEMÁFORO COMPARTILHADO": "006",
     "IP DDNS": "s05336.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "006",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -259,8 +259,8 @@
   },
   {
     "SEMÁFORO": "007",
-    "SEMÁFORO COMPARTILHADO": "007",
     "IP DDNS": "s04956.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "007",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -302,8 +302,8 @@
   },
   {
     "SEMÁFORO": "008",
-    "SEMÁFORO COMPARTILHADO": "008",
     "IP DDNS": "s05566.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "008",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -345,8 +345,8 @@
   },
   {
     "SEMÁFORO": "009",
-    "SEMÁFORO COMPARTILHADO": "009 / 343",
     "IP DDNS": "s05683.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "009 / 343",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -388,8 +388,8 @@
   },
   {
     "SEMÁFORO": "010",
-    "SEMÁFORO COMPARTILHADO": "010",
     "IP DDNS": "s05403.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "010",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOÃO TUDE DE MELO",
@@ -431,8 +431,8 @@
   },
   {
     "SEMÁFORO": "011",
-    "SEMÁFORO COMPARTILHADO": "011",
     "IP DDNS": "s05331.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "011",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CONSELHEIRO PORTELA",
@@ -474,8 +474,8 @@
   },
   {
     "SEMÁFORO": "012",
-    "SEMÁFORO COMPARTILHADO": "012 / 467",
     "IP DDNS": "s05262.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "012 / 467",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BARÃO DA VITÓRIA",
@@ -517,8 +517,8 @@
   },
   {
     "SEMÁFORO": "013",
-    "SEMÁFORO COMPARTILHADO": "013",
     "IP DDNS": "s05487.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "013",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO SOL",
@@ -560,8 +560,8 @@
   },
   {
     "SEMÁFORO": "014",
-    "SEMÁFORO COMPARTILHADO": "014",
     "IP DDNS": "s05356.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "014",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO SOL",
@@ -603,8 +603,8 @@
   },
   {
     "SEMÁFORO": "015",
-    "SEMÁFORO COMPARTILHADO": "015",
     "IP DDNS": "s05690.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "015",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DANTAS BARRETO",
@@ -646,8 +646,8 @@
   },
   {
     "SEMÁFORO": "016",
-    "SEMÁFORO COMPARTILHADO": "016",
     "IP DDNS": "s05260.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "016",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -689,8 +689,8 @@
   },
   {
     "SEMÁFORO": "017",
-    "SEMÁFORO COMPARTILHADO": "017",
     "IP DDNS": "s05036.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "017",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NOSSA SENHORA DO CARMO",
@@ -732,8 +732,8 @@
   },
   {
     "SEMÁFORO": "018",
-    "SEMÁFORO COMPARTILHADO": "018",
     "IP DDNS": "s05019.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "018",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO IMPERADOR",
@@ -775,8 +775,8 @@
   },
   {
     "SEMÁFORO": "019",
-    "SEMÁFORO COMPARTILHADO": "019",
     "IP DDNS": "s05028.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "019",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RIO BRANCO",
@@ -818,8 +818,8 @@
   },
   {
     "SEMÁFORO": "020",
-    "SEMÁFORO COMPARTILHADO": "020 / 165",
     "IP DDNS": "s05673.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "020 / 165",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MARQUÊS DE OLINDA",
@@ -861,8 +861,8 @@
   },
   {
     "SEMÁFORO": "021",
-    "SEMÁFORO COMPARTILHADO": "021",
     "IP DDNS": "s05328.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "021",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA HORA",
@@ -904,8 +904,8 @@
   },
   {
     "SEMÁFORO": "022",
-    "SEMÁFORO COMPARTILHADO": "022",
     "IP DDNS": "s05247.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "022",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PRINCESA ISABEL",
@@ -947,8 +947,8 @@
   },
   {
     "SEMÁFORO": "023",
-    "SEMÁFORO COMPARTILHADO": "023",
     "IP DDNS": "s05616.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "023",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONDE DA BOA VISTA",
@@ -990,8 +990,8 @@
   },
   {
     "SEMÁFORO": "024",
-    "SEMÁFORO COMPARTILHADO": "024",
     "IP DDNS": "s05617.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "024",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONDE DA BOA VISTA",
@@ -1033,8 +1033,8 @@
   },
   {
     "SEMÁFORO": "025",
-    "SEMÁFORO COMPARTILHADO": "025",
     "IP DDNS": "s05006.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "025",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONDE DA BOA VISTA",
@@ -1076,8 +1076,8 @@
   },
   {
     "SEMÁFORO": "026",
-    "SEMÁFORO COMPARTILHADO": "026",
     "IP DDNS": "s05073.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "026",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DE BELÉM",
@@ -1119,8 +1119,8 @@
   },
   {
     "SEMÁFORO": "027",
-    "SEMÁFORO COMPARTILHADO": "027",
     "IP DDNS": "s05340.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "027",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONDE DA BOA VISTA",
@@ -1162,8 +1162,8 @@
   },
   {
     "SEMÁFORO": "028",
-    "SEMÁFORO COMPARTILHADO": "028",
     "IP DDNS": "s05213.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "028",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MANOEL BORBA",
@@ -1205,8 +1205,8 @@
   },
   {
     "SEMÁFORO": "029",
-    "SEMÁFORO COMPARTILHADO": "029",
     "IP DDNS": "s04958.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "029",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MANOEL BORBA",
@@ -1248,8 +1248,8 @@
   },
   {
     "SEMÁFORO": "030",
-    "SEMÁFORO COMPARTILHADO": "030",
     "IP DDNS": "s04954.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "030",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA 13 DE MAIO",
@@ -1291,8 +1291,8 @@
   },
   {
     "SEMÁFORO": "031",
-    "SEMÁFORO COMPARTILHADO": "031 / 466",
     "IP DDNS": "s05237.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "031 / 466",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO HOSPÍCIO",
@@ -1334,8 +1334,8 @@
   },
   {
     "SEMÁFORO": "032",
-    "SEMÁFORO COMPARTILHADO": "032",
     "IP DDNS": "s05110.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "032",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO HOSPÍCIO",
@@ -1377,8 +1377,8 @@
   },
   {
     "SEMÁFORO": "033",
-    "SEMÁFORO COMPARTILHADO": "033",
     "IP DDNS": "s05390.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "033",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO HOSPÍCIO",
@@ -1420,8 +1420,8 @@
   },
   {
     "SEMÁFORO": "034",
-    "SEMÁFORO COMPARTILHADO": "034",
     "IP DDNS": "s05137.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "034",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -1463,8 +1463,8 @@
   },
   {
     "SEMÁFORO": "035",
-    "SEMÁFORO COMPARTILHADO": "035",
     "IP DDNS": "s05038.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "035",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DANTAS BARRETO",
@@ -1506,8 +1506,8 @@
   },
   {
     "SEMÁFORO": "036",
-    "SEMÁFORO COMPARTILHADO": "036",
     "IP DDNS": "s05281.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "036",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -1549,8 +1549,8 @@
   },
   {
     "SEMÁFORO": "037",
-    "SEMÁFORO COMPARTILHADO": "037",
     "IP DDNS": "s05256.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "037",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -1592,8 +1592,8 @@
   },
   {
     "SEMÁFORO": "038",
-    "SEMÁFORO COMPARTILHADO": "038",
     "IP DDNS": "s04961.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "038",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ADV. JOSÉ PAULO CAVALCANTE",
@@ -1635,8 +1635,8 @@
   },
   {
     "SEMÁFORO": "039",
-    "SEMÁFORO COMPARTILHADO": "039",
     "IP DDNS": "s05255.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "039",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA MOTOCOLOMBÓ",
@@ -1678,8 +1678,8 @@
   },
   {
     "SEMÁFORO": "040",
-    "SEMÁFORO COMPARTILHADO": "040 / 418",
     "IP DDNS": "s05290.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "040 / 418",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "PRAÇA DO DERBY",
@@ -1721,8 +1721,8 @@
   },
   {
     "SEMÁFORO": "041",
-    "SEMÁFORO COMPARTILHADO": "041",
     "IP DDNS": "s05130.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "041",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO PRÍNCIPE",
@@ -1764,8 +1764,8 @@
   },
   {
     "SEMÁFORO": "042",
-    "SEMÁFORO COMPARTILHADO": "042 / 664",
     "IP DDNS": "s05586.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "042 / 664",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -1807,8 +1807,8 @@
   },
   {
     "SEMÁFORO": "043",
-    "SEMÁFORO COMPARTILHADO": "043",
     "IP DDNS": "s05111.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "043",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -1850,8 +1850,8 @@
   },
   {
     "SEMÁFORO": "044",
-    "SEMÁFORO COMPARTILHADO": "044",
     "IP DDNS": "s05099.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "044",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -1893,8 +1893,8 @@
   },
   {
     "SEMÁFORO": "045",
-    "SEMÁFORO COMPARTILHADO": "045",
     "IP DDNS": "s05626.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "045",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -1936,8 +1936,8 @@
   },
   {
     "SEMÁFORO": "046",
-    "SEMÁFORO COMPARTILHADO": "046",
     "IP DDNS": "s05024.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "046",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONSELHEIRO ROSA E SILVA",
@@ -1979,8 +1979,8 @@
   },
   {
     "SEMÁFORO": "047",
-    "SEMÁFORO COMPARTILHADO": "047",
     "IP DDNS": "s05190.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "047",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONSELHEIRO ROSA E SILVA",
@@ -2022,8 +2022,8 @@
   },
   {
     "SEMÁFORO": "048",
-    "SEMÁFORO COMPARTILHADO": "048",
     "IP DDNS": "s05056..dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "048",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RUI BARBOSA",
@@ -2065,8 +2065,8 @@
   },
   {
     "SEMÁFORO": "049",
-    "SEMÁFORO COMPARTILHADO": "049",
     "IP DDNS": "s05236.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "049",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -2108,8 +2108,8 @@
   },
   {
     "SEMÁFORO": "050",
-    "SEMÁFORO COMPARTILHADO": "050 / 413",
     "IP DDNS": "s05234.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "050 / 413",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOSÉ OSÓRIO",
@@ -2151,8 +2151,8 @@
   },
   {
     "SEMÁFORO": "051",
-    "SEMÁFORO COMPARTILHADO": "051 / 353",
     "IP DDNS": "s05238.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "051 / 353",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BENFICA",
@@ -2194,8 +2194,8 @@
   },
   {
     "SEMÁFORO": "052",
-    "SEMÁFORO COMPARTILHADO": "052",
     "IP DDNS": "radium-tecnologia.fortiddns.com:20161",
+    "SEMÁFORO COMPARTILHADO": "052",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -2237,8 +2237,8 @@
   },
   {
     "SEMÁFORO": "053",
-    "SEMÁFORO COMPARTILHADO": "053",
     "IP DDNS": "s05675.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "053",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SÃO MIGUEL",
@@ -2280,8 +2280,8 @@
   },
   {
     "SEMÁFORO": "054",
-    "SEMÁFORO COMPARTILHADO": "054",
     "IP DDNS": "s05373.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "054",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DANTAS BARRETO",
@@ -2323,8 +2323,8 @@
   },
   {
     "SEMÁFORO": "055",
-    "SEMÁFORO COMPARTILHADO": "055",
     "IP DDNS": "s05142.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "055",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -2366,8 +2366,8 @@
   },
   {
     "SEMÁFORO": "056",
-    "SEMÁFORO COMPARTILHADO": "056 / 377",
     "IP DDNS": "s05511.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "056 / 377",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -2409,8 +2409,8 @@
   },
   {
     "SEMÁFORO": "057",
-    "SEMÁFORO COMPARTILHADO": "057",
     "IP DDNS": "radium-tecnologia.fortiddns.com:20101",
+    "SEMÁFORO COMPARTILHADO": "057",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -2452,8 +2452,8 @@
   },
   {
     "SEMÁFORO": "058",
-    "SEMÁFORO COMPARTILHADO": "058 / 687 / 688",
     "IP DDNS": "radium-tecnologia.fortiddns.com:20021",
+    "SEMÁFORO COMPARTILHADO": "058 / 687 / 688",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -2495,8 +2495,8 @@
   },
   {
     "SEMÁFORO": "059",
-    "SEMÁFORO COMPARTILHADO": "059",
     "IP DDNS": "s05648.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "059",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -2538,8 +2538,8 @@
   },
   {
     "SEMÁFORO": "060",
-    "SEMÁFORO COMPARTILHADO": "060",
     "IP DDNS": "s05225.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "060",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DR VICENTE GOMES",
@@ -2581,8 +2581,8 @@
   },
   {
     "SEMÁFORO": "061",
-    "SEMÁFORO COMPARTILHADO": "061",
     "IP DDNS": "s05635.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "061",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO ARRAIAL",
@@ -2624,8 +2624,8 @@
   },
   {
     "SEMÁFORO": "062",
-    "SEMÁFORO COMPARTILHADO": "062",
     "IP DDNS": "s05509.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "062",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -2667,8 +2667,8 @@
   },
   {
     "SEMÁFORO": "063",
-    "SEMÁFORO COMPARTILHADO": "063",
     "IP DDNS": "s05392.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "063",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -2710,8 +2710,8 @@
   },
   {
     "SEMÁFORO": "064",
-    "SEMÁFORO COMPARTILHADO": "064",
     "IP DDNS": "s05580.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "064",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -2753,8 +2753,8 @@
   },
   {
     "SEMÁFORO": "065",
-    "SEMÁFORO COMPARTILHADO": "065",
     "IP DDNS": "s05334.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "065",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -2796,8 +2796,8 @@
   },
   {
     "SEMÁFORO": "066",
-    "SEMÁFORO COMPARTILHADO": "066",
     "IP DDNS": "s05100.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "066",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -2839,8 +2839,8 @@
   },
   {
     "SEMÁFORO": "067",
-    "SEMÁFORO COMPARTILHADO": "067",
     "IP DDNS": "s05228.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "067",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GEN. SAN MARTIN",
@@ -2882,8 +2882,8 @@
   },
   {
     "SEMÁFORO": "068",
-    "SEMÁFORO COMPARTILHADO": "068",
     "IP DDNS": "s05559.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "068",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -2925,8 +2925,8 @@
   },
   {
     "SEMÁFORO": "069",
-    "SEMÁFORO COMPARTILHADO": "069",
     "IP DDNS": "s05563.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "069",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -2968,8 +2968,8 @@
   },
   {
     "SEMÁFORO": "070",
-    "SEMÁFORO COMPARTILHADO": "070",
     "IP DDNS": "s05395.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "070",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JEAN EMILE FAVRE",
@@ -3011,8 +3011,8 @@
   },
   {
     "SEMÁFORO": "071",
-    "SEMÁFORO COMPARTILHADO": "071",
     "IP DDNS": "s05121.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "071",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOAQUIM NABUCO",
@@ -3054,8 +3054,8 @@
   },
   {
     "SEMÁFORO": "072",
-    "SEMÁFORO COMPARTILHADO": "072",
     "IP DDNS": "s05318.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "072",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. SUL",
@@ -3097,8 +3097,8 @@
   },
   {
     "SEMÁFORO": "073",
-    "SEMÁFORO COMPARTILHADO": "073 / 528",
     "IP DDNS": "s05251.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "073 / 528",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA NICOLAU PEREIRA",
@@ -3140,8 +3140,8 @@
   },
   {
     "SEMÁFORO": "074",
-    "SEMÁFORO COMPARTILHADO": "074",
     "IP DDNS": "s05172.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "074",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO ARRAIAL",
@@ -3183,8 +3183,8 @@
   },
   {
     "SEMÁFORO": "075",
-    "SEMÁFORO COMPARTILHADO": "075 / 417",
     "IP DDNS": "s05562.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "075 / 417",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -3226,8 +3226,8 @@
   },
   {
     "SEMÁFORO": "076",
-    "SEMÁFORO COMPARTILHADO": "076",
     "IP DDNS": "s04972.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "076",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "CAIS DE SANTA RITA",
@@ -3269,8 +3269,8 @@
   },
   {
     "SEMÁFORO": "077",
-    "SEMÁFORO COMPARTILHADO": "077",
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": "077",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEIRA RIO",
@@ -3312,8 +3312,8 @@
   },
   {
     "SEMÁFORO": "078",
-    "SEMÁFORO COMPARTILHADO": "078",
     "IP DDNS": "s05661.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "078",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -3355,8 +3355,8 @@
   },
   {
     "SEMÁFORO": "079",
-    "SEMÁFORO COMPARTILHADO": "079 / 312",
     "IP DDNS": "s05104.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "079 / 312",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -3398,8 +3398,8 @@
   },
   {
     "SEMÁFORO": "080",
-    "SEMÁFORO COMPARTILHADO": "080 / 266 / 591",
     "IP DDNS": "s05069.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "080 / 266 / 591",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -3441,8 +3441,8 @@
   },
   {
     "SEMÁFORO": "081",
-    "SEMÁFORO COMPARTILHADO": "081",
     "IP DDNS": "s05625.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "081",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -3484,8 +3484,8 @@
   },
   {
     "SEMÁFORO": "082",
-    "SEMÁFORO COMPARTILHADO": "082",
     "IP DDNS": "s05046.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "082",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -3527,8 +3527,8 @@
   },
   {
     "SEMÁFORO": "083",
-    "SEMÁFORO COMPARTILHADO": "083",
     "IP DDNS": "s05387.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "083",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MANOEL BORBA",
@@ -3570,8 +3570,8 @@
   },
   {
     "SEMÁFORO": "084",
-    "SEMÁFORO COMPARTILHADO": "084",
     "IP DDNS": "s05051.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "084",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -3613,8 +3613,8 @@
   },
   {
     "SEMÁFORO": "085",
-    "SEMÁFORO COMPARTILHADO": "085",
     "IP DDNS": "s05291.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "085",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -3656,8 +3656,8 @@
   },
   {
     "SEMÁFORO": "086",
-    "SEMÁFORO COMPARTILHADO": "086",
     "IP DDNS": "s05089.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "086",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BARÃO DE ITAMARACÁ",
@@ -3699,8 +3699,8 @@
   },
   {
     "SEMÁFORO": "087",
-    "SEMÁFORO COMPARTILHADO": "087",
     "IP DDNS": "s05258.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "087",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA IMPERIAL",
@@ -3742,8 +3742,8 @@
   },
   {
     "SEMÁFORO": "088",
-    "SEMÁFORO COMPARTILHADO": "088",
     "IP DDNS": "s05207.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "088",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAURÍCIO DE NASSAU",
@@ -3785,8 +3785,8 @@
   },
   {
     "SEMÁFORO": "089",
-    "SEMÁFORO COMPARTILHADO": "089",
     "IP DDNS": "s05083.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "089",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JOÃO DE BARROS",
@@ -3828,8 +3828,8 @@
   },
   {
     "SEMÁFORO": "090",
-    "SEMÁFORO COMPARTILHADO": "090",
     "IP DDNS": "s05344.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "090",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA AURORA",
@@ -3871,8 +3871,8 @@
   },
   {
     "SEMÁFORO": "091",
-    "SEMÁFORO COMPARTILHADO": "091",
     "IP DDNS": "s04974.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "091",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA FALCÃO DE LACERDA",
@@ -3914,8 +3914,8 @@
   },
   {
     "SEMÁFORO": "092",
-    "SEMÁFORO COMPARTILHADO": "092",
     "IP DDNS": "s05123.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "092",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO HOSPÍCIO",
@@ -3957,8 +3957,8 @@
   },
   {
     "SEMÁFORO": "093",
-    "SEMÁFORO COMPARTILHADO": "093",
     "IP DDNS": "s05653.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "093",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ÁLVARES DE AZEVEDO",
@@ -4000,8 +4000,8 @@
   },
   {
     "SEMÁFORO": "094",
-    "SEMÁFORO COMPARTILHADO": "094",
     "IP DDNS": "s05547.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "094",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DE BELÉM",
@@ -4043,8 +4043,8 @@
   },
   {
     "SEMÁFORO": "095",
-    "SEMÁFORO COMPARTILHADO": "095",
     "IP DDNS": "s05332.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "095",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -4086,8 +4086,8 @@
   },
   {
     "SEMÁFORO": "096",
-    "SEMÁFORO COMPARTILHADO": "096",
     "IP DDNS": "s05105.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "096",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -4129,8 +4129,8 @@
   },
   {
     "SEMÁFORO": "097",
-    "SEMÁFORO COMPARTILHADO": "097",
     "IP DDNS": "s05589.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "097",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -4172,8 +4172,8 @@
   },
   {
     "SEMÁFORO": "098",
-    "SEMÁFORO COMPARTILHADO": "098",
     "IP DDNS": "s05192.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "098",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. SANTOS DUMONT",
@@ -4215,8 +4215,8 @@
   },
   {
     "SEMÁFORO": "099",
-    "SEMÁFORO COMPARTILHADO": "099",
     "IP DDNS": "s05125.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "099",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONSELHEIRO ROSA E SILVA",
@@ -4258,8 +4258,8 @@
   },
   {
     "SEMÁFORO": 100,
-    "SEMÁFORO COMPARTILHADO": 100,
     "IP DDNS": "s05184.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 100,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA VELHA DO BONGI",
@@ -4301,8 +4301,8 @@
   },
   {
     "SEMÁFORO": 101,
-    "SEMÁFORO COMPARTILHADO": 101,
     "IP DDNS": "s05400.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 101,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JEAN EMILE FAVRE",
@@ -4344,8 +4344,8 @@
   },
   {
     "SEMÁFORO": 102,
-    "SEMÁFORO COMPARTILHADO": 102,
     "IP DDNS": "s05660.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 102,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RUI BARBOSA",
@@ -4387,8 +4387,8 @@
   },
   {
     "SEMÁFORO": 103,
-    "SEMÁFORO COMPARTILHADO": 103,
     "IP DDNS": "radium-tecnologia.fortiddns.com:10104",
+    "SEMÁFORO COMPARTILHADO": 103,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ANTÔNIO DE GÓES",
@@ -4430,8 +4430,8 @@
   },
   {
     "SEMÁFORO": 104,
-    "SEMÁFORO COMPARTILHADO": 104,
     "IP DDNS": "radium-tecnologia.fortiddns.com:10061",
+    "SEMÁFORO COMPARTILHADO": 104,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -4473,8 +4473,8 @@
   },
   {
     "SEMÁFORO": 105,
-    "SEMÁFORO COMPARTILHADO": 105,
     "IP DDNS": "s05319.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 105,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -4516,8 +4516,8 @@
   },
   {
     "SEMÁFORO": 106,
-    "SEMÁFORO COMPARTILHADO": 106,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 106,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA REAL DA TORRE",
@@ -4559,8 +4559,8 @@
   },
   {
     "SEMÁFORO": 107,
-    "SEMÁFORO COMPARTILHADO": "107 / 370",
     "IP DDNS": "s05669.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "107 / 370",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -4602,8 +4602,8 @@
   },
   {
     "SEMÁFORO": 108,
-    "SEMÁFORO COMPARTILHADO": "108 / 465",
     "IP DDNS": "s05663.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "108 / 465",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -4645,8 +4645,8 @@
   },
   {
     "SEMÁFORO": 109,
-    "SEMÁFORO COMPARTILHADO": 109,
     "IP DDNS": "s05204.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 109,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAURÍCIO DE NASSAU",
@@ -4688,8 +4688,8 @@
   },
   {
     "SEMÁFORO": 110,
-    "SEMÁFORO COMPARTILHADO": 110,
     "IP DDNS": "s05620.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 110,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -4731,8 +4731,8 @@
   },
   {
     "SEMÁFORO": 111,
-    "SEMÁFORO COMPARTILHADO": 111,
     "IP DDNS": "s05541.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 111,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ITANAGÉ",
@@ -4774,8 +4774,8 @@
   },
   {
     "SEMÁFORO": 112,
-    "SEMÁFORO COMPARTILHADO": 112,
     "IP DDNS": "s05493.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 112,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -4817,8 +4817,8 @@
   },
   {
     "SEMÁFORO": 113,
-    "SEMÁFORO COMPARTILHADO": 113,
     "IP DDNS": "s05496.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 113,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -4860,8 +4860,8 @@
   },
   {
     "SEMÁFORO": 114,
-    "SEMÁFORO COMPARTILHADO": 114,
     "IP DDNS": "s05227.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 114,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -4903,8 +4903,8 @@
   },
   {
     "SEMÁFORO": 115,
-    "SEMÁFORO COMPARTILHADO": 115,
     "IP DDNS": "s05600.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 115,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -4946,8 +4946,8 @@
   },
   {
     "SEMÁFORO": 116,
-    "SEMÁFORO COMPARTILHADO": "116 / 471",
     "IP DDNS": "s05553.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "116 / 471",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAES",
@@ -4989,8 +4989,8 @@
   },
   {
     "SEMÁFORO": 117,
-    "SEMÁFORO COMPARTILHADO": 117,
     "IP DDNS": "s05397.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 117,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -5032,8 +5032,8 @@
   },
   {
     "SEMÁFORO": 118,
-    "SEMÁFORO COMPARTILHADO": 118,
     "IP DDNS": "s05316.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 118,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -5075,8 +5075,8 @@
   },
   {
     "SEMÁFORO": 119,
-    "SEMÁFORO COMPARTILHADO": 119,
     "IP DDNS": "s05619.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 119,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -5118,8 +5118,8 @@
   },
   {
     "SEMÁFORO": 120,
-    "SEMÁFORO COMPARTILHADO": 120,
     "IP DDNS": "s05492.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 120,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -5161,8 +5161,8 @@
   },
   {
     "SEMÁFORO": 121,
-    "SEMÁFORO COMPARTILHADO": 121,
     "IP DDNS": "s05314.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 121,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -5204,8 +5204,8 @@
   },
   {
     "SEMÁFORO": 122,
-    "SEMÁFORO COMPARTILHADO": 122,
     "IP DDNS": "radium-tecnologia.fortiddns.com:20001",
+    "SEMÁFORO COMPARTILHADO": 122,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. FREI MATIAS TEVES",
@@ -5247,8 +5247,8 @@
   },
   {
     "SEMÁFORO": 123,
-    "SEMÁFORO COMPARTILHADO": 123,
     "IP DDNS": "s05558.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 123,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -5290,8 +5290,8 @@
   },
   {
     "SEMÁFORO": 124,
-    "SEMÁFORO COMPARTILHADO": 124,
     "IP DDNS": "s05315.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 124,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -5333,8 +5333,8 @@
   },
   {
     "SEMÁFORO": 125,
-    "SEMÁFORO COMPARTILHADO": 125,
     "IP DDNS": "s05323.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 125,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -5376,8 +5376,8 @@
   },
   {
     "SEMÁFORO": 126,
-    "SEMÁFORO COMPARTILHADO": "126 / 562",
     "IP DDNS": "s05027.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "126 / 562",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RUI BARBOSA",
@@ -5419,8 +5419,8 @@
   },
   {
     "SEMÁFORO": 127,
-    "SEMÁFORO COMPARTILHADO": 127,
     "IP DDNS": "s05601.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 127,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -5462,8 +5462,8 @@
   },
   {
     "SEMÁFORO": 128,
-    "SEMÁFORO COMPARTILHADO": 128,
     "IP DDNS": "s05495.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 128,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -5505,8 +5505,8 @@
   },
   {
     "SEMÁFORO": 129,
-    "SEMÁFORO COMPARTILHADO": 129,
     "IP DDNS": "s05497.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 129,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. VISCONDE DE JEQUITINHONHA",
@@ -5548,8 +5548,8 @@
   },
   {
     "SEMÁFORO": 130,
-    "SEMÁFORO COMPARTILHADO": 130,
     "IP DDNS": "s05143.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 130,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -5591,8 +5591,8 @@
   },
   {
     "SEMÁFORO": 131,
-    "SEMÁFORO COMPARTILHADO": 131,
     "IP DDNS": "s05394.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 131,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -5634,8 +5634,8 @@
   },
   {
     "SEMÁFORO": 132,
-    "SEMÁFORO COMPARTILHADO": 132,
     "IP DDNS": "radium-tecnologia.fortiddns.com:20061",
+    "SEMÁFORO COMPARTILHADO": 132,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -5677,8 +5677,8 @@
   },
   {
     "SEMÁFORO": 133,
-    "SEMÁFORO COMPARTILHADO": 133,
     "IP DDNS": "s05383.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 133,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -5720,8 +5720,8 @@
   },
   {
     "SEMÁFORO": 134,
-    "SEMÁFORO COMPARTILHADO": 134,
     "IP DDNS": "s05615.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 134,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MÁRIO ALVES DE LIRA",
@@ -5763,8 +5763,8 @@
   },
   {
     "SEMÁFORO": 135,
-    "SEMÁFORO COMPARTILHADO": 135,
     "IP DDNS": "s04976.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 135,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JEAN EMILE FAVRE",
@@ -5806,8 +5806,8 @@
   },
   {
     "SEMÁFORO": 136,
-    "SEMÁFORO COMPARTILHADO": 136,
     "IP DDNS": "s05171.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 136,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PAULA BATISTA",
@@ -5849,8 +5849,8 @@
   },
   {
     "SEMÁFORO": 137,
-    "SEMÁFORO COMPARTILHADO": 137,
     "IP DDNS": "radium-tecnologia.fortiddns.com:10041",
+    "SEMÁFORO COMPARTILHADO": 137,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. HERCULANO BANDEIRA",
@@ -5892,8 +5892,8 @@
   },
   {
     "SEMÁFORO": 138,
-    "SEMÁFORO COMPARTILHADO": "138 / 226",
     "IP DDNS": "radium-tecnologia.fortiddns.com:20226",
+    "SEMÁFORO COMPARTILHADO": "138 / 226",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. HERCULANO BANDEIRA",
@@ -5935,8 +5935,8 @@
   },
   {
     "SEMÁFORO": 139,
-    "SEMÁFORO COMPARTILHADO": 139,
     "IP DDNS": "s05378.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 139,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -5978,8 +5978,8 @@
   },
   {
     "SEMÁFORO": 140,
-    "SEMÁFORO COMPARTILHADO": 140,
     "IP DDNS": "s05382.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 140,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -6021,8 +6021,8 @@
   },
   {
     "SEMÁFORO": 141,
-    "SEMÁFORO COMPARTILHADO": 141,
     "IP DDNS": "s05152.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 141,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DANTAS BARRETO",
@@ -6064,8 +6064,8 @@
   },
   {
     "SEMÁFORO": 142,
-    "SEMÁFORO COMPARTILHADO": 142,
     "IP DDNS": "s04964.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 142,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -6107,8 +6107,8 @@
   },
   {
     "SEMÁFORO": 143,
-    "SEMÁFORO COMPARTILHADO": 143,
     "IP DDNS": "s05337.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 143,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -6150,8 +6150,8 @@
   },
   {
     "SEMÁFORO": 144,
-    "SEMÁFORO COMPARTILHADO": 144,
     "IP DDNS": "s05376.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 144,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -6193,8 +6193,8 @@
   },
   {
     "SEMÁFORO": 145,
-    "SEMÁFORO COMPARTILHADO": 145,
     "IP DDNS": "s05379.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 145,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -6236,8 +6236,8 @@
   },
   {
     "SEMÁFORO": 146,
-    "SEMÁFORO COMPARTILHADO": 146,
     "IP DDNS": "s05604.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 146,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -6279,8 +6279,8 @@
   },
   {
     "SEMÁFORO": 147,
-    "SEMÁFORO COMPARTILHADO": 147,
     "IP DDNS": "s05603.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 147,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -6322,8 +6322,8 @@
   },
   {
     "SEMÁFORO": 148,
-    "SEMÁFORO COMPARTILHADO": 148,
     "IP DDNS": "s04991.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 148,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -6365,8 +6365,8 @@
   },
   {
     "SEMÁFORO": 149,
-    "SEMÁFORO COMPARTILHADO": 149,
     "IP DDNS": "s05696.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 149,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -6408,8 +6408,8 @@
   },
   {
     "SEMÁFORO": 150,
-    "SEMÁFORO COMPARTILHADO": 150,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 150,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -6451,8 +6451,8 @@
   },
   {
     "SEMÁFORO": 151,
-    "SEMÁFORO COMPARTILHADO": 151,
     "IP DDNS": "s05543.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 151,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. LINS PETTIT",
@@ -6494,8 +6494,8 @@
   },
   {
     "SEMÁFORO": 152,
-    "SEMÁFORO COMPARTILHADO": 152,
     "IP DDNS": "s04993.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 152,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -6537,8 +6537,8 @@
   },
   {
     "SEMÁFORO": 153,
-    "SEMÁFORO COMPARTILHADO": 153,
     "IP DDNS": "s05594.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 153,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -6580,8 +6580,8 @@
   },
   {
     "SEMÁFORO": 154,
-    "SEMÁFORO COMPARTILHADO": 154,
     "IP DDNS": "s05055.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 154,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. VISCONDE DE JEQUITINHONHA",
@@ -6623,8 +6623,8 @@
   },
   {
     "SEMÁFORO": 155,
-    "SEMÁFORO COMPARTILHADO": 155,
     "IP DDNS": "s05032.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 155,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -6666,8 +6666,8 @@
   },
   {
     "SEMÁFORO": 156,
-    "SEMÁFORO COMPARTILHADO": 156,
     "IP DDNS": "s05161.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 156,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -6709,8 +6709,8 @@
   },
   {
     "SEMÁFORO": 157,
-    "SEMÁFORO COMPARTILHADO": 157,
     "IP DDNS": "s04952.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 157,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA APRÍGIO GUIMARÃES",
@@ -6752,8 +6752,8 @@
   },
   {
     "SEMÁFORO": 158,
-    "SEMÁFORO COMPARTILHADO": 158,
     "IP DDNS": "s05488.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 158,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. VISCONDE DE JEQUITINHONHA",
@@ -6795,8 +6795,8 @@
   },
   {
     "SEMÁFORO": 159,
-    "SEMÁFORO COMPARTILHADO": "159 / 407",
     "IP DDNS": "s05267.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "159 / 407",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BARÃO DE SOUZA LEÃO",
@@ -6838,8 +6838,8 @@
   },
   {
     "SEMÁFORO": 160,
-    "SEMÁFORO COMPARTILHADO": 160,
     "IP DDNS": "s05053.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 160,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DOS NAVEGANTES",
@@ -6881,8 +6881,8 @@
   },
   {
     "SEMÁFORO": 161,
-    "SEMÁFORO COMPARTILHADO": "161 / 439",
     "IP DDNS": "s05295.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "161 / 439",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAES",
@@ -6924,8 +6924,8 @@
   },
   {
     "SEMÁFORO": 162,
-    "SEMÁFORO COMPARTILHADO": 162,
     "IP DDNS": "s05613.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 162,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONDE DA BOA VISTA",
@@ -6967,8 +6967,8 @@
   },
   {
     "SEMÁFORO": 163,
-    "SEMÁFORO COMPARTILHADO": 163,
     "IP DDNS": "s05367.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 163,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DANTAS BARRETO",
@@ -7010,8 +7010,8 @@
   },
   {
     "SEMÁFORO": 164,
-    "SEMÁFORO COMPARTILHADO": 164,
     "IP DDNS": "s05129.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 164,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MARTINS DE BARROS",
@@ -7053,8 +7053,8 @@
   },
   {
     "SEMÁFORO": 165,
-    "SEMÁFORO COMPARTILHADO": "165 / 020",
     "IP DDNS": "s05673.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "165 / 020",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "CAIS DO APOLO",
@@ -7096,8 +7096,8 @@
   },
   {
     "SEMÁFORO": 166,
-    "SEMÁFORO COMPARTILHADO": 166,
     "IP DDNS": "s05091.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 166,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO ESPINHEIRO",
@@ -7139,8 +7139,8 @@
   },
   {
     "SEMÁFORO": 167,
-    "SEMÁFORO COMPARTILHADO": 167,
     "IP DDNS": "s05248.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 167,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PRINCESA ISABEL",
@@ -7182,8 +7182,8 @@
   },
   {
     "SEMÁFORO": 168,
-    "SEMÁFORO COMPARTILHADO": 168,
     "IP DDNS": "s05254.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 168,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PRINCESA ISABEL",
@@ -7225,8 +7225,8 @@
   },
   {
     "SEMÁFORO": 169,
-    "SEMÁFORO COMPARTILHADO": 169,
     "IP DDNS": "s05215.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 169,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MANOEL BORBA",
@@ -7268,8 +7268,8 @@
   },
   {
     "SEMÁFORO": 170,
-    "SEMÁFORO COMPARTILHADO": 170,
     "IP DDNS": "s05158.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 170,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO PRÍNCIPE",
@@ -7311,8 +7311,8 @@
   },
   {
     "SEMÁFORO": 171,
-    "SEMÁFORO COMPARTILHADO": 171,
     "IP DDNS": "s04957.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 171,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -7354,8 +7354,8 @@
   },
   {
     "SEMÁFORO": 172,
-    "SEMÁFORO COMPARTILHADO": 172,
     "IP DDNS": "s05135.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 172,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. VISCONDE DE SUASSUNA",
@@ -7397,8 +7397,8 @@
   },
   {
     "SEMÁFORO": 173,
-    "SEMÁFORO COMPARTILHADO": 173,
     "IP DDNS": "s05141.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 173,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -7440,8 +7440,8 @@
   },
   {
     "SEMÁFORO": 174,
-    "SEMÁFORO COMPARTILHADO": 174,
     "IP DDNS": "s05185.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 174,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -7483,8 +7483,8 @@
   },
   {
     "SEMÁFORO": 175,
-    "SEMÁFORO COMPARTILHADO": 175,
     "IP DDNS": "s05086.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 175,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO RIACHUELO",
@@ -7526,8 +7526,8 @@
   },
   {
     "SEMÁFORO": 176,
-    "SEMÁFORO COMPARTILHADO": 176,
     "IP DDNS": "s05307.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 176,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO PRÍNCIPE",
@@ -7569,8 +7569,8 @@
   },
   {
     "SEMÁFORO": 177,
-    "SEMÁFORO COMPARTILHADO": "177 / 675",
     "IP DDNS": "s05362.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "177 / 675",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA AMÉLIA",
@@ -7612,8 +7612,8 @@
   },
   {
     "SEMÁFORO": 178,
-    "SEMÁFORO COMPARTILHADO": 178,
     "IP DDNS": "s05364.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 178,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA AMÉLIA",
@@ -7655,8 +7655,8 @@
   },
   {
     "SEMÁFORO": 179,
-    "SEMÁFORO COMPARTILHADO": 179,
     "IP DDNS": "s05235.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 179,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOSÉ OSÓRIO",
@@ -7698,8 +7698,8 @@
   },
   {
     "SEMÁFORO": 180,
-    "SEMÁFORO COMPARTILHADO": 180,
     "IP DDNS": "s05370.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 180,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA CONCÓRDIA",
@@ -7741,8 +7741,8 @@
   },
   {
     "SEMÁFORO": 181,
-    "SEMÁFORO COMPARTILHADO": 181,
     "IP DDNS": "s05374.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 181,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DANTAS BARRETO",
@@ -7784,8 +7784,8 @@
   },
   {
     "SEMÁFORO": 182,
-    "SEMÁFORO COMPARTILHADO": 182,
     "IP DDNS": "s05035.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 182,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA CONCÓRDIA",
@@ -7827,8 +7827,8 @@
   },
   {
     "SEMÁFORO": 183,
-    "SEMÁFORO COMPARTILHADO": 183,
     "IP DDNS": "s05643.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 183,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. FERNANDO SIMÕES BARBOSA",
@@ -7870,8 +7870,8 @@
   },
   {
     "SEMÁFORO": 184,
-    "SEMÁFORO COMPARTILHADO": 184,
     "IP DDNS": "s05090.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 184,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BARÃO DE ITAMARACÁ",
@@ -7913,8 +7913,8 @@
   },
   {
     "SEMÁFORO": 185,
-    "SEMÁFORO COMPARTILHADO": 185,
     "IP DDNS": "s05505.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 185,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GEN. SAN MARTIN",
@@ -7956,8 +7956,8 @@
   },
   {
     "SEMÁFORO": 186,
-    "SEMÁFORO COMPARTILHADO": 186,
     "IP DDNS": "s05274.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 186,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -7999,8 +7999,8 @@
   },
   {
     "SEMÁFORO": 187,
-    "SEMÁFORO COMPARTILHADO": 187,
     "IP DDNS": "s05582.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 187,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -8042,8 +8042,8 @@
   },
   {
     "SEMÁFORO": 188,
-    "SEMÁFORO COMPARTILHADO": 188,
     "IP DDNS": "s05363.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 188,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. SANTOS DUMONT",
@@ -8085,8 +8085,8 @@
   },
   {
     "SEMÁFORO": 189,
-    "SEMÁFORO COMPARTILHADO": 189,
     "IP DDNS": "s05542.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 189,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DOM MANOEL DE MEDEIROS",
@@ -8128,8 +8128,8 @@
   },
   {
     "SEMÁFORO": 190,
-    "SEMÁFORO COMPARTILHADO": 190,
     "IP DDNS": "s05698.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 190,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -8171,8 +8171,8 @@
   },
   {
     "SEMÁFORO": 191,
-    "SEMÁFORO COMPARTILHADO": 191,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 191,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOSÉ BONIFÁCIO",
@@ -8214,8 +8214,8 @@
   },
   {
     "SEMÁFORO": 192,
-    "SEMÁFORO COMPARTILHADO": 192,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 192,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA REAL DA TORRE",
@@ -8257,8 +8257,8 @@
   },
   {
     "SEMÁFORO": 193,
-    "SEMÁFORO COMPARTILHADO": 193,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 193,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOSÉ BONIFÁCIO",
@@ -8300,8 +8300,8 @@
   },
   {
     "SEMÁFORO": 194,
-    "SEMÁFORO COMPARTILHADO": 194,
     "IP DDNS": "s05692.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 194,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MARTINS DE BARROS",
@@ -8343,8 +8343,8 @@
   },
   {
     "SEMÁFORO": 195,
-    "SEMÁFORO COMPARTILHADO": 195,
     "IP DDNS": "s05338.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 195,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA AMÉLIA",
@@ -8386,8 +8386,8 @@
   },
   {
     "SEMÁFORO": 196,
-    "SEMÁFORO COMPARTILHADO": 196,
     "IP DDNS": "s05347.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 196,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ALFREDO DE LISBOA",
@@ -8429,8 +8429,8 @@
   },
   {
     "SEMÁFORO": 197,
-    "SEMÁFORO COMPARTILHADO": 197,
     "IP DDNS": "s05349.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 197,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO SOL",
@@ -8472,8 +8472,8 @@
   },
   {
     "SEMÁFORO": 198,
-    "SEMÁFORO COMPARTILHADO": "198 / 356",
     "IP DDNS": "s05583.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "198 / 356",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JOÃO DE BARROS",
@@ -8515,8 +8515,8 @@
   },
   {
     "SEMÁFORO": 199,
-    "SEMÁFORO COMPARTILHADO": 199,
     "IP DDNS": "s05092.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 199,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SÃO JOÃO",
@@ -8558,8 +8558,8 @@
   },
   {
     "SEMÁFORO": 200,
-    "SEMÁFORO COMPARTILHADO": 200,
     "IP DDNS": "s04968.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 200,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -8601,8 +8601,8 @@
   },
   {
     "SEMÁFORO": 201,
-    "SEMÁFORO COMPARTILHADO": 201,
     "IP DDNS": "s05080.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 201,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DE BELÉM",
@@ -8644,8 +8644,8 @@
   },
   {
     "SEMÁFORO": 202,
-    "SEMÁFORO COMPARTILHADO": 202,
     "IP DDNS": "s05682.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 202,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -8687,8 +8687,8 @@
   },
   {
     "SEMÁFORO": 203,
-    "SEMÁFORO COMPARTILHADO": 203,
     "IP DDNS": "s05020.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 203,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NOSSA SENHORA DO CARMO",
@@ -8730,8 +8730,8 @@
   },
   {
     "SEMÁFORO": 204,
-    "SEMÁFORO COMPARTILHADO": 204,
     "IP DDNS": "s05022.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 204,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NOSSA SENHORA DO CARMO",
@@ -8773,8 +8773,8 @@
   },
   {
     "SEMÁFORO": 205,
-    "SEMÁFORO COMPARTILHADO": "205 / 211",
     "IP DDNS": "s05368.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "205 / 211",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. SUL",
@@ -8816,8 +8816,8 @@
   },
   {
     "SEMÁFORO": 206,
-    "SEMÁFORO COMPARTILHADO": 206,
     "IP DDNS": "s05693.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 206,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO IMPERADOR",
@@ -8859,8 +8859,8 @@
   },
   {
     "SEMÁFORO": 207,
-    "SEMÁFORO COMPARTILHADO": "207 / 414",
     "IP DDNS": "s05037.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "207 / 414",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA IMPERIAL",
@@ -8902,8 +8902,8 @@
   },
   {
     "SEMÁFORO": 208,
-    "SEMÁFORO COMPARTILHADO": 208,
     "IP DDNS": "s05515.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 208,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -8945,8 +8945,8 @@
   },
   {
     "SEMÁFORO": 209,
-    "SEMÁFORO COMPARTILHADO": 209,
     "IP DDNS": "s05504.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 209,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DR. JOSÉ MARIANO",
@@ -8988,8 +8988,8 @@
   },
   {
     "SEMÁFORO": 210,
-    "SEMÁFORO COMPARTILHADO": 210,
     "IP DDNS": "s05229.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 210,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA AURORA",
@@ -9031,8 +9031,8 @@
   },
   {
     "SEMÁFORO": 211,
-    "SEMÁFORO COMPARTILHADO": "211 / 205",
     "IP DDNS": "s05368.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "211 / 205",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. SUL",
@@ -9074,8 +9074,8 @@
   },
   {
     "SEMÁFORO": 212,
-    "SEMÁFORO COMPARTILHADO": 212,
     "IP DDNS": "s05501.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 212,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -9117,8 +9117,8 @@
   },
   {
     "SEMÁFORO": 213,
-    "SEMÁFORO COMPARTILHADO": 213,
     "IP DDNS": "s05513.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 213,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -9160,8 +9160,8 @@
   },
   {
     "SEMÁFORO": 214,
-    "SEMÁFORO COMPARTILHADO": 214,
     "IP DDNS": "s05198.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 214,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONSELHEIRO ROSA E SILVA",
@@ -9203,8 +9203,8 @@
   },
   {
     "SEMÁFORO": 215,
-    "SEMÁFORO COMPARTILHADO": 215,
     "IP DDNS": "s05149.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 215,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO FUTURO",
@@ -9246,8 +9246,8 @@
   },
   {
     "SEMÁFORO": 216,
-    "SEMÁFORO COMPARTILHADO": 216,
     "IP DDNS": "s05377.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 216,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -9289,8 +9289,8 @@
   },
   {
     "SEMÁFORO": 217,
-    "SEMÁFORO COMPARTILHADO": 217,
     "IP DDNS": "s05029.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 217,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -9332,8 +9332,8 @@
   },
   {
     "SEMÁFORO": 218,
-    "SEMÁFORO COMPARTILHADO": 218,
     "IP DDNS": "s05178.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 218,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAES",
@@ -9375,8 +9375,8 @@
   },
   {
     "SEMÁFORO": 219,
-    "SEMÁFORO COMPARTILHADO": 219,
     "IP DDNS": "s05249.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 219,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ODETE MONTEIRO",
@@ -9418,8 +9418,8 @@
   },
   {
     "SEMÁFORO": 220,
-    "SEMÁFORO COMPARTILHADO": 220,
     "IP DDNS": "s05209.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 220,
     "Nº CHIP": "89550532880017578444AAC005HLR88",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MANOEL BORBA",
@@ -9461,8 +9461,8 @@
   },
   {
     "SEMÁFORO": 221,
-    "SEMÁFORO COMPARTILHADO": 221,
     "IP DDNS": "s05351.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 221,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RUI BARBOSA",
@@ -9504,8 +9504,8 @@
   },
   {
     "SEMÁFORO": 222,
-    "SEMÁFORO COMPARTILHADO": 222,
     "IP DDNS": "s05310.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 222,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA SOLEDADE",
@@ -9547,8 +9547,8 @@
   },
   {
     "SEMÁFORO": 223,
-    "SEMÁFORO COMPARTILHADO": 223,
     "IP DDNS": "s05140.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 223,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PADRE ROMA",
@@ -9590,8 +9590,8 @@
   },
   {
     "SEMÁFORO": 224,
-    "SEMÁFORO COMPARTILHADO": "224 / 588",
     "IP DDNS": "s05093.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "224 / 588",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DOM MANOEL DE MEDEIROS",
@@ -9633,8 +9633,8 @@
   },
   {
     "SEMÁFORO": 225,
-    "SEMÁFORO COMPARTILHADO": 225,
     "IP DDNS": "s05326.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 225,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAiS",
@@ -9676,8 +9676,8 @@
   },
   {
     "SEMÁFORO": 226,
-    "SEMÁFORO COMPARTILHADO": "226 / 138",
     "IP DDNS": "radium-tecnologia.fortiddns.com:20226",
+    "SEMÁFORO COMPARTILHADO": "226 / 138",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ANTÔNIO DE GÓES",
@@ -9719,8 +9719,8 @@
   },
   {
     "SEMÁFORO": 227,
-    "SEMÁFORO COMPARTILHADO": 227,
     "IP DDNS": "s05160.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 227,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ANTÔNIO FALCÃO",
@@ -9762,8 +9762,8 @@
   },
   {
     "SEMÁFORO": 228,
-    "SEMÁFORO COMPARTILHADO": 228,
     "IP DDNS": "s05239.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 228,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -9805,8 +9805,8 @@
   },
   {
     "SEMÁFORO": 229,
-    "SEMÁFORO COMPARTILHADO": 229,
     "IP DDNS": "s05565.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 229,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -9848,8 +9848,8 @@
   },
   {
     "SEMÁFORO": 230,
-    "SEMÁFORO COMPARTILHADO": 230,
     "IP DDNS": "s05595.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 230,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -9891,8 +9891,8 @@
   },
   {
     "SEMÁFORO": 231,
-    "SEMÁFORO COMPARTILHADO": "231 / 608",
     "IP DDNS": "s05596.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "231 / 608",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -9934,8 +9934,8 @@
   },
   {
     "SEMÁFORO": 232,
-    "SEMÁFORO COMPARTILHADO": 232,
     "IP DDNS": "s05688.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 232,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -9977,8 +9977,8 @@
   },
   {
     "SEMÁFORO": 233,
-    "SEMÁFORO COMPARTILHADO": 233,
     "IP DDNS": "s05230.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 233,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CARLOS GOMES",
@@ -10020,8 +10020,8 @@
   },
   {
     "SEMÁFORO": 234,
-    "SEMÁFORO COMPARTILHADO": 234,
     "IP DDNS": "s05568.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 234,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -10063,8 +10063,8 @@
   },
   {
     "SEMÁFORO": 235,
-    "SEMÁFORO COMPARTILHADO": 235,
     "IP DDNS": "s05068.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 235,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -10106,8 +10106,8 @@
   },
   {
     "SEMÁFORO": 236,
-    "SEMÁFORO COMPARTILHADO": 236,
     "IP DDNS": "s05587.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 236,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -10149,8 +10149,8 @@
   },
   {
     "SEMÁFORO": 237,
-    "SEMÁFORO COMPARTILHADO": 237,
     "IP DDNS": "s05165.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 237,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA REAL DA TORRE",
@@ -10192,8 +10192,8 @@
   },
   {
     "SEMÁFORO": 238,
-    "SEMÁFORO COMPARTILHADO": 238,
     "IP DDNS": "s05388.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 238,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -10235,8 +10235,8 @@
   },
   {
     "SEMÁFORO": 239,
-    "SEMÁFORO COMPARTILHADO": 239,
     "IP DDNS": "s05208.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 239,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SÃO MATEUS",
@@ -10278,8 +10278,8 @@
   },
   {
     "SEMÁFORO": 240,
-    "SEMÁFORO COMPARTILHADO": 240,
     "IP DDNS": "s05380.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 240,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -10321,8 +10321,8 @@
   },
   {
     "SEMÁFORO": 241,
-    "SEMÁFORO COMPARTILHADO": 241,
     "IP DDNS": "s05199.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 241,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -10364,8 +10364,8 @@
   },
   {
     "SEMÁFORO": 242,
-    "SEMÁFORO COMPARTILHADO": 242,
     "IP DDNS": "s05629.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 242,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DOS REMÉDIOS",
@@ -10407,8 +10407,8 @@
   },
   {
     "SEMÁFORO": 243,
-    "SEMÁFORO COMPARTILHADO": 243,
     "IP DDNS": "s05585.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 243,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -10450,8 +10450,8 @@
   },
   {
     "SEMÁFORO": 244,
-    "SEMÁFORO COMPARTILHADO": 244,
     "IP DDNS": "s04955.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 244,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. VISCONDE DE SUASSUNA",
@@ -10493,8 +10493,8 @@
   },
   {
     "SEMÁFORO": 245,
-    "SEMÁFORO COMPARTILHADO": 245,
     "IP DDNS": "s05345.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 245,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA 21 DE ABRIL",
@@ -10536,8 +10536,8 @@
   },
   {
     "SEMÁFORO": 246,
-    "SEMÁFORO COMPARTILHADO": 246,
     "IP DDNS": "s05544.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 246,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO BARBALHO",
@@ -10579,8 +10579,8 @@
   },
   {
     "SEMÁFORO": 247,
-    "SEMÁFORO COMPARTILHADO": 247,
     "IP DDNS": "s05205.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 247,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -10622,8 +10622,8 @@
   },
   {
     "SEMÁFORO": 248,
-    "SEMÁFORO COMPARTILHADO": 248,
     "IP DDNS": "s05264.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 248,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOIS IRMÃOS",
@@ -10665,8 +10665,8 @@
   },
   {
     "SEMÁFORO": 249,
-    "SEMÁFORO COMPARTILHADO": 249,
     "IP DDNS": "s05348.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 249,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DO FORTE",
@@ -10708,8 +10708,8 @@
   },
   {
     "SEMÁFORO": 250,
-    "SEMÁFORO COMPARTILHADO": 250,
     "IP DDNS": "s05196.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 250,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JOÃO CABRAL DE MELO NETO",
@@ -10751,8 +10751,8 @@
   },
   {
     "SEMÁFORO": 251,
-    "SEMÁFORO COMPARTILHADO": 251,
     "IP DDNS": "s05210.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 251,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -10794,8 +10794,8 @@
   },
   {
     "SEMÁFORO": 252,
-    "SEMÁFORO COMPARTILHADO": 252,
     "IP DDNS": "s05343.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 252,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DOM MANOEL DA COSTA",
@@ -10837,8 +10837,8 @@
   },
   {
     "SEMÁFORO": 253,
-    "SEMÁFORO COMPARTILHADO": "253 / 686",
     "IP DDNS": "s05109.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "253 / 686",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONSELHEIRO ROSA E SILVA",
@@ -10880,8 +10880,8 @@
   },
   {
     "SEMÁFORO": 254,
-    "SEMÁFORO COMPARTILHADO": 254,
     "IP DDNS": "s05573.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 254,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO BOM PASTOR",
@@ -10923,8 +10923,8 @@
   },
   {
     "SEMÁFORO": 255,
-    "SEMÁFORO COMPARTILHADO": 255,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 255,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA REAL DA TORRE",
@@ -10966,8 +10966,8 @@
   },
   {
     "SEMÁFORO": 256,
-    "SEMÁFORO COMPARTILHADO": 256,
     "IP DDNS": "s05333.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 256,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -11009,8 +11009,8 @@
   },
   {
     "SEMÁFORO": 257,
-    "SEMÁFORO COMPARTILHADO": 257,
     "IP DDNS": "s05623.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 257,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BENFICA",
@@ -11052,8 +11052,8 @@
   },
   {
     "SEMÁFORO": 258,
-    "SEMÁFORO COMPARTILHADO": 258,
     "IP DDNS": "s05057.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 258,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. VISCONDE DE JEQUITINHONHA",
@@ -11095,8 +11095,8 @@
   },
   {
     "SEMÁFORO": 259,
-    "SEMÁFORO COMPARTILHADO": "259 / 705",
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": "259 / 705",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -11138,8 +11138,8 @@
   },
   {
     "SEMÁFORO": 260,
-    "SEMÁFORO COMPARTILHADO": 260,
     "IP DDNS": "s05298.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 260,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. SUL",
@@ -11181,8 +11181,8 @@
   },
   {
     "SEMÁFORO": 261,
-    "SEMÁFORO COMPARTILHADO": "261 / 704",
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": "261 / 704",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -11224,8 +11224,8 @@
   },
   {
     "SEMÁFORO": 262,
-    "SEMÁFORO COMPARTILHADO": 262,
     "IP DDNS": "s05685.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 262,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -11267,8 +11267,8 @@
   },
   {
     "SEMÁFORO": 263,
-    "SEMÁFORO COMPARTILHADO": 263,
     "IP DDNS": "s04980.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 263,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -11310,8 +11310,8 @@
   },
   {
     "SEMÁFORO": 264,
-    "SEMÁFORO COMPARTILHADO": 264,
     "IP DDNS": "s05621.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 264,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -11353,8 +11353,8 @@
   },
   {
     "SEMÁFORO": 265,
-    "SEMÁFORO COMPARTILHADO": 265,
     "IP DDNS": "s05071.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 265,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -11396,8 +11396,8 @@
   },
   {
     "SEMÁFORO": 266,
-    "SEMÁFORO COMPARTILHADO": "266 / 080 / 591",
     "IP DDNS": "s05069.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "266 / 080 / 591",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -11439,8 +11439,8 @@
   },
   {
     "SEMÁFORO": 267,
-    "SEMÁFORO COMPARTILHADO": 267,
     "IP DDNS": "s05070.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 267,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -11482,8 +11482,8 @@
   },
   {
     "SEMÁFORO": 268,
-    "SEMÁFORO COMPARTILHADO": 268,
     "IP DDNS": "s04979.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 268,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -11525,8 +11525,8 @@
   },
   {
     "SEMÁFORO": 269,
-    "SEMÁFORO COMPARTILHADO": 269,
     "IP DDNS": "s05593.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 269,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -11568,8 +11568,8 @@
   },
   {
     "SEMÁFORO": 270,
-    "SEMÁFORO COMPARTILHADO": 270,
     "IP DDNS": "s05240.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 270,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -11611,8 +11611,8 @@
   },
   {
     "SEMÁFORO": 271,
-    "SEMÁFORO COMPARTILHADO": 271,
     "IP DDNS": "s05191.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 271,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -11654,8 +11654,8 @@
   },
   {
     "SEMÁFORO": 272,
-    "SEMÁFORO COMPARTILHADO": "272 / 295",
     "IP DDNS": "s05638.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "272 / 295",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO ARRAIAL",
@@ -11697,8 +11697,8 @@
   },
   {
     "SEMÁFORO": 273,
-    "SEMÁFORO COMPARTILHADO": "273 / 274",
     "IP DDNS": "s05389.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "273 / 274",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -11740,8 +11740,8 @@
   },
   {
     "SEMÁFORO": 274,
-    "SEMÁFORO COMPARTILHADO": "274 / 273",
     "IP DDNS": "s05389.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "274 / 273",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -11783,8 +11783,8 @@
   },
   {
     "SEMÁFORO": 275,
-    "SEMÁFORO COMPARTILHADO": 275,
     "IP DDNS": "s05067.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 275,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -11826,8 +11826,8 @@
   },
   {
     "SEMÁFORO": 276,
-    "SEMÁFORO COMPARTILHADO": "276 / 310",
     "IP DDNS": "s05552.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "276 / 310",
     "Nº CHIP": 895505532880017600000,
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -11869,8 +11869,8 @@
   },
   {
     "SEMÁFORO": 277,
-    "SEMÁFORO COMPARTILHADO": "277 / 538",
     "IP DDNS": "s05193.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "277 / 538",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ANTÔNIO DE GOES",
@@ -11912,8 +11912,8 @@
   },
   {
     "SEMÁFORO": 278,
-    "SEMÁFORO COMPARTILHADO": 278,
     "IP DDNS": "s05085.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 278,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "PÇA. DA REPÚBLICA",
@@ -11955,8 +11955,8 @@
   },
   {
     "SEMÁFORO": 279,
-    "SEMÁFORO COMPARTILHADO": "279 / 316",
     "IP DDNS": "s05203.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "279 / 316",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -11998,8 +11998,8 @@
   },
   {
     "SEMÁFORO": 280,
-    "SEMÁFORO COMPARTILHADO": 280,
     "IP DDNS": "s05574.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 280,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA TOMÁS GONZAGA",
@@ -12041,8 +12041,8 @@
   },
   {
     "SEMÁFORO": 281,
-    "SEMÁFORO COMPARTILHADO": "281 / 368",
     "IP DDNS": "s05686.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "281 / 368",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JOAQUIM RIBEIRO",
@@ -12084,8 +12084,8 @@
   },
   {
     "SEMÁFORO": 282,
-    "SEMÁFORO COMPARTILHADO": 282,
     "IP DDNS": "s05546.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 282,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JERÔNIMO VILELA",
@@ -12127,8 +12127,8 @@
   },
   {
     "SEMÁFORO": 283,
-    "SEMÁFORO COMPARTILHADO": 283,
     "IP DDNS": "s05174.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 283,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO ARRAIAL",
@@ -12170,8 +12170,8 @@
   },
   {
     "SEMÁFORO": 284,
-    "SEMÁFORO COMPARTILHADO": 284,
     "IP DDNS": "s05694.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 284,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NOSSA SENHORA DO CARMO",
@@ -12213,8 +12213,8 @@
   },
   {
     "SEMÁFORO": 285,
-    "SEMÁFORO COMPARTILHADO": 285,
     "IP DDNS": "s04975.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 285,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA FALCÃO DE LACERDA",
@@ -12256,8 +12256,8 @@
   },
   {
     "SEMÁFORO": 286,
-    "SEMÁFORO COMPARTILHADO": 286,
     "IP DDNS": "s05116.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 286,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -12299,8 +12299,8 @@
   },
   {
     "SEMÁFORO": 287,
-    "SEMÁFORO COMPARTILHADO": 287,
     "IP DDNS": "s05216.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 287,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -12342,8 +12342,8 @@
   },
   {
     "SEMÁFORO": 288,
-    "SEMÁFORO COMPARTILHADO": 288,
     "IP DDNS": "s05212.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 288,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -12385,8 +12385,8 @@
   },
   {
     "SEMÁFORO": 289,
-    "SEMÁFORO COMPARTILHADO": "289 / 290",
     "IP DDNS": "s05366.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "289 / 290",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -12428,8 +12428,8 @@
   },
   {
     "SEMÁFORO": 290,
-    "SEMÁFORO COMPARTILHADO": "290 / 289",
     "IP DDNS": "s05366.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "290 / 289",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -12471,8 +12471,8 @@
   },
   {
     "SEMÁFORO": 291,
-    "SEMÁFORO COMPARTILHADO": 291,
     "IP DDNS": "s05325.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 291,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO ARRAIAL",
@@ -12514,8 +12514,8 @@
   },
   {
     "SEMÁFORO": 292,
-    "SEMÁFORO COMPARTILHADO": 292,
     "IP DDNS": "s05352.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 292,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RUI BARBOSA",
@@ -12557,8 +12557,8 @@
   },
   {
     "SEMÁFORO": 293,
-    "SEMÁFORO COMPARTILHADO": 293,
     "IP DDNS": "s05499.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 293,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PINTOR ANTÔNIO DE ALBUQUERQUE",
@@ -12600,8 +12600,8 @@
   },
   {
     "SEMÁFORO": 294,
-    "SEMÁFORO COMPARTILHADO": 294,
     "IP DDNS": "s05115.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 294,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DOM BOSCO",
@@ -12643,8 +12643,8 @@
   },
   {
     "SEMÁFORO": 295,
-    "SEMÁFORO COMPARTILHADO": "295 / 272",
     "IP DDNS": "s05383.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "295 / 272",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO ARRAIAL",
@@ -12686,8 +12686,8 @@
   },
   {
     "SEMÁFORO": 296,
-    "SEMÁFORO COMPARTILHADO": 296,
     "IP DDNS": "s05489.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 296,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -12729,8 +12729,8 @@
   },
   {
     "SEMÁFORO": 297,
-    "SEMÁFORO COMPARTILHADO": 297,
     "IP DDNS": "s05271.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 297,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -12772,8 +12772,8 @@
   },
   {
     "SEMÁFORO": 298,
-    "SEMÁFORO COMPARTILHADO": 298,
     "IP DDNS": "s05655.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 298,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA RIBEIRO DE BRITO",
@@ -12815,8 +12815,8 @@
   },
   {
     "SEMÁFORO": 299,
-    "SEMÁFORO COMPARTILHADO": 299,
     "IP DDNS": "s05002.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 299,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONDE DA BOA VISTA",
@@ -12858,8 +12858,8 @@
   },
   {
     "SEMÁFORO": 300,
-    "SEMÁFORO COMPARTILHADO": 300,
     "IP DDNS": "s05676.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 300,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SÃO MIGUEL",
@@ -12901,8 +12901,8 @@
   },
   {
     "SEMÁFORO": 301,
-    "SEMÁFORO COMPARTILHADO": 301,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 301,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOSÉ BONIFÁCIO",
@@ -12944,8 +12944,8 @@
   },
   {
     "SEMÁFORO": 302,
-    "SEMÁFORO COMPARTILHADO": 302,
     "IP DDNS": "s05335.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 302,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA IMPERIAL",
@@ -12987,8 +12987,8 @@
   },
   {
     "SEMÁFORO": 303,
-    "SEMÁFORO COMPARTILHADO": 303,
     "IP DDNS": "s05273.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 303,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -13030,8 +13030,8 @@
   },
   {
     "SEMÁFORO": 304,
-    "SEMÁFORO COMPARTILHADO": 304,
     "IP DDNS": "s05578.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 304,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ERNESTO DE PAULA SANTOS",
@@ -13073,8 +13073,8 @@
   },
   {
     "SEMÁFORO": 305,
-    "SEMÁFORO COMPARTILHADO": 305,
     "IP DDNS": "s05354.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 305,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RUI BARBOSA",
@@ -13116,8 +13116,8 @@
   },
   {
     "SEMÁFORO": 306,
-    "SEMÁFORO COMPARTILHADO": 306,
     "IP DDNS": "s04960.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 306,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA VELHA DE ÁGUA FRIA",
@@ -13159,8 +13159,8 @@
   },
   {
     "SEMÁFORO": 307,
-    "SEMÁFORO COMPARTILHADO": 307,
     "IP DDNS": "s05591.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 307,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -13202,8 +13202,8 @@
   },
   {
     "SEMÁFORO": 308,
-    "SEMÁFORO COMPARTILHADO": 308,
     "IP DDNS": "s05107.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 308,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOÃO LIRA",
@@ -13245,8 +13245,8 @@
   },
   {
     "SEMÁFORO": 309,
-    "SEMÁFORO COMPARTILHADO": 309,
     "IP DDNS": "s05484.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 309,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONSELHEIRO ROSA E SILVA",
@@ -13288,8 +13288,8 @@
   },
   {
     "SEMÁFORO": 310,
-    "SEMÁFORO COMPARTILHADO": "310 / 276",
     "IP DDNS": "s05552.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "310 / 276",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -13331,8 +13331,8 @@
   },
   {
     "SEMÁFORO": 311,
-    "SEMÁFORO COMPARTILHADO": 311,
     "IP DDNS": "s05127.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 311,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. SUL",
@@ -13374,8 +13374,8 @@
   },
   {
     "SEMÁFORO": 312,
-    "SEMÁFORO COMPARTILHADO": "312 / 079",
     "IP DDNS": "s05104.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "312 / 079",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -13417,8 +13417,8 @@
   },
   {
     "SEMÁFORO": 313,
-    "SEMÁFORO COMPARTILHADO": 313,
     "IP DDNS": "s05346.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 313,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA 21 DE ABRIL",
@@ -13460,8 +13460,8 @@
   },
   {
     "SEMÁFORO": 314,
-    "SEMÁFORO COMPARTILHADO": 314,
     "IP DDNS": "s05607.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 314,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -13503,8 +13503,8 @@
   },
   {
     "SEMÁFORO": 315,
-    "SEMÁFORO COMPARTILHADO": 315,
     "IP DDNS": "s05503.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 315,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOM HELDER CAMERA",
@@ -13546,8 +13546,8 @@
   },
   {
     "SEMÁFORO": 316,
-    "SEMÁFORO COMPARTILHADO": "316 / 279",
     "IP DDNS": "s05203.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "316 / 279",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -13589,8 +13589,8 @@
   },
   {
     "SEMÁFORO": 317,
-    "SEMÁFORO COMPARTILHADO": 317,
     "IP DDNS": "s05252.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 317,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SOUZA BANDEIRA",
@@ -13632,8 +13632,8 @@
   },
   {
     "SEMÁFORO": 318,
-    "SEMÁFORO COMPARTILHADO": 318,
     "IP DDNS": "s05224.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 318,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -13675,8 +13675,8 @@
   },
   {
     "SEMÁFORO": 319,
-    "SEMÁFORO COMPARTILHADO": 319,
     "IP DDNS": "s05689.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 319,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -13718,8 +13718,8 @@
   },
   {
     "SEMÁFORO": 320,
-    "SEMÁFORO COMPARTILHADO": 320,
     "IP DDNS": "s05551.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 320,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. SUL",
@@ -13761,8 +13761,8 @@
   },
   {
     "SEMÁFORO": 321,
-    "SEMÁFORO COMPARTILHADO": 321,
     "IP DDNS": "s05640.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 321,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PADRE CARAPUCEIRO",
@@ -13804,8 +13804,8 @@
   },
   {
     "SEMÁFORO": 322,
-    "SEMÁFORO COMPARTILHADO": 322,
     "IP DDNS": "s05287.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 322,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DEZ DE JULHO",
@@ -13847,8 +13847,8 @@
   },
   {
     "SEMÁFORO": 323,
-    "SEMÁFORO COMPARTILHADO": 323,
     "IP DDNS": "s05401.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 323,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOIS RIOS",
@@ -13890,8 +13890,8 @@
   },
   {
     "SEMÁFORO": 324,
-    "SEMÁFORO COMPARTILHADO": 324,
     "IP DDNS": "s05270.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 324,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG. DOMINGOS FERREIRA",
@@ -13933,8 +13933,8 @@
   },
   {
     "SEMÁFORO": 325,
-    "SEMÁFORO COMPARTILHADO": 325,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 325,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOIS RIOS",
@@ -13976,8 +13976,8 @@
   },
   {
     "SEMÁFORO": 326,
-    "SEMÁFORO COMPARTILHADO": 326,
     "IP DDNS": "s05064.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 326,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GAL. SAN MARTIN",
@@ -14019,8 +14019,8 @@
   },
   {
     "SEMÁFORO": 327,
-    "SEMÁFORO COMPARTILHADO": "327 / 328",
     "IP DDNS": "s05530.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "327 / 328",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -14062,8 +14062,8 @@
   },
   {
     "SEMÁFORO": 328,
-    "SEMÁFORO COMPARTILHADO": "328 / 327",
     "IP DDNS": "s05530.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "328 / 327",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -14105,8 +14105,8 @@
   },
   {
     "SEMÁFORO": 329,
-    "SEMÁFORO COMPARTILHADO": 329,
     "IP DDNS": "s05650.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 329,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ERNESTO DE PAULA SANTOS",
@@ -14148,8 +14148,8 @@
   },
   {
     "SEMÁFORO": 330,
-    "SEMÁFORO COMPARTILHADO": 330,
     "IP DDNS": "s05649.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 330,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ERNESTO DE PAULA SANTOS",
@@ -14191,8 +14191,8 @@
   },
   {
     "SEMÁFORO": 331,
-    "SEMÁFORO COMPARTILHADO": "331 / 496",
     "IP DDNS": "s05651.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "331 / 496",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA RIBEIRO DE BRITO",
@@ -14234,8 +14234,8 @@
   },
   {
     "SEMÁFORO": 332,
-    "SEMÁFORO COMPARTILHADO": 332,
     "IP DDNS": "s05641.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 332,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA RIBEIRO DE BRITO",
@@ -14277,8 +14277,8 @@
   },
   {
     "SEMÁFORO": 333,
-    "SEMÁFORO COMPARTILHADO": 333,
     "IP DDNS": "s05679.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 333,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SÃO MIGUEL",
@@ -14320,8 +14320,8 @@
   },
   {
     "SEMÁFORO": 334,
-    "SEMÁFORO COMPARTILHADO": 334,
     "IP DDNS": "s05176.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 334,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA 21 DE ABRIL",
@@ -14363,8 +14363,8 @@
   },
   {
     "SEMÁFORO": 335,
-    "SEMÁFORO COMPARTILHADO": 335,
     "IP DDNS": "s05642.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 335,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. FERNANDO SIMÕES BARBOSA",
@@ -14406,8 +14406,8 @@
   },
   {
     "SEMÁFORO": 336,
-    "SEMÁFORO COMPARTILHADO": 336,
     "IP DDNS": "s05633.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 336,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -14449,8 +14449,8 @@
   },
   {
     "SEMÁFORO": 337,
-    "SEMÁFORO COMPARTILHADO": 337,
     "IP DDNS": "s05299.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 337,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -14492,8 +14492,8 @@
   },
   {
     "SEMÁFORO": 338,
-    "SEMÁFORO COMPARTILHADO": 338,
     "IP DDNS": "s05031.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 338,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -14535,8 +14535,8 @@
   },
   {
     "SEMÁFORO": 339,
-    "SEMÁFORO COMPARTILHADO": "339 / 656",
     "IP DDNS": "s05088.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "339 / 656",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JOÃO DE BARROS",
@@ -14578,8 +14578,8 @@
   },
   {
     "SEMÁFORO": 340,
-    "SEMÁFORO COMPARTILHADO": 340,
     "IP DDNS": "s04999.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 340,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "CAIS DO APOLO",
@@ -14621,8 +14621,8 @@
   },
   {
     "SEMÁFORO": 341,
-    "SEMÁFORO COMPARTILHADO": 341,
     "IP DDNS": "s05549.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 341,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JERÔNIMO VILELA",
@@ -14664,8 +14664,8 @@
   },
   {
     "SEMÁFORO": 342,
-    "SEMÁFORO COMPARTILHADO": "342 / 347",
     "IP DDNS": "s05056.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "342 / 347",
     "Nº CHIP": 89550532880017570000,
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CÔNEGO BARATA",
@@ -14707,8 +14707,8 @@
   },
   {
     "SEMÁFORO": 343,
-    "SEMÁFORO COMPARTILHADO": "343 / 009",
     "IP DDNS": "s05683.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "343 / 009",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -14750,8 +14750,8 @@
   },
   {
     "SEMÁFORO": 344,
-    "SEMÁFORO COMPARTILHADO": 344,
     "IP DDNS": "s05684.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 344,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -14793,8 +14793,8 @@
   },
   {
     "SEMÁFORO": 345,
-    "SEMÁFORO COMPARTILHADO": 345,
     "IP DDNS": "s05575.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 345,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -14836,8 +14836,8 @@
   },
   {
     "SEMÁFORO": 346,
-    "SEMÁFORO COMPARTILHADO": "346 / 585",
     "IP DDNS": "s05577.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "346 / 585",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -14879,8 +14879,8 @@
   },
   {
     "SEMÁFORO": 347,
-    "SEMÁFORO COMPARTILHADO": "347 / 342",
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": "347 / 342",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CÔNEGO BARATA",
@@ -14922,8 +14922,8 @@
   },
   {
     "SEMÁFORO": 348,
-    "SEMÁFORO COMPARTILHADO": 348,
     "IP DDNS": "s05065.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 348,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CARLOS GOMES",
@@ -14965,8 +14965,8 @@
   },
   {
     "SEMÁFORO": 349,
-    "SEMÁFORO COMPARTILHADO": "349 / 350",
     "IP DDNS": "s05561.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "349 / 350",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -15008,8 +15008,8 @@
   },
   {
     "SEMÁFORO": 350,
-    "SEMÁFORO COMPARTILHADO": "350 / 349",
     "IP DDNS": "s05561.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "350 / 349",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -15051,8 +15051,8 @@
   },
   {
     "SEMÁFORO": 351,
-    "SEMÁFORO COMPARTILHADO": 351,
     "IP DDNS": "s05399.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 351,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOIS RIOS",
@@ -15094,8 +15094,8 @@
   },
   {
     "SEMÁFORO": 352,
-    "SEMÁFORO COMPARTILHADO": 352,
     "IP DDNS": "s05259.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 352,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA IMPERIAL",
@@ -15137,8 +15137,8 @@
   },
   {
     "SEMÁFORO": 353,
-    "SEMÁFORO COMPARTILHADO": "353 / 051",
     "IP DDNS": "s05238.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "353 / 051",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOSÉ GONÇALVES DE MEDEIROS",
@@ -15180,8 +15180,8 @@
   },
   {
     "SEMÁFORO": 354,
-    "SEMÁFORO COMPARTILHADO": 354,
     "IP DDNS": "radium-tecnologia.fortiddns.com:20081",
+    "SEMÁFORO COMPARTILHADO": 354,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -15223,8 +15223,8 @@
   },
   {
     "SEMÁFORO": 355,
-    "SEMÁFORO COMPARTILHADO": "355 / 367 / 481",
     "IP DDNS": "radium-tecnologia.fortiddns.com:20481",
+    "SEMÁFORO COMPARTILHADO": "355 / 367 / 481",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -15266,8 +15266,8 @@
   },
   {
     "SEMÁFORO": 356,
-    "SEMÁFORO COMPARTILHADO": "356 / 198",
     "IP DDNS": "s05583.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "356 / 198",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JOÃO DE BARROS",
@@ -15309,8 +15309,8 @@
   },
   {
     "SEMÁFORO": 357,
-    "SEMÁFORO COMPARTILHADO": 357,
     "IP DDNS": "s05195.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 357,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ODORICO MENDES",
@@ -15352,8 +15352,8 @@
   },
   {
     "SEMÁFORO": 358,
-    "SEMÁFORO COMPARTILHADO": 358,
     "IP DDNS": "s05054.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 358,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "PÇA. PARNAMIRIM",
@@ -15395,8 +15395,8 @@
   },
   {
     "SEMÁFORO": 359,
-    "SEMÁFORO COMPARTILHADO": 359,
     "IP DDNS": "s05189.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 359,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DOS COELHOS",
@@ -15438,8 +15438,8 @@
   },
   {
     "SEMÁFORO": 360,
-    "SEMÁFORO COMPARTILHADO": 360,
     "IP DDNS": "s05173.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 360,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SENADOR ALBERTO PAIVA",
@@ -15481,8 +15481,8 @@
   },
   {
     "SEMÁFORO": 361,
-    "SEMÁFORO COMPARTILHADO": 361,
     "IP DDNS": "s05329.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 361,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA HORA",
@@ -15524,8 +15524,8 @@
   },
   {
     "SEMÁFORO": 362,
-    "SEMÁFORO COMPARTILHADO": 362,
     "IP DDNS": "s05164.dyndns-ip.com",
+    "SEMÁFORO COMPARTILHADO": 362,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA REGUEIRA COSTA",
@@ -15567,8 +15567,8 @@
   },
   {
     "SEMÁFORO": 363,
-    "SEMÁFORO COMPARTILHADO": 363,
     "IP DDNS": "s04992.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 363,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DAS MOÇAS",
@@ -15610,8 +15610,8 @@
   },
   {
     "SEMÁFORO": 364,
-    "SEMÁFORO COMPARTILHADO": 364,
     "IP DDNS": "s05514.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 364,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -15653,8 +15653,8 @@
   },
   {
     "SEMÁFORO": 365,
-    "SEMÁFORO COMPARTILHADO": 365,
     "IP DDNS": "s05628.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 365,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JOÃO DE BARROS",
@@ -15696,8 +15696,8 @@
   },
   {
     "SEMÁFORO": 366,
-    "SEMÁFORO COMPARTILHADO": 366,
     "IP DDNS": "s05381.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 366,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -15739,8 +15739,8 @@
   },
   {
     "SEMÁFORO": 367,
-    "SEMÁFORO COMPARTILHADO": "367 / 481 / 355",
     "IP DDNS": "radium-tecnologia.fortiddns.com:20481",
+    "SEMÁFORO COMPARTILHADO": "367 / 481 / 355",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SPORT CLUBE DO RECIFE",
@@ -15782,8 +15782,8 @@
   },
   {
     "SEMÁFORO": 368,
-    "SEMÁFORO COMPARTILHADO": "368 / 281",
     "IP DDNS": "s05686.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "368 / 281",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JOAQUIM RIBEIRO",
@@ -15825,8 +15825,8 @@
   },
   {
     "SEMÁFORO": 369,
-    "SEMÁFORO COMPARTILHADO": 369,
     "IP DDNS": "s05016.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 369,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PADRE LEMOS",
@@ -15868,8 +15868,8 @@
   },
   {
     "SEMÁFORO": 370,
-    "SEMÁFORO COMPARTILHADO": "370 / 107",
     "IP DDNS": "s05669.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "370 / 107",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -15911,8 +15911,8 @@
   },
   {
     "SEMÁFORO": 371,
-    "SEMÁFORO COMPARTILHADO": 371,
     "IP DDNS": "s05175.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 371,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GAL. SAN MARTIN",
@@ -15954,8 +15954,8 @@
   },
   {
     "SEMÁFORO": 372,
-    "SEMÁFORO COMPARTILHADO": 372,
     "IP DDNS": "s05622.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 372,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -15997,8 +15997,8 @@
   },
   {
     "SEMÁFORO": 373,
-    "SEMÁFORO COMPARTILHADO": "373 / 653",
     "IP DDNS": "radium-tecnologia.fortiddns.com:20181",
+    "SEMÁFORO COMPARTILHADO": "373 / 653",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ESTADO DE ISRAEL",
@@ -16040,8 +16040,8 @@
   },
   {
     "SEMÁFORO": 374,
-    "SEMÁFORO COMPARTILHADO": 374,
     "IP DDNS": "s05162.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 374,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. PROFESSOR LUÍS FREIRE",
@@ -16083,8 +16083,8 @@
   },
   {
     "SEMÁFORO": 375,
-    "SEMÁFORO COMPARTILHADO": 375,
     "IP DDNS": "radium-tecnologia.fortiddns.com:20141",
+    "SEMÁFORO COMPARTILHADO": 375,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -16126,8 +16126,8 @@
   },
   {
     "SEMÁFORO": 376,
-    "SEMÁFORO COMPARTILHADO": 376,
     "IP DDNS": "s05120.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 376,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -16169,8 +16169,8 @@
   },
   {
     "SEMÁFORO": 377,
-    "SEMÁFORO COMPARTILHADO": "377 / 056",
     "IP DDNS": "s05511.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "377 / 056",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA MARECHAL DEODORO",
@@ -16212,8 +16212,8 @@
   },
   {
     "SEMÁFORO": 378,
-    "SEMÁFORO COMPARTILHADO": "378 / 379",
     "IP DDNS": "s05218.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "378 / 379",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -16255,8 +16255,8 @@
   },
   {
     "SEMÁFORO": 379,
-    "SEMÁFORO COMPARTILHADO": "379 / 378",
     "IP DDNS": "s05218.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "379 / 378",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -16298,8 +16298,8 @@
   },
   {
     "SEMÁFORO": 380,
-    "SEMÁFORO COMPARTILHADO": 380,
     "IP DDNS": "s05275.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 380,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -16341,8 +16341,8 @@
   },
   {
     "SEMÁFORO": 381,
-    "SEMÁFORO COMPARTILHADO": 381,
     "IP DDNS": "s05094.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 381,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DANTAS BARRETO",
@@ -16384,8 +16384,8 @@
   },
   {
     "SEMÁFORO": 382,
-    "SEMÁFORO COMPARTILHADO": 382,
     "IP DDNS": "s05570.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 382,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DANTAS BARRETO",
@@ -16427,8 +16427,8 @@
   },
   {
     "SEMÁFORO": 383,
-    "SEMÁFORO COMPARTILHADO": 383,
     "IP DDNS": "s05372.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 383,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "CAIS DE SANTA RITA",
@@ -16470,8 +16470,8 @@
   },
   {
     "SEMÁFORO": 384,
-    "SEMÁFORO COMPARTILHADO": 384,
     "IP DDNS": "s05220.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 384,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DANTAS BARRETO",
@@ -16513,8 +16513,8 @@
   },
   {
     "SEMÁFORO": 385,
-    "SEMÁFORO COMPARTILHADO": "385 / 386",
     "IP DDNS": "s05134.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "385 / 386",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -16556,8 +16556,8 @@
   },
   {
     "SEMÁFORO": 386,
-    "SEMÁFORO COMPARTILHADO": "386 / 385",
     "IP DDNS": "s05134.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "386 / 385",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -16599,8 +16599,8 @@
   },
   {
     "SEMÁFORO": 387,
-    "SEMÁFORO COMPARTILHADO": 387,
     "IP DDNS": "s05232.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 387,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEIRA RIO",
@@ -16642,8 +16642,8 @@
   },
   {
     "SEMÁFORO": 388,
-    "SEMÁFORO COMPARTILHADO": 388,
     "IP DDNS": "s05590.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 388,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -16685,8 +16685,8 @@
   },
   {
     "SEMÁFORO": 389,
-    "SEMÁFORO COMPARTILHADO": 389,
     "IP DDNS": "s05579.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 389,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -16728,8 +16728,8 @@
   },
   {
     "SEMÁFORO": 390,
-    "SEMÁFORO COMPARTILHADO": 390,
     "IP DDNS": "s05357.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 390,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DOS REMÉDIOS",
@@ -16771,8 +16771,8 @@
   },
   {
     "SEMÁFORO": 391,
-    "SEMÁFORO COMPARTILHADO": 391,
     "IP DDNS": "s04996.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 391,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SÃO MIGUEL",
@@ -16814,8 +16814,8 @@
   },
   {
     "SEMÁFORO": 392,
-    "SEMÁFORO COMPARTILHADO": 392,
     "IP DDNS": "s05048.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 392,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SÃO MIGUEL",
@@ -16857,8 +16857,8 @@
   },
   {
     "SEMÁFORO": 393,
-    "SEMÁFORO COMPARTILHADO": 393,
     "IP DDNS": "s05687.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 393,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -16900,8 +16900,8 @@
   },
   {
     "SEMÁFORO": 394,
-    "SEMÁFORO COMPARTILHADO": 394,
     "IP DDNS": "s05358.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 394,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA VELHA DO BONGI",
@@ -16943,8 +16943,8 @@
   },
   {
     "SEMÁFORO": 395,
-    "SEMÁFORO COMPARTILHADO": 395,
     "IP DDNS": "s05538.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 395,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA LINDOLFO COLLOR",
@@ -16986,8 +16986,8 @@
   },
   {
     "SEMÁFORO": 396,
-    "SEMÁFORO COMPARTILHADO": "396 / 532",
     "IP DDNS": "s05211.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "396 / 532",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA OLÍVIA MENELAU",
@@ -17029,8 +17029,8 @@
   },
   {
     "SEMÁFORO": 397,
-    "SEMÁFORO COMPARTILHADO": 397,
     "IP DDNS": "s05386.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 397,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -17072,8 +17072,8 @@
   },
   {
     "SEMÁFORO": 398,
-    "SEMÁFORO COMPARTILHADO": 398,
     "IP DDNS": "s05548.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 398,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -17115,8 +17115,8 @@
   },
   {
     "SEMÁFORO": 399,
-    "SEMÁFORO COMPARTILHADO": 399,
     "IP DDNS": "s05525.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 399,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ARQUITETO LUIZ NUNES",
@@ -17158,8 +17158,8 @@
   },
   {
     "SEMÁFORO": 400,
-    "SEMÁFORO COMPARTILHADO": 400,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 400,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DESEMBARGADOR JOSÉ NEVES",
@@ -17201,8 +17201,8 @@
   },
   {
     "SEMÁFORO": 401,
-    "SEMÁFORO COMPARTILHADO": 401,
     "IP DDNS": "s05265.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 401,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DOM BOSCO",
@@ -17244,8 +17244,8 @@
   },
   {
     "SEMÁFORO": 402,
-    "SEMÁFORO COMPARTILHADO": 402,
     "IP DDNS": "s05293.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 402,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GAL. MAC ARTHUR",
@@ -17287,8 +17287,8 @@
   },
   {
     "SEMÁFORO": 403,
-    "SEMÁFORO COMPARTILHADO": 403,
     "IP DDNS": "s05047.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 403,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GAL. SAN MARTIN",
@@ -17330,8 +17330,8 @@
   },
   {
     "SEMÁFORO": 404,
-    "SEMÁFORO COMPARTILHADO": 404,
     "IP DDNS": "s05151.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 404,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO ARRAIAL",
@@ -17373,8 +17373,8 @@
   },
   {
     "SEMÁFORO": 405,
-    "SEMÁFORO COMPARTILHADO": 405,
     "IP DDNS": "s05584.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 405,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -17416,8 +17416,8 @@
   },
   {
     "SEMÁFORO": 406,
-    "SEMÁFORO COMPARTILHADO": 406,
     "IP DDNS": "s05385.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 406,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JOÃO DE BARROS",
@@ -17459,8 +17459,8 @@
   },
   {
     "SEMÁFORO": 407,
-    "SEMÁFORO COMPARTILHADO": "407 / 159",
     "IP DDNS": "s05267.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "407 / 159",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BARÃO DE SOUZA LEÃO",
@@ -17502,8 +17502,8 @@
   },
   {
     "SEMÁFORO": 408,
-    "SEMÁFORO COMPARTILHADO": 408,
     "IP DDNS": "s05034.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 408,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA CONCÓRDIA",
@@ -17545,8 +17545,8 @@
   },
   {
     "SEMÁFORO": 409,
-    "SEMÁFORO COMPARTILHADO": 409,
     "IP DDNS": "s05508.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 409,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CONDE DE IRAJÁ",
@@ -17588,8 +17588,8 @@
   },
   {
     "SEMÁFORO": 410,
-    "SEMÁFORO COMPARTILHADO": 410,
     "IP DDNS": "s05571.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 410,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -17631,8 +17631,8 @@
   },
   {
     "SEMÁFORO": 411,
-    "SEMÁFORO COMPARTILHADO": 411,
     "IP DDNS": "s05516.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 411,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA FALCÃO DE LACERDA",
@@ -17674,8 +17674,8 @@
   },
   {
     "SEMÁFORO": 412,
-    "SEMÁFORO COMPARTILHADO": 412,
     "IP DDNS": "s05283.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 412,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JOÃO DE BARROS",
@@ -17717,8 +17717,8 @@
   },
   {
     "SEMÁFORO": 413,
-    "SEMÁFORO COMPARTILHADO": "413 / 050",
     "IP DDNS": "s05234.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "413 / 050",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. VISCONDE DE ALBUQUERQUE",
@@ -17760,8 +17760,8 @@
   },
   {
     "SEMÁFORO": 414,
-    "SEMÁFORO COMPARTILHADO": "414 / 207",
     "IP DDNS": "s05037.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "414 / 207",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA IMPERIAL",
@@ -17803,8 +17803,8 @@
   },
   {
     "SEMÁFORO": 415,
-    "SEMÁFORO COMPARTILHADO": "415 / 614",
     "IP DDNS": "s05572.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "415 / 614",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -17846,8 +17846,8 @@
   },
   {
     "SEMÁFORO": 416,
-    "SEMÁFORO COMPARTILHADO": 416,
     "IP DDNS": "s05269.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 416,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOIS IRMÃOS",
@@ -17889,8 +17889,8 @@
   },
   {
     "SEMÁFORO": 417,
-    "SEMÁFORO COMPARTILHADO": "417 / 075",
     "IP DDNS": "s05562.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "417 / 075",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -17932,8 +17932,8 @@
   },
   {
     "SEMÁFORO": 418,
-    "SEMÁFORO COMPARTILHADO": "418 / 040",
     "IP DDNS": "s05290.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "418 / 040",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "PRAÇA DO DERBY",
@@ -17975,8 +17975,8 @@
   },
   {
     "SEMÁFORO": 419,
-    "SEMÁFORO COMPARTILHADO": 419,
     "IP DDNS": "s05223.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 419,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -18018,8 +18018,8 @@
   },
   {
     "SEMÁFORO": 420,
-    "SEMÁFORO COMPARTILHADO": 420,
     "IP DDNS": "s05301.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 420,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CAPITÃO ZUZINHA",
@@ -18061,8 +18061,8 @@
   },
   {
     "SEMÁFORO": 421,
-    "SEMÁFORO COMPARTILHADO": 421,
     "IP DDNS": "s05637.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 421,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO ARRAIAL",
@@ -18104,8 +18104,8 @@
   },
   {
     "SEMÁFORO": 422,
-    "SEMÁFORO COMPARTILHADO": 422,
     "IP DDNS": "radium-tecnologia.fortiddns.com:20121",
+    "SEMÁFORO COMPARTILHADO": 422,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -18147,8 +18147,8 @@
   },
   {
     "SEMÁFORO": 423,
-    "SEMÁFORO COMPARTILHADO": 423,
     "IP DDNS": "s05050.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 423,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DE SÃO MIGUEL",
@@ -18190,8 +18190,8 @@
   },
   {
     "SEMÁFORO": 424,
-    "SEMÁFORO COMPARTILHADO": 424,
     "IP DDNS": "s04962.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 424,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -18233,8 +18233,8 @@
   },
   {
     "SEMÁFORO": 425,
-    "SEMÁFORO COMPARTILHADO": 425,
     "IP DDNS": "s05045.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 425,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SÃO MIGUEL",
@@ -18276,8 +18276,8 @@
   },
   {
     "SEMÁFORO": 426,
-    "SEMÁFORO COMPARTILHADO": 426,
     "IP DDNS": "s05187.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 426,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA COSME VIANA",
@@ -18319,8 +18319,8 @@
   },
   {
     "SEMÁFORO": 427,
-    "SEMÁFORO COMPARTILHADO": 427,
     "IP DDNS": "s05658.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 427,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA 13 DE MAIO",
@@ -18362,8 +18362,8 @@
   },
   {
     "SEMÁFORO": 428,
-    "SEMÁFORO COMPARTILHADO": 428,
     "IP DDNS": "s05305.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 428,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA 13 DE MAIO",
@@ -18405,8 +18405,8 @@
   },
   {
     "SEMÁFORO": 429,
-    "SEMÁFORO COMPARTILHADO": 429,
     "IP DDNS": "s05117.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 429,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA AURORA",
@@ -18448,8 +18448,8 @@
   },
   {
     "SEMÁFORO": 430,
-    "SEMÁFORO COMPARTILHADO": 430,
     "IP DDNS": "s05200.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 430,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA COSME VIANA",
@@ -18491,8 +18491,8 @@
   },
   {
     "SEMÁFORO": 431,
-    "SEMÁFORO COMPARTILHADO": 431,
     "IP DDNS": "s05581.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 431,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ALEGRE",
@@ -18534,8 +18534,8 @@
   },
   {
     "SEMÁFORO": 432,
-    "SEMÁFORO COMPARTILHADO": "432 / 595 / 498",
     "IP DDNS": "s05659.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "432 / 595 / 498",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA GUILHERME PINTO",
@@ -18577,8 +18577,8 @@
   },
   {
     "SEMÁFORO": 433,
-    "SEMÁFORO COMPARTILHADO": 433,
     "IP DDNS": "s05498.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 433,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. VISCONDE DE JEQUITINHONHA",
@@ -18620,8 +18620,8 @@
   },
   {
     "SEMÁFORO": 434,
-    "SEMÁFORO COMPARTILHADO": 434,
     "IP DDNS": "s05163.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 434,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -18663,8 +18663,8 @@
   },
   {
     "SEMÁFORO": 435,
-    "SEMÁFORO COMPARTILHADO": "435 / 696",
     "IP DDNS": "s05075.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "435 / 696",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA HARMONIA",
@@ -18706,8 +18706,8 @@
   },
   {
     "SEMÁFORO": 436,
-    "SEMÁFORO COMPARTILHADO": 436,
     "IP DDNS": "s04995.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 436,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "CAIS DO APOLO",
@@ -18749,8 +18749,8 @@
   },
   {
     "SEMÁFORO": 437,
-    "SEMÁFORO COMPARTILHADO": 437,
     "IP DDNS": "s05286.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 437,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA 10 DE JULHO",
@@ -18792,8 +18792,8 @@
   },
   {
     "SEMÁFORO": 438,
-    "SEMÁFORO COMPARTILHADO": 438,
     "IP DDNS": "s05699.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 438,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -18835,8 +18835,8 @@
   },
   {
     "SEMÁFORO": 439,
-    "SEMÁFORO COMPARTILHADO": "439 / 161",
     "IP DDNS": "s05295.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "439 / 161",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -18878,8 +18878,8 @@
   },
   {
     "SEMÁFORO": 440,
-    "SEMÁFORO COMPARTILHADO": 440,
     "IP DDNS": "s05536.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 440,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. LIBERDADE",
@@ -18921,8 +18921,8 @@
   },
   {
     "SEMÁFORO": 441,
-    "SEMÁFORO COMPARTILHADO": 441,
     "IP DDNS": "s05146.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 441,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ARMINDO MOURA",
@@ -18964,8 +18964,8 @@
   },
   {
     "SEMÁFORO": 442,
-    "SEMÁFORO COMPARTILHADO": 442,
     "IP DDNS": "s04973.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 442,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SGT. SILVINO DE MACEDO",
@@ -19007,8 +19007,8 @@
   },
   {
     "SEMÁFORO": 443,
-    "SEMÁFORO COMPARTILHADO": 443,
     "IP DDNS": "s05030.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 443,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. VISCONDE DE JEQUITINHONHA",
@@ -19050,8 +19050,8 @@
   },
   {
     "SEMÁFORO": 444,
-    "SEMÁFORO COMPARTILHADO": 444,
     "IP DDNS": "s05494.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 444,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -19093,8 +19093,8 @@
   },
   {
     "SEMÁFORO": 445,
-    "SEMÁFORO COMPARTILHADO": 445,
     "IP DDNS": "s04990.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 445,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -19136,8 +19136,8 @@
   },
   {
     "SEMÁFORO": 446,
-    "SEMÁFORO COMPARTILHADO": 446,
     "IP DDNS": "s05634.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 446,
     "Nº CHIP": 89550532880018200000,
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO ARRAIAL",
@@ -19179,8 +19179,8 @@
   },
   {
     "SEMÁFORO": 447,
-    "SEMÁFORO COMPARTILHADO": 447,
     "IP DDNS": "s05534.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 447,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA URIEL DE HOLANDA",
@@ -19222,8 +19222,8 @@
   },
   {
     "SEMÁFORO": 448,
-    "SEMÁFORO COMPARTILHADO": 448,
     "IP DDNS": "s05221.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 448,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SOUZA BANDEIRA",
@@ -19265,8 +19265,8 @@
   },
   {
     "SEMÁFORO": 449,
-    "SEMÁFORO COMPARTILHADO": 449,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 449,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JEAN EMILE FAVRE",
@@ -19308,8 +19308,8 @@
   },
   {
     "SEMÁFORO": 450,
-    "SEMÁFORO COMPARTILHADO": "450 / 534",
     "IP DDNS": "s05327.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "450 / 534",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PAMPULHA",
@@ -19351,8 +19351,8 @@
   },
   {
     "SEMÁFORO": 451,
-    "SEMÁFORO COMPARTILHADO": 451,
     "IP DDNS": "s05485.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 451,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -19394,8 +19394,8 @@
   },
   {
     "SEMÁFORO": 452,
-    "SEMÁFORO COMPARTILHADO": 452,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 452,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RUI BARBOSA",
@@ -19437,8 +19437,8 @@
   },
   {
     "SEMÁFORO": 453,
-    "SEMÁFORO COMPARTILHADO": "453 / 454",
     "IP DDNS": "s05507.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "453 / 454",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "CAIS DO APOLO",
@@ -19480,8 +19480,8 @@
   },
   {
     "SEMÁFORO": 454,
-    "SEMÁFORO COMPARTILHADO": "454 / 453",
     "IP DDNS": "s05507.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "454 / 453",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "CAIS DO APOLO",
@@ -19523,8 +19523,8 @@
   },
   {
     "SEMÁFORO": 455,
-    "SEMÁFORO COMPARTILHADO": 455,
     "IP DDNS": "s05313.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 455,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -19566,8 +19566,8 @@
   },
   {
     "SEMÁFORO": 456,
-    "SEMÁFORO COMPARTILHADO": 456,
     "IP DDNS": "s05512.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 456,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -19609,8 +19609,8 @@
   },
   {
     "SEMÁFORO": 457,
-    "SEMÁFORO COMPARTILHADO": 457,
     "IP DDNS": "s05296.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 457,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -19652,8 +19652,8 @@
   },
   {
     "SEMÁFORO": 458,
-    "SEMÁFORO COMPARTILHADO": 458,
     "IP DDNS": "s05074.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 458,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DE BELÉM",
@@ -19695,8 +19695,8 @@
   },
   {
     "SEMÁFORO": 459,
-    "SEMÁFORO COMPARTILHADO": 459,
     "IP DDNS": "s05108.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 459,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONSELHEIRO ROSA E SILVA",
@@ -19738,8 +19738,8 @@
   },
   {
     "SEMÁFORO": 460,
-    "SEMÁFORO COMPARTILHADO": 460,
     "IP DDNS": "s05404.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 460,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. PARNAMIRIM",
@@ -19781,8 +19781,8 @@
   },
   {
     "SEMÁFORO": 461,
-    "SEMÁFORO COMPARTILHADO": 461,
     "IP DDNS": "s05303.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 461,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -19824,8 +19824,8 @@
   },
   {
     "SEMÁFORO": 462,
-    "SEMÁFORO COMPARTILHADO": 462,
     "IP DDNS": "s05076.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 462,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO ENCANAMENTO",
@@ -19867,8 +19867,8 @@
   },
   {
     "SEMÁFORO": 463,
-    "SEMÁFORO COMPARTILHADO": "463 / 587",
     "IP DDNS": "s05624.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "463 / 587",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -19910,8 +19910,8 @@
   },
   {
     "SEMÁFORO": 464,
-    "SEMÁFORO COMPARTILHADO": 464,
     "IP DDNS": "s05330.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 464,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CONSELHEIRO PORTELA",
@@ -19953,8 +19953,8 @@
   },
   {
     "SEMÁFORO": 465,
-    "SEMÁFORO COMPARTILHADO": "465 / 108",
     "IP DDNS": "s05663.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "465 / 108",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -19996,8 +19996,8 @@
   },
   {
     "SEMÁFORO": 466,
-    "SEMÁFORO COMPARTILHADO": "466 / 031",
     "IP DDNS": "s05237.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "466 / 031",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DO PRÍNCIPE",
@@ -20039,8 +20039,8 @@
   },
   {
     "SEMÁFORO": 467,
-    "SEMÁFORO COMPARTILHADO": "467 / 012",
     "IP DDNS": "s05262.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "467 / 012",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BARÃO DA VITÓRIA",
@@ -20082,8 +20082,8 @@
   },
   {
     "SEMÁFORO": 468,
-    "SEMÁFORO COMPARTILHADO": "468 / 470",
     "IP DDNS": "s05681.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "468 / 470",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -20125,8 +20125,8 @@
   },
   {
     "SEMÁFORO": 469,
-    "SEMÁFORO COMPARTILHADO": 469,
     "IP DDNS": "s05665.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 469,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -20168,8 +20168,8 @@
   },
   {
     "SEMÁFORO": 470,
-    "SEMÁFORO COMPARTILHADO": "470 / 468",
     "IP DDNS": "s05681.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "470 / 468",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -20211,8 +20211,8 @@
   },
   {
     "SEMÁFORO": 471,
-    "SEMÁFORO COMPARTILHADO": "471 / 116",
     "IP DDNS": "s05553.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "471 / 116",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -20254,8 +20254,8 @@
   },
   {
     "SEMÁFORO": 472,
-    "SEMÁFORO COMPARTILHADO": 472,
     "IP DDNS": "s05040.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 472,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DAS MOÇAS",
@@ -20297,8 +20297,8 @@
   },
   {
     "SEMÁFORO": 473,
-    "SEMÁFORO COMPARTILHADO": 473,
     "IP DDNS": "s05350.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 473,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JEQUITINHINHA",
@@ -20340,8 +20340,8 @@
   },
   {
     "SEMÁFORO": 474,
-    "SEMÁFORO COMPARTILHADO": "474 / 479",
     "IP DDNS": "s05680.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "474 / 479",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -20383,8 +20383,8 @@
   },
   {
     "SEMÁFORO": 475,
-    "SEMÁFORO COMPARTILHADO": 475,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 475,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOIS RIOS",
@@ -20426,8 +20426,8 @@
   },
   {
     "SEMÁFORO": 476,
-    "SEMÁFORO COMPARTILHADO": 476,
     "IP DDNS": "s05266.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 476,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BARÃO DE SOUZA LEÃO",
@@ -20469,8 +20469,8 @@
   },
   {
     "SEMÁFORO": 477,
-    "SEMÁFORO COMPARTILHADO": 477,
     "IP DDNS": "s04973.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 477,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA MADRE DE DEUS",
@@ -20512,8 +20512,8 @@
   },
   {
     "SEMÁFORO": 478,
-    "SEMÁFORO COMPARTILHADO": 478,
     "IP DDNS": "s05302.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 478,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA COSMORAMA",
@@ -20555,8 +20555,8 @@
   },
   {
     "SEMÁFORO": 479,
-    "SEMÁFORO COMPARTILHADO": "479 / 474",
     "IP DDNS": "s05680.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "479 / 474",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -20598,8 +20598,8 @@
   },
   {
     "SEMÁFORO": 480,
-    "SEMÁFORO COMPARTILHADO": 480,
     "IP DDNS": "s05393.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 480,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -20641,8 +20641,8 @@
   },
   {
     "SEMÁFORO": 481,
-    "SEMÁFORO COMPARTILHADO": "481 / 367 / 355",
     "IP DDNS": "radium-tecnologia.fortiddns.com:20481",
+    "SEMÁFORO COMPARTILHADO": "481 / 367 / 355",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SPORT CLUBE DO RECIFE",
@@ -20684,8 +20684,8 @@
   },
   {
     "SEMÁFORO": 482,
-    "SEMÁFORO COMPARTILHADO": 482,
     "IP DDNS": "s05537.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 482,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DO FORTE",
@@ -20727,8 +20727,8 @@
   },
   {
     "SEMÁFORO": 483,
-    "SEMÁFORO COMPARTILHADO": 483,
     "IP DDNS": "s04994.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 483,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -20770,8 +20770,8 @@
   },
   {
     "SEMÁFORO": 484,
-    "SEMÁFORO COMPARTILHADO": 484,
     "IP DDNS": "s05272.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 484,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -20813,8 +20813,8 @@
   },
   {
     "SEMÁFORO": 485,
-    "SEMÁFORO COMPARTILHADO": 485,
     "IP DDNS": "s05569.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 485,
     "Nº CHIP": 89550534890028470000,
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA LEONARDO BEZERRA CAVALCANTE",
@@ -20856,8 +20856,8 @@
   },
   {
     "SEMÁFORO": 486,
-    "SEMÁFORO COMPARTILHADO": 486,
     "IP DDNS": "s05614.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 486,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONDE DA BOA VISTA",
@@ -20899,8 +20899,8 @@
   },
   {
     "SEMÁFORO": 487,
-    "SEMÁFORO COMPARTILHADO": 487,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 487,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOSÉ BONIFÁCIO",
@@ -20942,8 +20942,8 @@
   },
   {
     "SEMÁFORO": 488,
-    "SEMÁFORO COMPARTILHADO": 488,
     "IP DDNS": "s05532.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 488,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "PÇA. DA REPÚBLICA",
@@ -20985,8 +20985,8 @@
   },
   {
     "SEMÁFORO": 489,
-    "SEMÁFORO COMPARTILHADO": 489,
     "IP DDNS": "s05282.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 489,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -21028,8 +21028,8 @@
   },
   {
     "SEMÁFORO": 490,
-    "SEMÁFORO COMPARTILHADO": 490,
     "IP DDNS": "radium-tecnologia.fortiddns.com:10161",
+    "SEMÁFORO COMPARTILHADO": 490,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. FREI MATIAS TEVES",
@@ -21071,8 +21071,8 @@
   },
   {
     "SEMÁFORO": 491,
-    "SEMÁFORO COMPARTILHADO": 491,
     "IP DDNS": "s05049.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 491,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -21114,8 +21114,8 @@
   },
   {
     "SEMÁFORO": 492,
-    "SEMÁFORO COMPARTILHADO": 492,
     "IP DDNS": "s05576.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 492,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -21157,8 +21157,8 @@
   },
   {
     "SEMÁFORO": 493,
-    "SEMÁFORO COMPARTILHADO": 493,
     "IP DDNS": "s05524.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 493,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ARQUITETO LUIZ NUNES",
@@ -21200,8 +21200,8 @@
   },
   {
     "SEMÁFORO": 494,
-    "SEMÁFORO COMPARTILHADO": 494,
     "IP DDNS": "s05500.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 494,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -21243,8 +21243,8 @@
   },
   {
     "SEMÁFORO": 495,
-    "SEMÁFORO COMPARTILHADO": 495,
     "IP DDNS": "s05391.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 495,
     "Nº CHIP": 89550534890029740000,
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA MEM DE SÁ",
@@ -21286,8 +21286,8 @@
   },
   {
     "SEMÁFORO": 496,
-    "SEMÁFORO COMPARTILHADO": "496 / 331",
     "IP DDNS": "s05651.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "496 / 331",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA RIBEIRO DE BRITO",
@@ -21329,8 +21329,8 @@
   },
   {
     "SEMÁFORO": 497,
-    "SEMÁFORO COMPARTILHADO": 497,
     "IP DDNS": "s05169.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 497,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -21372,8 +21372,8 @@
   },
   {
     "SEMÁFORO": 498,
-    "SEMÁFORO COMPARTILHADO": "498 / 595 / 432",
     "IP DDNS": "s05659.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "498 / 595 / 432",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOAQUIM NABUCO",
@@ -21415,8 +21415,8 @@
   },
   {
     "SEMÁFORO": 499,
-    "SEMÁFORO COMPARTILHADO": 499,
     "IP DDNS": "s05003.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 499,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA COSME VIANA",
@@ -21458,8 +21458,8 @@
   },
   {
     "SEMÁFORO": 500,
-    "SEMÁFORO COMPARTILHADO": 500,
     "IP DDNS": "s05667.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 500,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOIS IRMÃOS",
@@ -21501,8 +21501,8 @@
   },
   {
     "SEMÁFORO": 501,
-    "SEMÁFORO COMPARTILHADO": "501 / 502",
     "IP DDNS": "s05238.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "501 / 502",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -21544,8 +21544,8 @@
   },
   {
     "SEMÁFORO": 502,
-    "SEMÁFORO COMPARTILHADO": "502 / 501",
     "IP DDNS": "s05238.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "502 / 501",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -21587,8 +21587,8 @@
   },
   {
     "SEMÁFORO": 503,
-    "SEMÁFORO COMPARTILHADO": 503,
     "IP DDNS": "s05183.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 503,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOÃO IVO DA SILVA",
@@ -21630,8 +21630,8 @@
   },
   {
     "SEMÁFORO": 504,
-    "SEMÁFORO COMPARTILHADO": 504,
     "IP DDNS": "s05079.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 504,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DE BELÉM",
@@ -21673,8 +21673,8 @@
   },
   {
     "SEMÁFORO": 505,
-    "SEMÁFORO COMPARTILHADO": 505,
     "IP DDNS": "s05632.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 505,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SÃO NICOLAU",
@@ -21716,8 +21716,8 @@
   },
   {
     "SEMÁFORO": 506,
-    "SEMÁFORO COMPARTILHADO": 506,
     "IP DDNS": "s05611.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 506,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -21759,8 +21759,8 @@
   },
   {
     "SEMÁFORO": 507,
-    "SEMÁFORO COMPARTILHADO": 507,
     "IP DDNS": "s04978.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 507,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. SÃO PAULO",
@@ -21802,8 +21802,8 @@
   },
   {
     "SEMÁFORO": 508,
-    "SEMÁFORO COMPARTILHADO": 508,
     "IP DDNS": "radium-tecnologia.fortiddns.com:10141",
+    "SEMÁFORO COMPARTILHADO": 508,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA FRANCISCO ALVES",
@@ -21845,8 +21845,8 @@
   },
   {
     "SEMÁFORO": 509,
-    "SEMÁFORO COMPARTILHADO": 509,
     "IP DDNS": "s05119.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 509,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. SUL",
@@ -21888,8 +21888,8 @@
   },
   {
     "SEMÁFORO": 510,
-    "SEMÁFORO COMPARTILHADO": "510 / 511",
     "IP DDNS": "s05371.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "510 / 511",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA IMPERIAL",
@@ -21931,8 +21931,8 @@
   },
   {
     "SEMÁFORO": 511,
-    "SEMÁFORO COMPARTILHADO": "511 / 510",
     "IP DDNS": "s05371.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "511 / 510",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA IMPERIAL",
@@ -21974,8 +21974,8 @@
   },
   {
     "SEMÁFORO": 512,
-    "SEMÁFORO COMPARTILHADO": 512,
     "IP DDNS": "s05095.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 512,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RIO LARGO",
@@ -22017,8 +22017,8 @@
   },
   {
     "SEMÁFORO": 513,
-    "SEMÁFORO COMPARTILHADO": 513,
     "IP DDNS": "s05180.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 513,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CONSELHEIRO TEODORO",
@@ -22060,8 +22060,8 @@
   },
   {
     "SEMÁFORO": 514,
-    "SEMÁFORO COMPARTILHADO": 514,
     "IP DDNS": "s05608.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 514,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -22103,8 +22103,8 @@
   },
   {
     "SEMÁFORO": 515,
-    "SEMÁFORO COMPARTILHADO": "515 / 629",
     "IP DDNS": "s05608.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "515 / 629",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BENFICA",
@@ -22146,8 +22146,8 @@
   },
   {
     "SEMÁFORO": 516,
-    "SEMÁFORO COMPARTILHADO": "516 / 552",
     "IP DDNS": "s05279.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "516 / 552",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "PRAÇA DO DERBY",
@@ -22189,8 +22189,8 @@
   },
   {
     "SEMÁFORO": 517,
-    "SEMÁFORO COMPARTILHADO": 517,
     "IP DDNS": "s05588.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 517,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -22232,8 +22232,8 @@
   },
   {
     "SEMÁFORO": 518,
-    "SEMÁFORO COMPARTILHADO": 518,
     "IP DDNS": "s05112.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 518,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOIS RIOS",
@@ -22275,8 +22275,8 @@
   },
   {
     "SEMÁFORO": 519,
-    "SEMÁFORO COMPARTILHADO": 519,
     "IP DDNS": "s05677.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 519,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PROF. AUGUSTO WANDERLEY FILHO",
@@ -22318,8 +22318,8 @@
   },
   {
     "SEMÁFORO": 520,
-    "SEMÁFORO COMPARTILHADO": 520,
     "IP DDNS": "s04986.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 520,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ACADÊMICO HÉLIO RAMOS",
@@ -22361,8 +22361,8 @@
   },
   {
     "SEMÁFORO": 521,
-    "SEMÁFORO COMPARTILHADO": 521,
     "IP DDNS": "s05361.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 521,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CONSELHEIRO PORTELA",
@@ -22404,8 +22404,8 @@
   },
   {
     "SEMÁFORO": 522,
-    "SEMÁFORO COMPARTILHADO": 522,
     "IP DDNS": "s05636.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 522,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONSELHEIRO ROSA E SILVA",
@@ -22447,8 +22447,8 @@
   },
   {
     "SEMÁFORO": 523,
-    "SEMÁFORO COMPARTILHADO": 523,
     "IP DDNS": "s05300.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 523,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -22490,8 +22490,8 @@
   },
   {
     "SEMÁFORO": 524,
-    "SEMÁFORO COMPARTILHADO": 524,
     "IP DDNS": "s05087.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 524,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DOS REMÉDIOS",
@@ -22533,8 +22533,8 @@
   },
   {
     "SEMÁFORO": 525,
-    "SEMÁFORO COMPARTILHADO": 525,
     "IP DDNS": "s05309.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 525,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA COSME VIANA",
@@ -22576,8 +22576,8 @@
   },
   {
     "SEMÁFORO": 526,
-    "SEMÁFORO COMPARTILHADO": 526,
     "IP DDNS": "s05654.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 526,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ÁLVARES DE AZEVEDO",
@@ -22619,8 +22619,8 @@
   },
   {
     "SEMÁFORO": 527,
-    "SEMÁFORO COMPARTILHADO": 527,
     "IP DDNS": "s05398.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 527,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JEAN EMILE FAVRE",
@@ -22662,8 +22662,8 @@
   },
   {
     "SEMÁFORO": 528,
-    "SEMÁFORO COMPARTILHADO": "528 / 073",
     "IP DDNS": "s05324.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "528 / 073",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PAZ",
@@ -22705,8 +22705,8 @@
   },
   {
     "SEMÁFORO": 529,
-    "SEMÁFORO COMPARTILHADO": 529,
     "IP DDNS": "s05139.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 529,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ARMINDO MOURA",
@@ -22748,8 +22748,8 @@
   },
   {
     "SEMÁFORO": 530,
-    "SEMÁFORO COMPARTILHADO": "530 / 531",
     "IP DDNS": "s05320.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "530 / 531",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -22791,8 +22791,8 @@
   },
   {
     "SEMÁFORO": 531,
-    "SEMÁFORO COMPARTILHADO": "531 / 530",
     "IP DDNS": "s05320.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "531 / 530",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -22834,8 +22834,8 @@
   },
   {
     "SEMÁFORO": 532,
-    "SEMÁFORO COMPARTILHADO": "532 / 396",
     "IP DDNS": "s05211.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "532 / 396",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -22877,8 +22877,8 @@
   },
   {
     "SEMÁFORO": 533,
-    "SEMÁFORO COMPARTILHADO": 533,
     "IP DDNS": "s05567.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 533,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -22920,8 +22920,8 @@
   },
   {
     "SEMÁFORO": 534,
-    "SEMÁFORO COMPARTILHADO": "534 / 450",
     "IP DDNS": "s05327.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "534 / 450",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -22963,8 +22963,8 @@
   },
   {
     "SEMÁFORO": 535,
-    "SEMÁFORO COMPARTILHADO": 535,
     "IP DDNS": "s05159.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 535,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. APIPUCOS",
@@ -23006,8 +23006,8 @@
   },
   {
     "SEMÁFORO": 536,
-    "SEMÁFORO COMPARTILHADO": 536,
     "IP DDNS": "s05342.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 536,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA REGENERAÇÃO",
@@ -23049,8 +23049,8 @@
   },
   {
     "SEMÁFORO": 537,
-    "SEMÁFORO COMPARTILHADO": 537,
     "IP DDNS": "s05526.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 537,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ARQUITETO LUIZ NUNES",
@@ -23092,8 +23092,8 @@
   },
   {
     "SEMÁFORO": 538,
-    "SEMÁFORO COMPARTILHADO": "538 / 277",
     "IP DDNS": "s05193.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "538 / 277",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ANTÔNIO DE GOES",
@@ -23135,8 +23135,8 @@
   },
   {
     "SEMÁFORO": 539,
-    "SEMÁFORO COMPARTILHADO": 539,
     "IP DDNS": "s05096.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 539,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -23178,8 +23178,8 @@
   },
   {
     "SEMÁFORO": 540,
-    "SEMÁFORO COMPARTILHADO": 540,
     "IP DDNS": "s05102.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 540,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. APIPUCOS",
@@ -23221,8 +23221,8 @@
   },
   {
     "SEMÁFORO": 541,
-    "SEMÁFORO COMPARTILHADO": 541,
     "IP DDNS": "s05539.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 541,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PROF. JOAQUIM XAVIER DE BRITO",
@@ -23264,8 +23264,8 @@
   },
   {
     "SEMÁFORO": 542,
-    "SEMÁFORO COMPARTILHADO": 542,
     "IP DDNS": "s05645.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 542,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PADRE CARAPUCEIRO",
@@ -23307,8 +23307,8 @@
   },
   {
     "SEMÁFORO": 543,
-    "SEMÁFORO COMPARTILHADO": 543,
     "IP DDNS": "s05128.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 543,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOM JOÃO VI",
@@ -23350,8 +23350,8 @@
   },
   {
     "SEMÁFORO": 544,
-    "SEMÁFORO COMPARTILHADO": 544,
     "IP DDNS": "s05168.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 544,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA FÉLIX DE BRITO E MELO",
@@ -23393,8 +23393,8 @@
   },
   {
     "SEMÁFORO": 545,
-    "SEMÁFORO COMPARTILHADO": 545,
     "IP DDNS": "s05033.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 545,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -23436,8 +23436,8 @@
   },
   {
     "SEMÁFORO": 546,
-    "SEMÁFORO COMPARTILHADO": 546,
     "IP DDNS": "s05599.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 546,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -23479,8 +23479,8 @@
   },
   {
     "SEMÁFORO": 547,
-    "SEMÁFORO COMPARTILHADO": 547,
     "IP DDNS": "s05491.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 547,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -23522,8 +23522,8 @@
   },
   {
     "SEMÁFORO": 548,
-    "SEMÁFORO COMPARTILHADO": 548,
     "IP DDNS": "s05555.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 548,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -23565,8 +23565,8 @@
   },
   {
     "SEMÁFORO": 549,
-    "SEMÁFORO COMPARTILHADO": 549,
     "IP DDNS": "s05294.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 549,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONS. AGUIAR",
@@ -23608,8 +23608,8 @@
   },
   {
     "SEMÁFORO": 550,
-    "SEMÁFORO COMPARTILHADO": 550,
     "IP DDNS": "s05375.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 550,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -23651,8 +23651,8 @@
   },
   {
     "SEMÁFORO": 551,
-    "SEMÁFORO COMPARTILHADO": 551,
     "IP DDNS": "s05167.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 551,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA FÉLIX DE BRITO E MELO",
@@ -23694,8 +23694,8 @@
   },
   {
     "SEMÁFORO": 552,
-    "SEMÁFORO COMPARTILHADO": "552 / 516",
     "IP DDNS": "s05550.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "552 / 516",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "PRAÇA DO DERBY",
@@ -23737,8 +23737,8 @@
   },
   {
     "SEMÁFORO": 553,
-    "SEMÁFORO COMPARTILHADO": 553,
     "IP DDNS": "s05678.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 553,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA AUGUSTO CALHEIROS",
@@ -23780,8 +23780,8 @@
   },
   {
     "SEMÁFORO": 554,
-    "SEMÁFORO COMPARTILHADO": 554,
     "IP DDNS": "s05263.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 554,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PETRONILA V. BOTELHO",
@@ -23823,8 +23823,8 @@
   },
   {
     "SEMÁFORO": 555,
-    "SEMÁFORO COMPARTILHADO": 555,
     "IP DDNS": "s05490.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 555,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -23866,8 +23866,8 @@
   },
   {
     "SEMÁFORO": 556,
-    "SEMÁFORO COMPARTILHADO": 556,
     "IP DDNS": "s05306.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 556,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA COSMORAMA",
@@ -23909,8 +23909,8 @@
   },
   {
     "SEMÁFORO": 557,
-    "SEMÁFORO COMPARTILHADO": 557,
     "IP DDNS": "s05098.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 557,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -23952,8 +23952,8 @@
   },
   {
     "SEMÁFORO": 558,
-    "SEMÁFORO COMPARTILHADO": 558,
     "IP DDNS": "s04984.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 558,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA GOMES TABORDA",
@@ -23995,8 +23995,8 @@
   },
   {
     "SEMÁFORO": 559,
-    "SEMÁFORO COMPARTILHADO": 559,
     "IP DDNS": "s05605.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 559,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -24038,8 +24038,8 @@
   },
   {
     "SEMÁFORO": 560,
-    "SEMÁFORO COMPARTILHADO": 560,
     "IP DDNS": "s05523.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 560,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ARQUITETO LUIZ NUNES",
@@ -24081,8 +24081,8 @@
   },
   {
     "SEMÁFORO": 561,
-    "SEMÁFORO COMPARTILHADO": 561,
     "IP DDNS": "s05155.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 561,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOIS RIOS",
@@ -24124,8 +24124,8 @@
   },
   {
     "SEMÁFORO": 562,
-    "SEMÁFORO COMPARTILHADO": "562 / 126",
     "IP DDNS": "s05027.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "562 / 126",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RUI BARBOSA",
@@ -24167,8 +24167,8 @@
   },
   {
     "SEMÁFORO": 563,
-    "SEMÁFORO COMPARTILHADO": 563,
     "IP DDNS": "s04998.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 563,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. LUÍS CORREIA DE BRITO",
@@ -24210,8 +24210,8 @@
   },
   {
     "SEMÁFORO": 564,
-    "SEMÁFORO COMPARTILHADO": 564,
     "IP DDNS": "s05396.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 564,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JEAN EMILE FAVRE",
@@ -24253,8 +24253,8 @@
   },
   {
     "SEMÁFORO": 565,
-    "SEMÁFORO COMPARTILHADO": 565,
     "IP DDNS": "s05540.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 565,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JERÔNIMO VILELA",
@@ -24296,8 +24296,8 @@
   },
   {
     "SEMÁFORO": 566,
-    "SEMÁFORO COMPARTILHADO": 566,
     "IP DDNS": "s05610.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 566,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DR. MIGUEL VIEIRA FERREIRA",
@@ -24339,8 +24339,8 @@
   },
   {
     "SEMÁFORO": 567,
-    "SEMÁFORO COMPARTILHADO": 567,
     "IP DDNS": "s05131.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 567,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DESEMBARGADOR JOSÉ NEVES",
@@ -24382,8 +24382,8 @@
   },
   {
     "SEMÁFORO": 568,
-    "SEMÁFORO COMPARTILHADO": 568,
     "IP DDNS": "s05685.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 568,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -24425,8 +24425,8 @@
   },
   {
     "SEMÁFORO": 569,
-    "SEMÁFORO COMPARTILHADO": 569,
     "IP DDNS": "s04985.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 569,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA AURORA CAÇOTE",
@@ -24468,8 +24468,8 @@
   },
   {
     "SEMÁFORO": 570,
-    "SEMÁFORO COMPARTILHADO": 570,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 570,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -24511,8 +24511,8 @@
   },
   {
     "SEMÁFORO": 571,
-    "SEMÁFORO COMPARTILHADO": 571,
     "IP DDNS": "s55039.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 571,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "CAIS DE SANTA RITA",
@@ -24554,8 +24554,8 @@
   },
   {
     "SEMÁFORO": 572,
-    "SEMÁFORO COMPARTILHADO": 572,
     "IP DDNS": "s05285.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 572,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA 10 DE JULHO",
@@ -24597,8 +24597,8 @@
   },
   {
     "SEMÁFORO": 573,
-    "SEMÁFORO COMPARTILHADO": 573,
     "IP DDNS": "s05311.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 573,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA 10 DE JULHO",
@@ -24640,8 +24640,8 @@
   },
   {
     "SEMÁFORO": 574,
-    "SEMÁFORO COMPARTILHADO": 574,
     "IP DDNS": "s05312.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 574,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOÃO CARDOSO AIRES",
@@ -24683,8 +24683,8 @@
   },
   {
     "SEMÁFORO": 575,
-    "SEMÁFORO COMPARTILHADO": 575,
     "IP DDNS": "s05606.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 575,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEBERIBE",
@@ -24726,8 +24726,8 @@
   },
   {
     "SEMÁFORO": 576,
-    "SEMÁFORO COMPARTILHADO": 576,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 576,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOSÉ BONIFÁCIO",
@@ -24769,8 +24769,8 @@
   },
   {
     "SEMÁFORO": 577,
-    "SEMÁFORO COMPARTILHADO": 577,
     "IP DDNS": "s04988.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 577,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA GAL. POLIDORO",
@@ -24812,8 +24812,8 @@
   },
   {
     "SEMÁFORO": 578,
-    "SEMÁFORO COMPARTILHADO": 578,
     "IP DDNS": "s05627.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 578,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA SOLEDADE",
@@ -24855,8 +24855,8 @@
   },
   {
     "SEMÁFORO": 579,
-    "SEMÁFORO COMPARTILHADO": 579,
     "IP DDNS": "s05308.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 579,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA AURORA",
@@ -24898,8 +24898,8 @@
   },
   {
     "SEMÁFORO": 580,
-    "SEMÁFORO COMPARTILHADO": 580,
     "IP DDNS": "s05321.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 580,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DESEMBARGADOR JOSÉ NEVES",
@@ -24941,8 +24941,8 @@
   },
   {
     "SEMÁFORO": 581,
-    "SEMÁFORO COMPARTILHADO": 581,
     "IP DDNS": "s04987.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 581,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MARIA IRENE",
@@ -24984,8 +24984,8 @@
   },
   {
     "SEMÁFORO": 582,
-    "SEMÁFORO COMPARTILHADO": 582,
     "IP DDNS": "s05044.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 582,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "CAIS DE SANTA RITA",
@@ -25027,8 +25027,8 @@
   },
   {
     "SEMÁFORO": 583,
-    "SEMÁFORO COMPARTILHADO": 583,
     "IP DDNS": "s05041.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 583,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "CAIS DE SANTA RITA",
@@ -25070,8 +25070,8 @@
   },
   {
     "SEMÁFORO": 584,
-    "SEMÁFORO COMPARTILHADO": 584,
     "IP DDNS": "s05118.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 584,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MARIA IRENE",
@@ -25113,8 +25113,8 @@
   },
   {
     "SEMÁFORO": 585,
-    "SEMÁFORO COMPARTILHADO": "585 / 346",
     "IP DDNS": "s05577.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "585 / 346",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA LEONARDO BEZERRA CAVALCANTE",
@@ -25156,8 +25156,8 @@
   },
   {
     "SEMÁFORO": 586,
-    "SEMÁFORO COMPARTILHADO": 586,
     "IP DDNS": "s05081.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 586,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DELMIRO GOUVEIA",
@@ -25199,8 +25199,8 @@
   },
   {
     "SEMÁFORO": 587,
-    "SEMÁFORO COMPARTILHADO": "587 / 463",
     "IP DDNS": "s05624.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "587 / 463",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -25242,8 +25242,8 @@
   },
   {
     "SEMÁFORO": 588,
-    "SEMÁFORO COMPARTILHADO": "588 / 224",
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": "588 / 224",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DOS PINTOS",
@@ -25285,8 +25285,8 @@
   },
   {
     "SEMÁFORO": 589,
-    "SEMÁFORO COMPARTILHADO": 589,
     "IP DDNS": "s05250.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 589,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ODETE MONTEIRO",
@@ -25328,8 +25328,8 @@
   },
   {
     "SEMÁFORO": 590,
-    "SEMÁFORO COMPARTILHADO": 590,
     "IP DDNS": "s05277.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 590,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BENFICA",
@@ -25371,8 +25371,8 @@
   },
   {
     "SEMÁFORO": 591,
-    "SEMÁFORO COMPARTILHADO": "591 / 080 / 266",
     "IP DDNS": "s05069.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "591 / 080 / 266",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -25414,8 +25414,8 @@
   },
   {
     "SEMÁFORO": 592,
-    "SEMÁFORO COMPARTILHADO": 592,
     "IP DDNS": "s05126.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 592,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOM JOÃO VI",
@@ -25457,8 +25457,8 @@
   },
   {
     "SEMÁFORO": 593,
-    "SEMÁFORO COMPARTILHADO": 593,
     "IP DDNS": "s05082.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 593,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO ENCANAMENTO",
@@ -25500,8 +25500,8 @@
   },
   {
     "SEMÁFORO": 594,
-    "SEMÁFORO COMPARTILHADO": 594,
     "IP DDNS": "s05114.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 594,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOIS RIOS",
@@ -25543,8 +25543,8 @@
   },
   {
     "SEMÁFORO": 595,
-    "SEMÁFORO COMPARTILHADO": "595 / 498 / 432",
     "IP DDNS": "s05659.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "595 / 498 / 432",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOAQUIM NABUCO",
@@ -25586,8 +25586,8 @@
   },
   {
     "SEMÁFORO": 596,
-    "SEMÁFORO COMPARTILHADO": 596,
     "IP DDNS": "s04963.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 596,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -25629,8 +25629,8 @@
   },
   {
     "SEMÁFORO": 597,
-    "SEMÁFORO COMPARTILHADO": 597,
     "IP DDNS": "s05289.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 597,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ODETE MONTEIRO",
@@ -25672,8 +25672,8 @@
   },
   {
     "SEMÁFORO": 598,
-    "SEMÁFORO COMPARTILHADO": 598,
     "IP DDNS": "s05170.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 598,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA HARMONIA",
@@ -25715,8 +25715,8 @@
   },
   {
     "SEMÁFORO": 599,
-    "SEMÁFORO COMPARTILHADO": 599,
     "IP DDNS": "s55304.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 599,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -25758,8 +25758,8 @@
   },
   {
     "SEMÁFORO": 600,
-    "SEMÁFORO COMPARTILHADO": 600,
     "IP DDNS": "s05005.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 600,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA MONSENHOR AMBROSINO LEITE",
@@ -25801,8 +25801,8 @@
   },
   {
     "SEMÁFORO": 601,
-    "SEMÁFORO COMPARTILHADO": 601,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 601,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOSÉ BONIFÁCIO",
@@ -25844,8 +25844,8 @@
   },
   {
     "SEMÁFORO": 602,
-    "SEMÁFORO COMPARTILHADO": 602,
     "IP DDNS": "s05113.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 602,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PADRE LEMOS",
@@ -25887,8 +25887,8 @@
   },
   {
     "SEMÁFORO": 603,
-    "SEMÁFORO COMPARTILHADO": 603,
     "IP DDNS": "s05355.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 603,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GUARARAPES",
@@ -25930,8 +25930,8 @@
   },
   {
     "SEMÁFORO": 604,
-    "SEMÁFORO COMPARTILHADO": 604,
     "IP DDNS": "s05691.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 604,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GUARARAPES",
@@ -25973,8 +25973,8 @@
   },
   {
     "SEMÁFORO": 605,
-    "SEMÁFORO COMPARTILHADO": 605,
     "IP DDNS": "s05021.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 605,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -26016,8 +26016,8 @@
   },
   {
     "SEMÁFORO": 606,
-    "SEMÁFORO COMPARTILHADO": 606,
     "IP DDNS": "s05241.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 606,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -26059,8 +26059,8 @@
   },
   {
     "SEMÁFORO": 607,
-    "SEMÁFORO COMPARTILHADO": "607 / 610",
     "IP DDNS": "s05564.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "607 / 610",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -26102,8 +26102,8 @@
   },
   {
     "SEMÁFORO": 608,
-    "SEMÁFORO COMPARTILHADO": "608 / 231",
     "IP DDNS": "s05596.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "608 / 231",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -26145,8 +26145,8 @@
   },
   {
     "SEMÁFORO": 609,
-    "SEMÁFORO COMPARTILHADO": 609,
     "IP DDNS": "s05597.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 609,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -26188,8 +26188,8 @@
   },
   {
     "SEMÁFORO": 610,
-    "SEMÁFORO COMPARTILHADO": "610 / 607",
     "IP DDNS": "s05564.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "610 / 607",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAXANGÁ",
@@ -26231,8 +26231,8 @@
   },
   {
     "SEMÁFORO": 611,
-    "SEMÁFORO COMPARTILHADO": 611,
     "IP DDNS": "s05181.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 611,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA 21 DE ABRIL",
@@ -26274,8 +26274,8 @@
   },
   {
     "SEMÁFORO": 612,
-    "SEMÁFORO COMPARTILHADO": 612,
     "IP DDNS": "s05072.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 612,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DE BELÉM",
@@ -26317,8 +26317,8 @@
   },
   {
     "SEMÁFORO": 613,
-    "SEMÁFORO COMPARTILHADO": 613,
     "IP DDNS": "s05132.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 613,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DES. GOES CAVALCANTE",
@@ -26360,8 +26360,8 @@
   },
   {
     "SEMÁFORO": 614,
-    "SEMÁFORO COMPARTILHADO": "614 / 415",
     "IP DDNS": "s05572.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "614 / 415",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -26403,8 +26403,8 @@
   },
   {
     "SEMÁFORO": 615,
-    "SEMÁFORO COMPARTILHADO": "615 / 726",
     "IP DDNS": "s05206.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "615 / 726",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -26446,8 +26446,8 @@
   },
   {
     "SEMÁFORO": 616,
-    "SEMÁFORO COMPARTILHADO": 616,
     "IP DDNS": "s05261.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 616,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -26489,8 +26489,8 @@
   },
   {
     "SEMÁFORO": 617,
-    "SEMÁFORO COMPARTILHADO": 617,
     "IP DDNS": "s05502.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 617,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -26532,8 +26532,8 @@
   },
   {
     "SEMÁFORO": 618,
-    "SEMÁFORO COMPARTILHADO": 618,
     "IP DDNS": "s05644.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 618,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -26575,8 +26575,8 @@
   },
   {
     "SEMÁFORO": 619,
-    "SEMÁFORO COMPARTILHADO": 619,
     "IP DDNS": "s05647.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 619,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -26618,8 +26618,8 @@
   },
   {
     "SEMÁFORO": 620,
-    "SEMÁFORO COMPARTILHADO": 620,
     "IP DDNS": "s05646.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 620,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -26661,8 +26661,8 @@
   },
   {
     "SEMÁFORO": 621,
-    "SEMÁFORO COMPARTILHADO": 621,
     "IP DDNS": "s05539.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 621,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -26704,8 +26704,8 @@
   },
   {
     "SEMÁFORO": 622,
-    "SEMÁFORO COMPARTILHADO": 622,
     "IP DDNS": "s05592.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 622,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA REGENERAÇÃO",
@@ -26747,8 +26747,8 @@
   },
   {
     "SEMÁFORO": 623,
-    "SEMÁFORO COMPARTILHADO": 623,
     "IP DDNS": "s05226.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 623,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CARLOS GOMES",
@@ -26790,8 +26790,8 @@
   },
   {
     "SEMÁFORO": 624,
-    "SEMÁFORO COMPARTILHADO": 624,
     "IP DDNS": "s05657.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 624,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. VISCONDE DE SUASSUNA",
@@ -26833,8 +26833,8 @@
   },
   {
     "SEMÁFORO": 625,
-    "SEMÁFORO COMPARTILHADO": 625,
     "IP DDNS": "s05122.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 625,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -26876,8 +26876,8 @@
   },
   {
     "SEMÁFORO": 626,
-    "SEMÁFORO COMPARTILHADO": 626,
     "IP DDNS": "s04950.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 626,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -26919,8 +26919,8 @@
   },
   {
     "SEMÁFORO": 627,
-    "SEMÁFORO COMPARTILHADO": 627,
     "IP DDNS": "s05369.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 627,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -26962,8 +26962,8 @@
   },
   {
     "SEMÁFORO": 628,
-    "SEMÁFORO COMPARTILHADO": 628,
     "IP DDNS": "s05666.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 628,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BENFICA",
@@ -27005,8 +27005,8 @@
   },
   {
     "SEMÁFORO": 629,
-    "SEMÁFORO COMPARTILHADO": "629 / 515",
     "IP DDNS": "s05279.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "629 / 515",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BENFICA",
@@ -27048,8 +27048,8 @@
   },
   {
     "SEMÁFORO": 630,
-    "SEMÁFORO COMPARTILHADO": 630,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 630,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CONDE DE IRAJÁ",
@@ -27091,8 +27091,8 @@
   },
   {
     "SEMÁFORO": 631,
-    "SEMÁFORO COMPARTILHADO": 631,
     "IP DDNS": "s05365.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 631,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. MASCARENHAS DE MORAIS",
@@ -27134,8 +27134,8 @@
   },
   {
     "SEMÁFORO": 632,
-    "SEMÁFORO COMPARTILHADO": 632,
     "IP DDNS": "s05201.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 632,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ARQUITETO LUIZ NUNES",
@@ -27177,8 +27177,8 @@
   },
   {
     "SEMÁFORO": 633,
-    "SEMÁFORO COMPARTILHADO": 633,
     "IP DDNS": "s05521.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 633,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ARQUITETO LUIZ NUNES",
@@ -27220,8 +27220,8 @@
   },
   {
     "SEMÁFORO": 634,
-    "SEMÁFORO COMPARTILHADO": 634,
     "IP DDNS": "s05219.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 634,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ARQUITETO LUIZ NUNES",
@@ -27263,8 +27263,8 @@
   },
   {
     "SEMÁFORO": 635,
-    "SEMÁFORO COMPARTILHADO": 635,
     "IP DDNS": "s05222.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 635,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ARQUITETO LUIZ NUNES",
@@ -27306,8 +27306,8 @@
   },
   {
     "SEMÁFORO": 636,
-    "SEMÁFORO COMPARTILHADO": 636,
     "IP DDNS": "s05214.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 636,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PARIS",
@@ -27349,8 +27349,8 @@
   },
   {
     "SEMÁFORO": 637,
-    "SEMÁFORO COMPARTILHADO": 637,
     "IP DDNS": "s05217.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 637,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ARQUITETO LUIZ NUNES",
@@ -27392,8 +27392,8 @@
   },
   {
     "SEMÁFORO": 638,
-    "SEMÁFORO COMPARTILHADO": 638,
     "IP DDNS": "s05602.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 638,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. AFONSO OLINDENSE",
@@ -27435,8 +27435,8 @@
   },
   {
     "SEMÁFORO": 639,
-    "SEMÁFORO COMPARTILHADO": 639,
     "IP DDNS": "s05317.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 639,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOM JOÃO VI",
@@ -27478,8 +27478,8 @@
   },
   {
     "SEMÁFORO": 640,
-    "SEMÁFORO COMPARTILHADO": 640,
     "IP DDNS": "s05133.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 640,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GAL. MAC ARTHUR",
@@ -27521,8 +27521,8 @@
   },
   {
     "SEMÁFORO": 641,
-    "SEMÁFORO COMPARTILHADO": 641,
     "IP DDNS": "s05297.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 641,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA URIEL DE HOLANDA",
@@ -27564,8 +27564,8 @@
   },
   {
     "SEMÁFORO": 642,
-    "SEMÁFORO COMPARTILHADO": 642,
     "IP DDNS": "s05609.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 642,
     "Nº CHIP": 89550534890029740000,
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JERÔNIMO VILELA",
@@ -27607,8 +27607,8 @@
   },
   {
     "SEMÁFORO": 643,
-    "SEMÁFORO COMPARTILHADO": 643,
     "IP DDNS": "s05510.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 643,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -27650,8 +27650,8 @@
   },
   {
     "SEMÁFORO": 644,
-    "SEMÁFORO COMPARTILHADO": 644,
     "IP DDNS": "s05288.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 644,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BARÃO DE SOUZA LEÃO",
@@ -27693,8 +27693,8 @@
   },
   {
     "SEMÁFORO": 645,
-    "SEMÁFORO COMPARTILHADO": 645,
     "IP DDNS": "s05202.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 645,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAURÍCIO DE NASSAU",
@@ -27736,8 +27736,8 @@
   },
   {
     "SEMÁFORO": 646,
-    "SEMÁFORO COMPARTILHADO": 646,
     "IP DDNS": "s05253.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 646,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -27779,8 +27779,8 @@
   },
   {
     "SEMÁFORO": 647,
-    "SEMÁFORO COMPARTILHADO": 647,
     "IP DDNS": "s05177.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 647,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DO ARRAIAL",
@@ -27822,8 +27822,8 @@
   },
   {
     "SEMÁFORO": 648,
-    "SEMÁFORO COMPARTILHADO": 648,
     "IP DDNS": "s05124.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 648,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ANTÔNIO FALCÃO",
@@ -27865,8 +27865,8 @@
   },
   {
     "SEMÁFORO": 649,
-    "SEMÁFORO COMPARTILHADO": 649,
     "IP DDNS": "s05078.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 649,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOÃO TUDE DE MELO",
@@ -27908,8 +27908,8 @@
   },
   {
     "SEMÁFORO": 650,
-    "SEMÁFORO COMPARTILHADO": 650,
     "IP DDNS": "s05257.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 650,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -27951,8 +27951,8 @@
   },
   {
     "SEMÁFORO": 651,
-    "SEMÁFORO COMPARTILHADO": 651,
     "IP DDNS": "s04937.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 651,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JOÃO SALES DE MENEZES",
@@ -27994,8 +27994,8 @@
   },
   {
     "SEMÁFORO": 652,
-    "SEMÁFORO COMPARTILHADO": 652,
     "IP DDNS": "s05197.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 652,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MÁRIO ÁLVARES PEREIRA DE LYRA",
@@ -28037,8 +28037,8 @@
   },
   {
     "SEMÁFORO": 653,
-    "SEMÁFORO COMPARTILHADO": "653 / 373",
     "IP DDNS": "radium-tecnologia.fortiddns.com:10181",
+    "SEMÁFORO COMPARTILHADO": "653 / 373",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ESTADO DE ISRAEL",
@@ -28080,8 +28080,8 @@
   },
   {
     "SEMÁFORO": 654,
-    "SEMÁFORO COMPARTILHADO": 654,
     "IP DDNS": "s04977.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 654,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. SÃO PAULO",
@@ -28123,8 +28123,8 @@
   },
   {
     "SEMÁFORO": 655,
-    "SEMÁFORO COMPARTILHADO": 655,
     "IP DDNS": "s05077.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 655,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DAS UBAIAS",
@@ -28166,8 +28166,8 @@
   },
   {
     "SEMÁFORO": 656,
-    "SEMÁFORO COMPARTILHADO": "656 / 339",
     "IP DDNS": "s05088.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "656 / 339",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JOÃO DE BARROS",
@@ -28209,8 +28209,8 @@
   },
   {
     "SEMÁFORO": 657,
-    "SEMÁFORO COMPARTILHADO": "657 / 660 / 710",
     "IP DDNS": "radium-tecnologia.fortiddns.com:31657",
+    "SEMÁFORO COMPARTILHADO": "657 / 660 / 710",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. HERCULANO BANDEIRA",
@@ -28252,8 +28252,8 @@
   },
   {
     "SEMÁFORO": 658,
-    "SEMÁFORO COMPARTILHADO": "658 / 659",
     "IP DDNS": "45.168.143.15",
+    "SEMÁFORO COMPARTILHADO": "658 / 659",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. REPÚBLICA ÁRABE UNIDA",
@@ -28295,8 +28295,8 @@
   },
   {
     "SEMÁFORO": 659,
-    "SEMÁFORO COMPARTILHADO": "659 / 658",
     "IP DDNS": "radium-tecnologia.fortiddns.com:20659",
+    "SEMÁFORO COMPARTILHADO": "659 / 658",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA MANOEL DE BRITO",
@@ -28338,8 +28338,8 @@
   },
   {
     "SEMÁFORO": 660,
-    "SEMÁFORO COMPARTILHADO": "660 / 657 / 710",
     "IP DDNS": "radium-tecnologia.fortiddns.com:31657",
+    "SEMÁFORO COMPARTILHADO": "660 / 657 / 710",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. HERCULANO BANDEIRA",
@@ -28381,8 +28381,8 @@
   },
   {
     "SEMÁFORO": 661,
-    "SEMÁFORO COMPARTILHADO": 661,
     "IP DDNS": "s05084.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 661,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. SATURNINO DE BRITO",
@@ -28424,8 +28424,8 @@
   },
   {
     "SEMÁFORO": 662,
-    "SEMÁFORO COMPARTILHADO": 662,
     "IP DDNS": "s05042.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 662,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "LARGO DO CABANGA",
@@ -28467,8 +28467,8 @@
   },
   {
     "SEMÁFORO": 663,
-    "SEMÁFORO COMPARTILHADO": 663,
     "IP DDNS": "s05557.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 663,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BOA VIAGEM",
@@ -28510,8 +28510,8 @@
   },
   {
     "SEMÁFORO": 664,
-    "SEMÁFORO COMPARTILHADO": "664 / 042",
     "IP DDNS": "s05586.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "664 / 042",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. JOÃO DE BARROS",
@@ -28553,8 +28553,8 @@
   },
   {
     "SEMÁFORO": 665,
-    "SEMÁFORO COMPARTILHADO": 665,
     "IP DDNS": "s05284.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 665,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -28596,8 +28596,8 @@
   },
   {
     "SEMÁFORO": 666,
-    "SEMÁFORO COMPARTILHADO": 666,
     "IP DDNS": "s05157.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 666,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA CASTRO ALVES",
@@ -28639,8 +28639,8 @@
   },
   {
     "SEMÁFORO": 667,
-    "SEMÁFORO COMPARTILHADO": 667,
     "IP DDNS": "s05147.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 667,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GAL. MAC ARTHUR",
@@ -28682,8 +28682,8 @@
   },
   {
     "SEMÁFORO": 668,
-    "SEMÁFORO COMPARTILHADO": 668,
     "IP DDNS": "s05656.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 668,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA FLORIANO PEIXOTO",
@@ -28725,8 +28725,8 @@
   },
   {
     "SEMÁFORO": 669,
-    "SEMÁFORO COMPARTILHADO": "669 / 670",
     "IP DDNS": "s05322.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "669 / 670",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOM JOÃO VI",
@@ -28768,8 +28768,8 @@
   },
   {
     "SEMÁFORO": 670,
-    "SEMÁFORO COMPARTILHADO": "670 / 669",
     "IP DDNS": "s05318.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "670 / 669",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOM JOÃO VI",
@@ -28811,8 +28811,8 @@
   },
   {
     "SEMÁFORO": 671,
-    "SEMÁFORO COMPARTILHADO": 671,
     "IP DDNS": "s05486.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 671,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -28854,8 +28854,8 @@
   },
   {
     "SEMÁFORO": 672,
-    "SEMÁFORO COMPARTILHADO": 672,
     "IP DDNS": "radium-tecnologia.fortiddns.com:10121",
+    "SEMÁFORO COMPARTILHADO": 672,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -28897,8 +28897,8 @@
   },
   {
     "SEMÁFORO": 673,
-    "SEMÁFORO COMPARTILHADO": 673,
     "IP DDNS": "s05156.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 673,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GAL. MAC ARTHUR",
@@ -28940,8 +28940,8 @@
   },
   {
     "SEMÁFORO": 674,
-    "SEMÁFORO COMPARTILHADO": 674,
     "IP DDNS": "s05292.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 674,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CRUZ CABUGÁ",
@@ -28983,8 +28983,8 @@
   },
   {
     "SEMÁFORO": 675,
-    "SEMÁFORO COMPARTILHADO": "675 / 177",
     "IP DDNS": "s05362.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "675 / 177",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA AMÉLIA",
@@ -29026,8 +29026,8 @@
   },
   {
     "SEMÁFORO": 676,
-    "SEMÁFORO COMPARTILHADO": 676,
     "IP DDNS": "s05103.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 676,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -29069,8 +29069,8 @@
   },
   {
     "SEMÁFORO": 677,
-    "SEMÁFORO COMPARTILHADO": 677,
     "IP DDNS": "s05106.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 677,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. NORTE MIGUEL ARRAES DE ALENCAR",
@@ -29112,8 +29112,8 @@
   },
   {
     "SEMÁFORO": 678,
-    "SEMÁFORO COMPARTILHADO": 678,
     "IP DDNS": "s05231.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 678,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA JENER DE SOUZA",
@@ -29155,8 +29155,8 @@
   },
   {
     "SEMÁFORO": 679,
-    "SEMÁFORO COMPARTILHADO": 679,
     "IP DDNS": "s05008.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 679,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONDE DA BOA VISTA",
@@ -29198,8 +29198,8 @@
   },
   {
     "SEMÁFORO": 680,
-    "SEMÁFORO COMPARTILHADO": 680,
     "IP DDNS": "s05007.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 680,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONDE DA BOA VISTA",
@@ -29241,8 +29241,8 @@
   },
   {
     "SEMÁFORO": 681,
-    "SEMÁFORO COMPARTILHADO": 681,
     "IP DDNS": "s05001.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 681,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONDE DA BOA VISTA",
@@ -29284,8 +29284,8 @@
   },
   {
     "SEMÁFORO": 682,
-    "SEMÁFORO COMPARTILHADO": 682,
     "IP DDNS": "s05341.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 682,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONDE DA BOA VISTA",
@@ -29327,8 +29327,8 @@
   },
   {
     "SEMÁFORO": 683,
-    "SEMÁFORO COMPARTILHADO": 683,
     "IP DDNS": "s05618.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 683,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONDE DA BOA VISTA",
@@ -29370,8 +29370,8 @@
   },
   {
     "SEMÁFORO": 684,
-    "SEMÁFORO COMPARTILHADO": "684 / 685",
     "IP DDNS": "s05664.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "684 / 685",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -29413,8 +29413,8 @@
   },
   {
     "SEMÁFORO": 685,
-    "SEMÁFORO COMPARTILHADO": "685 / 684",
     "IP DDNS": "s05664.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "685 / 684",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -29456,8 +29456,8 @@
   },
   {
     "SEMÁFORO": 686,
-    "SEMÁFORO COMPARTILHADO": "686 / 253",
     "IP DDNS": "s05109.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "686 / 253",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CONSELHEIRO ROSA E SILVA",
@@ -29499,8 +29499,8 @@
   },
   {
     "SEMÁFORO": 687,
-    "SEMÁFORO COMPARTILHADO": "687 / 688 / 058",
     "IP DDNS": "radium-tecnologia.fortiddns.com:20021",
+    "SEMÁFORO COMPARTILHADO": "687 / 688 / 058",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -29542,8 +29542,8 @@
   },
   {
     "SEMÁFORO": 688,
-    "SEMÁFORO COMPARTILHADO": "688 / 687 / 058",
     "IP DDNS": "radium-tecnologia.fortiddns.com:20021",
+    "SEMÁFORO COMPARTILHADO": "688 / 687 / 058",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG ABDIAS DE CARVALHO",
@@ -29585,8 +29585,8 @@
   },
   {
     "SEMÁFORO": 689,
-    "SEMÁFORO COMPARTILHADO": "689 / 690 / 691 / 692",
     "IP DDNS": "s04959.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "689 / 690 / 691 / 692",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEIRA RIO",
@@ -29628,8 +29628,8 @@
   },
   {
     "SEMÁFORO": 690,
-    "SEMÁFORO COMPARTILHADO": "690 / 691 / 692 / 689",
     "IP DDNS": "s04959.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "690 / 691 / 692 / 689",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEIRA RIO",
@@ -29671,8 +29671,8 @@
   },
   {
     "SEMÁFORO": 691,
-    "SEMÁFORO COMPARTILHADO": "691 / 692 / 689 / 690",
     "IP DDNS": "s04959.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "691 / 692 / 689 / 690",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEIRA RIO",
@@ -29714,8 +29714,8 @@
   },
   {
     "SEMÁFORO": 692,
-    "SEMÁFORO COMPARTILHADO": "692 / 689 / 690 / 691",
     "IP DDNS": "s04959.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "692 / 689 / 690 / 691",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. BEIRA RIO",
@@ -29757,8 +29757,8 @@
   },
   {
     "SEMÁFORO": 693,
-    "SEMÁFORO COMPARTILHADO": 693,
     "IP DDNS": "s04966.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 693,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GAL. SAN MARTIN",
@@ -29800,8 +29800,8 @@
   },
   {
     "SEMÁFORO": 694,
-    "SEMÁFORO COMPARTILHADO": "694 / 695",
     "IP DDNS": "s05148.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "694 / 695",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PADRE ROMA",
@@ -29843,8 +29843,8 @@
   },
   {
     "SEMÁFORO": 695,
-    "SEMÁFORO COMPARTILHADO": "695 / 694",
     "IP DDNS": "s05148.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "695 / 694",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PADRE ROMA",
@@ -29886,8 +29886,8 @@
   },
   {
     "SEMÁFORO": 696,
-    "SEMÁFORO COMPARTILHADO": "696 / 435",
     "IP DDNS": "s05075.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "696 / 435",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DA HARMONIA",
@@ -29929,8 +29929,8 @@
   },
   {
     "SEMÁFORO": 697,
-    "SEMÁFORO COMPARTILHADO": 697,
     "IP DDNS": "s05017.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 697,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA RIBEIRO DE BRITO",
@@ -29972,8 +29972,8 @@
   },
   {
     "SEMÁFORO": 698,
-    "SEMÁFORO COMPARTILHADO": 698,
     "IP DDNS": "s05145.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 698,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BRUNO VELOSO",
@@ -30015,8 +30015,8 @@
   },
   {
     "SEMÁFORO": 699,
-    "SEMÁFORO COMPARTILHADO": 699,
     "IP DDNS": "s05138.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 699,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BRUNO VELOSO",
@@ -30058,8 +30058,8 @@
   },
   {
     "SEMÁFORO": 700,
-    "SEMÁFORO COMPARTILHADO": 700,
     "IP DDNS": "s05153.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 700,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BRUNO VELOSO",
@@ -30101,8 +30101,8 @@
   },
   {
     "SEMÁFORO": 701,
-    "SEMÁFORO COMPARTILHADO": 701,
     "IP DDNS": "s05154.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 701,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA BRUNO VELOSO",
@@ -30144,8 +30144,8 @@
   },
   {
     "SEMÁFORO": 702,
-    "SEMÁFORO COMPARTILHADO": 702,
     "IP DDNS": "s05268.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 702,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA SENZALA",
@@ -30187,8 +30187,8 @@
   },
   {
     "SEMÁFORO": 703,
-    "SEMÁFORO COMPARTILHADO": 703,
     "IP DDNS": "s05179.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 703,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. REPÚBLICA ÁRABE UNIDA",
@@ -30230,8 +30230,8 @@
   },
   {
     "SEMÁFORO": 704,
-    "SEMÁFORO COMPARTILHADO": "704 / 261",
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": "704 / 261",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -30273,8 +30273,8 @@
   },
   {
     "SEMÁFORO": 705,
-    "SEMÁFORO COMPARTILHADO": "705 / 259",
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": "705 / 259",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. RECIFE",
@@ -30316,8 +30316,8 @@
   },
   {
     "SEMÁFORO": 706,
-    "SEMÁFORO COMPARTILHADO": 706,
     "IP DDNS": "s05101.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 706,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -30359,8 +30359,8 @@
   },
   {
     "SEMÁFORO": 707,
-    "SEMÁFORO COMPARTILHADO": 707,
     "IP DDNS": "s05630.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 707,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOIS RIOS",
@@ -30402,8 +30402,8 @@
   },
   {
     "SEMÁFORO": 708,
-    "SEMÁFORO COMPARTILHADO": 708,
     "IP DDNS": "s05154.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 708,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "TRAVESSA PADRE CARAPUCEIRO",
@@ -30445,8 +30445,8 @@
   },
   {
     "SEMÁFORO": 709,
-    "SEMÁFORO COMPARTILHADO": 709,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 709,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA",
@@ -30488,8 +30488,8 @@
   },
   {
     "SEMÁFORO": 710,
-    "SEMÁFORO COMPARTILHADO": "710 / 657 / 660",
     "IP DDNS": "radium-tecnologia.fortiddns.com:31657",
+    "SEMÁFORO COMPARTILHADO": "710 / 657 / 660",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. HERCULANO BANDEIRA",
@@ -30531,8 +30531,8 @@
   },
   {
     "SEMÁFORO": 711,
-    "SEMÁFORO COMPARTILHADO": 711,
     "IP DDNS": "s05276.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 711,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -30574,8 +30574,8 @@
   },
   {
     "SEMÁFORO": 712,
-    "SEMÁFORO COMPARTILHADO": 712,
     "IP DDNS": "s05025.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 712,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA DOM MANOEL DE MEDEIROS",
@@ -30617,8 +30617,8 @@
   },
   {
     "SEMÁFORO": 713,
-    "SEMÁFORO COMPARTILHADO": "713 / 714",
     "IP DDNS": "s04953.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "713 / 714",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA (PISTA OESTE)",
@@ -30660,8 +30660,8 @@
   },
   {
     "SEMÁFORO": 714,
-    "SEMÁFORO COMPARTILHADO": "714 / 713",
     "IP DDNS": "s04953.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "714 / 713",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DOMINGOS FERREIRA (PISTA LESTE)",
@@ -30703,8 +30703,8 @@
   },
   {
     "SEMÁFORO": 715,
-    "SEMÁFORO COMPARTILHADO": 715,
     "IP DDNS": "s04951.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 715,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA PROF. CHAVES BATISTA",
@@ -30746,8 +30746,8 @@
   },
   {
     "SEMÁFORO": 716,
-    "SEMÁFORO COMPARTILHADO": 716,
     "IP DDNS": "s05063.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 716,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ITACARI",
@@ -30789,8 +30789,8 @@
   },
   {
     "SEMÁFORO": 717,
-    "SEMÁFORO COMPARTILHADO": 717,
     "IP DDNS": "s04983.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 717,
     "Nº CHIP": 89550532880017570000,
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. GOV. AGAMENON MAGALHÃES",
@@ -30832,8 +30832,8 @@
   },
   {
     "SEMÁFORO": 718,
-    "SEMÁFORO COMPARTILHADO": 718,
     "IP DDNS": "s05243.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 718,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. 17 DE AGOSTO",
@@ -30875,8 +30875,8 @@
   },
   {
     "SEMÁFORO": 719,
-    "SEMÁFORO COMPARTILHADO": "719 / 720",
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": "719 / 720",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA LEAL DE BARROS",
@@ -30918,8 +30918,8 @@
   },
   {
     "SEMÁFORO": 720,
-    "SEMÁFORO COMPARTILHADO": "720 / 719",
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": "720 / 719",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA LEAL DE BARROS",
@@ -30961,8 +30961,8 @@
   },
   {
     "SEMÁFORO": 721,
-    "SEMÁFORO COMPARTILHADO": 721,
     "IP DDNS": "s05668.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 721,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA MAURÍCIO DE NASSAU",
@@ -31004,8 +31004,8 @@
   },
   {
     "SEMÁFORO": 722,
-    "SEMÁFORO COMPARTILHADO": 722,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 722,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "ESTRADA DOS REMÉDIOS",
@@ -31047,8 +31047,8 @@
   },
   {
     "SEMÁFORO": 723,
-    "SEMÁFORO COMPARTILHADO": 723,
     "IP DDNS": "s05052.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 723,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "PRAÇA DA CONVENÇÃO",
@@ -31090,8 +31090,8 @@
   },
   {
     "SEMÁFORO": 724,
-    "SEMÁFORO COMPARTILHADO": 724,
     "IP DDNS": "s05081.dyndns-ip.com",
+    "SEMÁFORO COMPARTILHADO": 724,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA 48",
@@ -31133,8 +31133,8 @@
   },
   {
     "SEMÁFORO": 725,
-    "SEMÁFORO COMPARTILHADO": 725,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 725,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR. JOSÉ RUFINO",
@@ -31176,8 +31176,8 @@
   },
   {
     "SEMÁFORO": 726,
-    "SEMÁFORO COMPARTILHADO": "726 / 615",
     "IP DDNS": "s05402.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": "726 / 615",
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. DR JOSÉ RUFINO",
@@ -31219,8 +31219,8 @@
   },
   {
     "SEMÁFORO": 727,
-    "SEMÁFORO COMPARTILHADO": 727,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 727,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "RUA ODORICO MENDES",
@@ -31262,8 +31262,8 @@
   },
   {
     "SEMÁFORO": 728,
-    "SEMÁFORO COMPARTILHADO": 728,
     "IP DDNS": "s05695.dyndns.org",
+    "SEMÁFORO COMPARTILHADO": 728,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. MAL. JUAREZ TÁVORA",
@@ -31305,8 +31305,8 @@
   },
   {
     "SEMÁFORO": 729,
-    "SEMÁFORO COMPARTILHADO": 729,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 729,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. TAPAJÓS",
@@ -31348,8 +31348,8 @@
   },
   {
     "SEMÁFORO": 730,
-    "SEMÁFORO COMPARTILHADO": 730,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 730,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. ENG. ALVES DE SOUZA",
@@ -31391,8 +31391,8 @@
   },
   {
     "SEMÁFORO": 731,
-    "SEMÁFORO COMPARTILHADO": 731,
     "IP DDNS": "",
+    "SEMÁFORO COMPARTILHADO": 731,
     "Nº CHIP": "",
     "ELSYS": "",
     "LOCALIZAÇÃO 1": "AV. CAMPINA GRANDE",

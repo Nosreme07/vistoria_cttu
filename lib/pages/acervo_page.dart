@@ -1,110 +1,10 @@
-import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart'; 
+import 'package:http/http.dart' as http; 
 import 'package:url_launcher/url_launcher.dart'; 
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:intl/intl.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
-
-// ==== FUNÇÃO GLOBAL PARA ABRIR MAPS OU WAZE ====
-void _mostrarOpcoesGPS(BuildContext context, String georeferencia) {
-  if (georeferencia.trim().isEmpty || !georeferencia.contains(' ')) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Semáforo sem coordenadas cadastradas!'), backgroundColor: Colors.orange));
-    return;
-  }
-
-  showModalBottomSheet(
-    context: context,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-    builder: (context) {
-      return SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Como deseja chegar ao semáforo?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade400, 
-                        foregroundColor: Colors.white, 
-                        padding: const EdgeInsets.symmetric(vertical: 16), 
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
-                      ),
-                      icon: const Icon(Icons.directions_car, size: 28),
-                      label: const Text('Waze', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _abrirAppNavegacao(context, georeferencia, 'waze');
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green.shade600, 
-                        foregroundColor: Colors.white, 
-                        padding: const EdgeInsets.symmetric(vertical: 16), 
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
-                      ),
-                      icon: const Icon(Icons.map, size: 28),
-                      label: const Text('Maps', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _abrirAppNavegacao(context, georeferencia, 'maps');
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-  );
-}
-
-Future<void> _abrirAppNavegacao(BuildContext context, String georeferencia, String app) async {
-  try {
-    String geoLimpa = georeferencia.replaceAll(',', ' ').trim();
-    List<String> partes = geoLimpa.split(RegExp(r'\s+'));
-
-    if (partes.length < 2) {
-      throw 'Formato de coordenada inválido.';
-    }
-
-    String lat = partes[0];
-    String lng = partes[1];
-
-    Uri url;
-    if (app == 'waze') {
-      url = Uri.parse('https://waze.com/ul?ll=$lat,$lng&navigate=yes');
-    } else {
-      url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng'); // Se usar a api directions, mude para: http://maps.google.com/maps?daddr=$lat,$lng
-    }
-
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      throw 'Não foi possível abrir o aplicativo.';
-    }
-  } catch (e) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao abrir o $app. Verifique se ele está instalado!'), backgroundColor: Colors.red));
-    }
-  }
-}
-
+import 'package:flutter_map/flutter_map.dart'; 
+import 'package:latlong2/latlong.dart'; 
 
 class AcervoPage extends StatefulWidget {
   const AcervoPage({super.key});
@@ -113,216 +13,507 @@ class AcervoPage extends StatefulWidget {
   State<AcervoPage> createState() => _AcervoPageState();
 }
 
-class _AcervoPageState extends State<AcervoPage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final TextEditingController _pesquisaController = TextEditingController();
+class _AcervoPageState extends State<AcervoPage> {
+  List<dynamic> _todosSemaforos = [];
+  List<dynamic> _semaforosFiltrados = [];
+  List<String> _listaRotasDisponiveis = ['Todas']; 
+  bool _carregando = true;
+  bool _sincronizandoComPlanilha = false; 
   String _textoPesquisa = '';
+  String _rotaSelecionada = 'Todas'; 
+  final TextEditingController _pesquisaController = TextEditingController();
 
-  String _filtroRotaLista = 'Todas';
-  String _filtroRota = 'Todas';
-  String _filtroGrupo = 'Todos';
-
-  late Stream<QuerySnapshot> _semaforosStream;
-
-  final List<String> _todosOsCampos = [
-    'id', 'endereco', 'bairro', 'empresa', 'georeferencia', 'rota', 'grupo',
-    'tipo_do_controlador', 'id_do_controlador', 'subareas',
-    'grupo_focal_veicular_tipo_i', 'grupo_focal_veicular_tipo_t',
-    'grupo_focal_pedestre_simples', 'grupo_focal_pedestre_com_cronometro',
-    'grupo_focal_faixa_reversivel', 'grupo_focal_ciclista_com_tres_focos',
-    'grupo_focal_ciclista_com_dois_focos', 'anteparo_tipo_i',
-    'veicular_com_sequencial', 'veicular_com_cronometro', 'sirene',
-    'horario_de_funcionamente_das_sirenes', 'botoeira_com_dispositivo_sonoro',
-    'botoeira_simples', 'nobreak', 'kit_bateria', 'numero_do_nobreak',
-    'medidor', 'numero_do_medidor', 'kit_de_comunicacao', 'modo_de_funcionamento',
-    'semiportico_conico', 'semiportico_simples', 'semiportico_estruturado',
-    'portico_simples', 'portico_estruturado', 'coluna_conica', 'coluna_simples',
-    'placa_adesiva_para_botoeira', 'conjunto_entrada_de_energia_padrao_celpe_instalado',
-    'conjunto_aterramento_para_colunas', 'cabo_2x1mm', 'cabo_3x1mm', 'cabo_4x1mm',
-    'cabo_7x1mm', 'luminarias', 'placa_de_identificacao_de_semaforo',
-    'fotossensor_equipamento', 'conta_contrato', 'link_da_programacao',
-    'observacoes', 'observacoes_2', 'historico', 'data_de_implantacao'
+  // SEQUÊNCIA EXATA DAS COLUNAS SOLICITADAS PARA EXIBIÇÃO NO POPUP
+  final List<String> _ordemCamposExibicao = [
+    "SEMÁFORO",
+    "IP DDNS",
+    "SEMÁFORO COMPARTILHADO",
+    "Nº CHIP",
+    "ELSYS",
+    "LOCALIZAÇÃO 1",
+    "LOCALIZAÇÃO 2",
+    "ENDEREÇO",
+    "BAIRRO",
+    "TIPO DE CONTROLADOR",
+    "EMPRESA",
+    "ROTA",
+    "OBSERVAÇOES",
+    "SUB-ÁREA (TRAFGO)",
+    "LATITUDE",
+    "LONGITUDE",
+    "GEOREFERÊNCIA",
+    "NOBREAK",
+    "Nº do No Break",
+    "CÂMERAS",
+    "BOTOEIRA COM DISPOSITIVO SONORO",
+    "HORÁRIO DE FUNCIONAMENTO Do dispositivo sonoro",
+    "BOTOEIRA SIMPLES",
+    "Coluna Cônica",
+    "Coluna Simples",
+    "Semipórtico Cônico",
+    "Semipórtico Simples",
+    "Semipórtico Estruturado",
+    "Pórtico Estruturado",
+    "Veicular TIPO I",
+    "VeiculaR Tipo T",
+    "PEDESTRE SIMPLES",
+    "Pedestre com cronômetro",
+    "Ciclista",
+    "Anteparo TIpo I",
+    "Veicular com sequencial",
+    "Veicular com cronômetro",
+    "Luminárias",
+    "Conta-Contrato",
+    "NÚMERO DO Medidor",
+    "Data de implantação"
   ];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _semaforosStream = FirebaseFirestore.instance.collection('semaforos').orderBy('id').snapshots();
-
-    _pesquisaController.addListener(() {
-      setState(() {
-        _textoPesquisa = _pesquisaController.text.toLowerCase();
-      });
-    });
+    _carregarDadosIniciais();
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     _pesquisaController.dispose();
     super.dispose();
   }
 
-  Future<void> _exportarAcervoPDF(List<Map<String, dynamic>> semaforos) async {
-    if (semaforos.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nenhum semáforo para exportar.'), backgroundColor: Colors.orange));
-      return;
+  // FUNÇÃO DE BUSCA INTELIGENTE DE CAMPOS
+  String _obterValorCampo(Map<String, dynamic> semaforo, String chaveOriginal) {
+    if (semaforo.containsKey(chaveOriginal)) {
+      return semaforo[chaveOriginal].toString();
     }
-
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando PDF do Acervo...'), backgroundColor: Colors.teal));
-
-    try {
-      String rotaStr = _filtroRotaLista == 'Todas' ? 'Todas as Rotas' : 'Rota $_filtroRotaLista';
-      String dataHoraAtual = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
-
-      await Printing.layoutPdf(
-        name: 'Acervo_$rotaStr.pdf',
-        onLayout: (PdfPageFormat format) async {
-          final pdf = pw.Document();
-
-          pdf.addPage(
-            pw.MultiPage(
-              pageFormat: format, 
-              margin: const pw.EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 20),
-              footer: (pw.Context context) {
-                return pw.Column(
-                  mainAxisSize: pw.MainAxisSize.min,
-                  crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-                  children: [
-                    pw.Divider(thickness: 1, color: PdfColors.grey400),
-                    pw.SizedBox(height: 4),
-                    pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Text('Relatório gerado pelo aplicativo Vistoria CTTU ($dataHoraAtual)', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
-                        pw.Text('Pág. ${context.pageNumber} / ${context.pagesCount}', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
-                      ]
-                    )
-                  ]
-                );
-              },
-              build: (pw.Context context) {
-                return [
-                  pw.Header(
-                    level: 0, 
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text('Relatório do Acervo de Semáforos', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-                        pw.SizedBox(height: 4),
-                        pw.Text('Filtro: $rotaStr | Total: ${semaforos.length} semáforos', style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
-                      ]
-                    )
-                  ),
-                  pw.SizedBox(height: 16),
-                  pw.TableHelper.fromTextArray(
-                    context: context,
-                    headers: ['Semáforo', 'Endereço', 'Bairro', 'Empresa', 'Rota'],
-                    data: semaforos.map((s) {
-                      String rotaDoSem = (s['rota'] ?? '').toString().replaceFirst(RegExp(r'^0+'), '');
-                      return [ 
-                        s['id']?.toString() ?? '', 
-                        s['endereco']?.toString() ?? '', 
-                        s['bairro']?.toString() ?? '', 
-                        s['empresa']?.toString() ?? '', 
-                        rotaDoSem.isEmpty ? 'S/R' : rotaDoSem
-                      ];
-                    }).toList(),
-                    headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 10),
-                    headerDecoration: const pw.BoxDecoration(color: PdfColors.teal700),
-                    cellAlignment: pw.Alignment.centerLeft, 
-                    cellStyle: const pw.TextStyle(fontSize: 9),
-                    columnWidths: { 
-                      0: const pw.FlexColumnWidth(1), 
-                      1: const pw.FlexColumnWidth(3), 
-                      2: const pw.FlexColumnWidth(1.5), 
-                      3: const pw.FlexColumnWidth(1.5), 
-                      4: const pw.FlexColumnWidth(1) 
-                    }
-                  ),
-                ];
-              }
-            )
-          );
-          
-          return pdf.save();
-        }
-      );
-    } catch (e) {
-      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF!'), backgroundColor: Colors.red));
+    
+    String chaveMinuscula = chaveOriginal.toLowerCase();
+    if (semaforo.containsKey(chaveMinuscula)) {
+      return semaforo[chaveMinuscula].toString();
     }
-  }
-
-  Future<void> _exportarAcervoExcel(List<Map<String, dynamic>> semaforos) async {
-    if (semaforos.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nenhum semáforo para exportar.'), backgroundColor: Colors.orange));
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando Planilha Excel...'), backgroundColor: Colors.green));
-
-    try {
-      String csv = '\uFEFF'; 
-      csv += 'SEMAFORO;ENDERECO;BAIRRO;EMPRESA;ROTA;COORDENADAS\n';
-      
-      for (var s in semaforos) {
-        String id = s['id']?.toString() ?? '';
-        String endereco = s['endereco']?.toString().replaceAll(';', ',') ?? ''; 
-        String bairro = s['bairro']?.toString() ?? '';
-        String empresa = s['empresa']?.toString() ?? '';
-        String rota = (s['rota'] ?? '').toString().replaceFirst(RegExp(r'^0+'), '');
-        if (rota.isEmpty) rota = 'S/R';
-        String coords = s['georeferencia']?.toString() ?? '';
-
-        csv += '$id;$endereco;$bairro;$empresa;$rota;$coords\n';
+    
+    for (var entry in semaforo.entries) {
+      if (entry.key.trim().toLowerCase() == chaveMinuscula) {
+        return entry.value.toString();
       }
+    }
 
-      String rotaStr = _filtroRotaLista == 'Todas' ? 'Todas' : _filtroRotaLista;
-      final dir = await getTemporaryDirectory();
-      final path = '${dir.path}/Acervo_Rota_$rotaStr.xls';
-      final file = File(path);
-      await file.writeAsBytes(utf8.encode(csv));
-      await Share.shareXFiles([XFile(path)], text: 'Acervo de Semáforos - Rota $rotaStr.');
-    } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar Excel!'), backgroundColor: Colors.red));
+    if (chaveMinuscula == 'semáforo' || chaveMinuscula == 'semaforo') {
+      return (semaforo['id'] ?? semaforo['semáforo'] ?? semaforo['semaforo'] ?? '').toString();
+    }
+    if (chaveMinuscula == 'endereço' || chaveMinuscula == 'endereco') {
+      return (semaforo['endereco'] ?? semaforo['endereço'] ?? '').toString();
+    }
+    if (chaveMinuscula == 'observacoes' || chaveMinuscula == 'observaçoes') {
+      return (semaforo['observacoes'] ?? semaforo['observacoes_2'] ?? semaforo['observaçoes'] ?? '').toString();
+    }
+    if (chaveMinuscula == 'sub-área (trafgo)' || chaveMinuscula == 'sub-área (tráfego)') {
+      return (semaforo['sub-área (trafgo)'] ?? semaforo['subarea'] ?? semaforo['subareas'] ?? '').toString();
+    }
+
+    return '';
+  }
+
+  // GERADOR DE CORES DINÂMICAS PARA CADA ROTA
+  Color _obterCorDaRota(String rota) {
+    String r = rota.trim().toUpperCase().replaceAll('ROTA', '').replaceAll(' ', '');
+    if (r.isEmpty) return Colors.grey.shade600;
+
+    switch (r) {
+      case '1': case '01': return Colors.blue.shade700;
+      case '2': case '02': return Colors.green.shade700;
+      case '3': case '03': return Colors.red.shade700;
+      case '4': case '04': return Colors.purple.shade700;
+      case '5': case '05': return Colors.amber.shade800;
+      case '6': case '06': return Colors.teal.shade700;
+      case '7': case '07': return Colors.indigo.shade700;
+      case '8': case '08': return Colors.pink.shade700;
+      case '9': case '09': return Colors.cyan.shade800;
+      case '10': return Colors.deepOrange.shade700;
+      default:
+        final int hash = r.hashCode;
+        final List<Color> coresDisponiveis = [
+          Colors.blue.shade700, Colors.green.shade700, Colors.red.shade700,
+          Colors.purple.shade700, Colors.amber.shade800, Colors.teal.shade700,
+          Colors.indigo.shade700, Colors.pink.shade700, Colors.cyan.shade800,
+          Colors.deepOrange.shade700, Colors.brown.shade600, Colors.blueGrey.shade700
+        ];
+        return coresDisponiveis[hash.abs() % coresDisponiveis.length];
     }
   }
 
-  void _mostrarFichaTecnica(Map<String, dynamic> data) {
-    String georef = (data['georeferencia'] ?? '').toString();
+  void _atualizarListaDeRotas() {
+    Set<String> rotasSet = {};
+    for (var semaforo in _todosSemaforos) {
+      String rotaRaw = _obterValorCampo(Map<String, dynamic>.from(semaforo), "ROTA").trim();
+      if (rotaRaw.isNotEmpty) {
+        if (!rotaRaw.toLowerCase().contains('rota')) {
+          rotasSet.add('Rota ${rotaRaw.padLeft(2, '0')}');
+        } else {
+          rotasSet.add(rotaRaw);
+        }
+      }
+    }
+    List<String> rotasOrdenadas = rotasSet.toList()..sort();
+    
+    setState(() {
+      _listaRotasDisponiveis = ['Todas', ...rotasOrdenadas];
+      if (!_listaRotasDisponiveis.contains(_rotaSelecionada)) {
+        _rotaSelecionada = 'Todas';
+      }
+    });
+  }
+
+  // 1. CARREGA O DATASET INICIAL DO ASSET LOCAL
+  Future<void> _carregarDadosIniciais() async {
+    setState(() => _carregando = true);
+
+    try {
+      final String resposta = await rootBundle.loadString('assets/informacoes_gerais.json');
+      final List<dynamic> dados = json.decode(resposta);
+
+      setState(() {
+        _todosSemaforos = dados;
+        _carregando = false;
+      });
+      _atualizarListaDeRotas();
+      _aplicarFiltrosCombinados();
+    } catch (e) {
+      setState(() => _carregando = false);
+      _mostrarSnackBar('Aviso: Iniciado sem dados locais pré-carregados.', Colors.orange);
+    }
+  }
+
+  // 2. BUSCA AS ATUALIZAÇÕES DIRETO DA PLANILHA
+  Future<void> _sincronizarComGoogleDrive() async {
+    if (_sincronizandoComPlanilha) return;
+
+    setState(() => _sincronizandoComPlanilha = true);
+    _mostrarSnackBar('Buscando atualizações na planilha do Drive...', Colors.blueGrey);
+
+    try {
+      final url = Uri.parse(
+          'https://docs.google.com/spreadsheets/d/1fUpL6AOxFmk_RI66E09asktSYi4vyoRQ2P8ivcfiivI/export?format=csv&gid=1606226965');
+
+      final resposta = await http.get(url).timeout(const Duration(seconds: 15));
+
+      if (resposta.statusCode == 200) {
+        String csvDados = utf8.decode(resposta.bodyBytes);
+        List<Map<String, dynamic>> novosDados = _converterCsvParaLista(csvDados);
+
+        if (novosDados.isNotEmpty) {
+          setState(() {
+            _todosSemaforos = novosDados;
+            _sincronizandoComPlanilha = false;
+          });
+          _atualizarListaDeRotas();
+          _aplicarFiltrosCombinados();
+          _mostrarSnackBar('Sincronizado! ${_todosSemaforos.length} semáforos atualizados.', Colors.green);
+        } else {
+          throw Exception('Planilha retornou vazia ou formato inválido.');
+        }
+      } else {
+        throw Exception('Erro de resposta: ${resposta.statusCode}');
+      }
+    } catch (e) {
+      setState(() => _sincronizandoComPlanilha = false);
+      _mostrarSnackBar('Falha na sincronização. Verifique a internet!', Colors.red);
+    }
+  }
+
+  List<Map<String, dynamic>> _converterCsvParaLista(String csvText) {
+    List<List<String>> linhas = _parseCsvRobusto(csvText, csvText.contains(';') ? ';' : ',');
+    if (linhas.length <= 1) return [];
+
+    List<Map<String, dynamic>> lista = [];
+    List<String> cabecalhos = linhas.first.map((h) => h.trim()).toList(); 
+
+    for (int i = 1; i < linhas.length; i++) {
+      List<String> colunas = linhas[i];
+      if (colunas.isEmpty || (colunas.length == 1 && colunas[0].trim().isEmpty)) continue;
+
+      Map<String, dynamic> mapaSemaforo = {};
+      for (int j = 0; j < cabecalhos.length; j++) {
+        mapaSemaforo[cabecalhos[j]] = j < colunas.length ? colunas[j].trim() : '';
+      }
+      
+      String idStr = _obterValorCampo(mapaSemaforo, "SEMÁFORO");
+      String endStr = _obterValorCampo(mapaSemaforo, "ENDEREÇO");
+      if (idStr.isNotEmpty || endStr.isNotEmpty) {
+        lista.add(mapaSemaforo);
+      }
+    }
+    return lista;
+  }
+
+  List<List<String>> _parseCsvRobusto(String text, String separator) {
+    List<List<String>> rows = [];
+    List<String> currentRow = [];
+    StringBuffer currentCell = StringBuffer();
+    bool inQuotes = false;
+    
+    for (int i = 0; i < text.length; i++) {
+      String char = text[i];
+      
+      if (char == '"') {
+        if (inQuotes && i + 1 < text.length && text[i + 1] == '"') {
+          currentCell.write('"'); 
+          i++; 
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char == separator && !inQuotes) {
+        currentRow.add(currentCell.toString().trim());
+        currentCell.clear();
+      } else if (char == '\n' && !inQuotes) {
+        currentRow.add(currentCell.toString().trim());
+        rows.add(currentRow);
+        currentRow = [];
+        currentCell.clear();
+      } else if (char == '\r' && !inQuotes) {
+        // Ignora
+      } else {
+        currentCell.write(char);
+      }
+    }
+    if (currentCell.isNotEmpty || currentRow.isNotEmpty) {
+      currentRow.add(currentCell.toString().trim());
+      rows.add(currentRow);
+    }
+    return rows;
+  }
+
+  void _aplicarFiltrosCombinados() {
+    setState(() {
+      _semaforosFiltrados = _todosSemaforos.where((item) {
+        final Map<String, dynamic> semaforo = Map<String, dynamic>.from(item);
+        
+        bool passaRota = false;
+        if (_rotaSelecionada == 'Todas') {
+          passaRota = true;
+        } else {
+          String rotaRaw = _obterValorCampo(semaforo, "ROTA").trim();
+          String rotaFormatadaItem = rotaRaw;
+          if (rotaRaw.isNotEmpty && !rotaRaw.toLowerCase().contains('rota')) {
+            rotaFormatadaItem = 'Rota ${rotaRaw.padLeft(2, '0')}';
+          }
+          passaRota = (rotaFormatadaItem.toLowerCase() == _rotaSelecionada.toLowerCase());
+        }
+
+        bool passaTexto = false;
+        if (_textoPesquisa.isEmpty) {
+          passaTexto = true;
+        } else {
+          String numero = _obterValorCampo(semaforo, "SEMÁFORO").toLowerCase();
+          String endereco = _obterValorCampo(semaforo, "ENDEREÇO").toLowerCase();
+          String bairro = _obterValorCampo(semaforo, "BAIRRO").toLowerCase();
+
+          passaTexto = numero.contains(_textoPesquisa) || 
+                       endereco.contains(_textoPesquisa) || 
+                       bairro.contains(_textoPesquisa);
+        }
+
+        return passaRota && passaTexto;
+      }).toList();
+    });
+  }
+
+  void _mostrarOpcoesGPS(BuildContext context, String georeferencia) {
+    if (georeferencia.trim().isEmpty || !georeferencia.contains(',')) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Semáforo sem coordenadas válidas!'), backgroundColor: Colors.orange));
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Como deseja chegar ao semáforo?', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade400, 
+                          foregroundColor: Colors.white, 
+                          padding: const EdgeInsets.symmetric(vertical: 14), 
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                        ),
+                        icon: const Icon(Icons.directions_car, size: 24),
+                        label: const Text('Waze', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _abrirAppNavegacao(context, georeferencia, 'waze');
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green.shade600, 
+                          foregroundColor: Colors.white, 
+                          padding: const EdgeInsets.symmetric(vertical: 14), 
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                        ),
+                        icon: const Icon(Icons.map, size: 24),
+                        label: const Text('Google Maps', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _abrirAppNavegacao(context, georeferencia, 'maps');
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
+
+  Future<void> _abrirAppNavegacao(BuildContext context, String georeferencia, String app) async {
+    try {
+      String geoLimpa = georeferencia.trim();
+      List<String> partes = geoLimpa.split(',');
+      if (partes.length < 2) throw 'Formato inválido';
+
+      String lat = partes[0].trim();
+      String lng = partes[1].trim();
+
+      Uri url = app == 'waze' 
+          ? Uri.parse('https://waze.com/ul?ll=$lat,$lng&navigate=yes')
+          : Uri.parse('http://maps.google.com/maps?daddr=$lat,$lng'); 
+
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        throw 'Erro ao abrir';
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Não foi possível abrir o $app.'), backgroundColor: Colors.red));
+      }
+    }
+  }
+
+  void _mostrarSnackBar(String mensagem, Color corFundo) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem, style: const TextStyle(fontWeight: FontWeight.w500)),
+        backgroundColor: corFundo,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  // POPUP MODAL DETALHADO DO SEMÁFORO
+  void _mostrarDetalhesSemaforo(Map<String, dynamic> semaforo, String numero, Color corRota) {
+    String endereco = _obterValorCampo(semaforo, "ENDEREÇO");
+    String bairro = _obterValorCampo(semaforo, "BAIRRO");
+    String georef = _obterValorCampo(semaforo, "GEOREFERÊNCIA").trim();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) {
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
         return DraggableScrollableSheet(
-          initialChildSize: 0.7, minChildSize: 0.5, maxChildSize: 0.95, expand: false,
-          builder: (context, scrollController) {
-            return Padding(
-              padding: const EdgeInsets.all(24.0),
+          initialChildSize: 0.75, 
+          minChildSize: 0.5,
+          maxChildSize: 0.95, 
+          builder: (_, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Text(
-                      'Ficha Técnica - Semáforo Nº ${data['id'] ?? ''}', 
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.orange.shade800)
-                    )
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    height: 5,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  const Divider(thickness: 2, height: 32),
+                  
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: corRota, 
+                          radius: 26,
+                          child: Text(
+                            numero,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                endereco.isNotEmpty ? endereco : 'Semáforo Nº $numero',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.5,
+                                  color: Colors.black87,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                bairro.isNotEmpty ? bairro : 'Bairro não informado',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 13.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, color: Colors.grey),
+                          onPressed: () => Navigator.pop(context),
+                        )
+                      ],
+                    ),
+                  ),
+                  const Divider(thickness: 1, height: 20),
 
-                  // BOTÃO DE COMO CHEGAR DENTRO DA FICHA
                   if (georef.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
+                      padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 12.0),
                       child: SizedBox(
-                        width: double.infinity, height: 50,
+                        width: double.infinity,
+                        height: 48,
                         child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade600, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                          icon: const Icon(Icons.directions),
-                          label: const Text('COMO CHEGAR (GPS)', style: TextStyle(fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: corRota,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 1,
+                          ),
+                          icon: const Icon(Icons.directions, size: 22),
+                          label: const Text('COMO CHEGAR (GPS)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                           onPressed: () => _mostrarOpcoesGPS(context, georef),
                         ),
                       ),
@@ -331,55 +522,66 @@ class _AcervoPageState extends State<AcervoPage> with SingleTickerProviderStateM
                   Expanded(
                     child: ListView.builder(
                       controller: scrollController,
-                      itemCount: _todosOsCampos.length,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                      itemCount: _ordemCamposExibicao.length,
                       itemBuilder: (context, index) {
-                        String campo = _todosOsCampos[index];
-                        String titulo = campo.replaceAll('_', ' ').toUpperCase();
-                        String valor = (data[campo] ?? '').toString().trim();
-                        
-                        if (valor.isEmpty) return const SizedBox.shrink();
+                        final String chaveOriginal = _ordemCamposExibicao[index];
+                        String valor = _obterValorCampo(semaforo, chaveOriginal).trim();
 
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: RichText(
-                            text: TextSpan(
-                              style: const TextStyle(color: Colors.black87, fontSize: 15),
-                              children: [
-                                TextSpan(text: '$titulo: ', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey)),
-                                TextSpan(text: valor),
-                              ],
-                            ),
+                        if (valor.isEmpty) {
+                          valor = "-";
+                        }
+
+                        return Container(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.label_important_outline, size: 18, color: corRota),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: RichText(
+                                  text: TextSpan(
+                                    style: const TextStyle(color: Colors.black87, fontSize: 14, height: 1.4),
+                                    children: [
+                                      TextSpan(
+                                        text: '${chaveOriginal.toUpperCase()}\n',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blueGrey,
+                                          fontSize: 11.5,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: valor,
+                                        style: TextStyle(
+                                          fontWeight: valor == "-" ? FontWeight.w300 : FontWeight.w400, 
+                                          fontSize: 14.5,
+                                          color: valor == "-" ? Colors.grey : Colors.black87
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       },
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity, height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade300, foregroundColor: Colors.black87, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Fechar Ficha', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
                 ],
               ),
             );
-          }
+          },
         );
       },
-    );
-  }
-
-  void _abrirMapaDaRota(String titulo, List<Map<String, dynamic>> semaforosParaMapa) {
-    if (semaforosParaMapa.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nenhum semáforo encontrado com estes filtros.'), backgroundColor: Colors.orange));
-      return;
-    }
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => TelaMapaRota(titulo: titulo, semaforosDaRota: semaforosParaMapa)),
     );
   }
 
@@ -388,365 +590,663 @@ class _AcervoPageState extends State<AcervoPage> with SingleTickerProviderStateM
     return Scaffold(
       appBar: AppBar(
         title: const Text('Acervo de Semáforos', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.orange.shade400,
+        backgroundColor: Colors.orange.shade500,
         foregroundColor: Colors.white,
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor: Colors.white,
-          tabs: const [
-            Tab(icon: Icon(Icons.list), text: 'Lista Geral'),
-            Tab(icon: Icon(Icons.map_outlined), text: 'Mapa / Filtros'),
-          ],
-        ),
+        elevation: 2,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.map, size: 26),
+            tooltip: 'Abrir Visão do Mapa',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TelaMapa(
+                    todosSemaforos: _todosSemaforos,
+                    listaRotasDisponiveis: _listaRotasDisponiveis,
+                    ordemCamposExibicao: _ordemCamposExibicao,
+                  ),
+                ),
+              );
+            },
+          ),
+          _sincronizandoComPlanilha
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    ),
+                  ),
+                )
+              : IconButton(
+                  icon: const Icon(Icons.cloud_sync, size: 28),
+                  tooltip: 'Sincronizar com Planilha',
+                  onPressed: _sincronizarComGoogleDrive,
+                ),
+        ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _semaforosStream, 
-        builder: (context, snapshot) {
-          if (snapshot.hasError) return const Center(child: Text('Erro ao carregar o acervo.'));
-          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-
-          var todosSemaforos = snapshot.data!.docs.map((d) => d.data() as Map<String, dynamic>).toList();
-
-          Set<String> rotasSet = {};
-          for (var s in todosSemaforos) {
-            String rota = (s['rota'] ?? '').toString().replaceFirst(RegExp(r'^0+'), '');
-            if (rota.isNotEmpty) rotasSet.add(rota);
-          }
-          List<String> listaRotas = rotasSet.toList()..sort();
-
-          return TabBarView(
-            controller: _tabController,
-            children: [
-              // ================= ABA 1: LISTA GERAL =================
-              Builder(
-                builder: (context) {
-                  var semaforosFiltradosPesquisa = todosSemaforos;
-
-                  if (_filtroRotaLista != 'Todas') {
-                    semaforosFiltradosPesquisa = semaforosFiltradosPesquisa.where((data) {
-                      return (data['rota'] ?? '').toString().replaceFirst(RegExp(r'^0+'), '') == _filtroRotaLista;
-                    }).toList();
-                  }
-
-                  if (_textoPesquisa.isNotEmpty) {
-                    semaforosFiltradosPesquisa = semaforosFiltradosPesquisa.where((data) {
-                      final endereco = (data['endereco'] ?? '').toString().toLowerCase();
-                      final id = (data['id'] ?? '').toString().toLowerCase();
-                      return endereco.contains(_textoPesquisa) || id.contains(_textoPesquisa);
-                    }).toList();
-                  }
-
-                  return Column(
+      body: _carregando
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: Colors.orange),
+                  SizedBox(height: 16),
+                  Text('Carregando acervo básico...'),
+                ],
+              ),
+            )
+          : Column(
+              children: [
+                Container(
+                  color: Colors.orange.shade50,
+                  padding: const EdgeInsets.all(12.0),
+                  child: Row(
                     children: [
-                      Container(
-                        color: Colors.orange.shade50,
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: InputDecorator(
-                                    decoration: InputDecoration(
-                                      labelText: 'Rota',
-                                      filled: true, fillColor: Colors.white,
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                                    ),
-                                    child: DropdownButtonHideUnderline(
-                                      child: DropdownButton<String>(
-                                        isExpanded: true,
-                                        value: listaRotas.contains(_filtroRotaLista) ? _filtroRotaLista : 'Todas',
-                                        items: [
-                                          const DropdownMenuItem(value: 'Todas', child: Text('Todas')),
-                                          ...listaRotas.map((r) => DropdownMenuItem(value: r, child: Text('Rota $r')))
-                                        ],
-                                        onChanged: (val) => setState(() => _filtroRotaLista = val!),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  flex: 5,
-                                  child: TextField(
-                                    controller: _pesquisaController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Pesquisar...',
-                                      prefixIcon: const Icon(Icons.search),
-                                      suffixIcon: _textoPesquisa.isNotEmpty ? IconButton(icon: const Icon(Icons.clear), onPressed: () => _pesquisaController.clear()) : null,
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                                      filled: true, fillColor: Colors.white,
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                      Expanded(
+                        flex: 4,
+                        child: TextField(
+                          controller: _pesquisaController,
+                          onChanged: (busca) {
+                            _textoPesquisa = busca.toLowerCase();
+                            _aplicarFiltrosCombinados();
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'Pesquisar...',
+                            prefixIcon: const Icon(Icons.search, color: Colors.orange),
+                            suffixIcon: _textoPesquisa.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear, size: 20),
+                                    onPressed: () {
+                                      _pesquisaController.clear();
+                                      _textoPesquisa = '';
+                                      _aplicarFiltrosCombinados();
+                                    },
+                                  )
+                                : null,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
                             ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red.shade700, 
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 12),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
-                                    ),
-                                    icon: const Icon(Icons.picture_as_pdf),
-                                    label: Text('PDF (${semaforosFiltradosPesquisa.length})', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    onPressed: () => _exportarAcervoPDF(semaforosFiltradosPesquisa),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green.shade700, 
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 12),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
-                                    ),
-                                    icon: const Icon(Icons.grid_on),
-                                    label: Text('Excel (${semaforosFiltradosPesquisa.length})', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    onPressed: () => _exportarAcervoExcel(semaforosFiltradosPesquisa),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            isDense: true,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Expanded(
-                        child: semaforosFiltradosPesquisa.isEmpty 
-                          ? const Center(child: Text('Nenhum semáforo encontrado.', style: TextStyle(fontSize: 16, color: Colors.grey)))
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: semaforosFiltradosPesquisa.length,
-                              itemBuilder: (context, index) {
-                                final data = semaforosFiltradosPesquisa[index];
-                                String rota = (data['rota'] ?? 'S/R').toString().replaceFirst(RegExp(r'^0+'), '');
-                                String georef = (data['georeferencia'] ?? '').toString();
-
-                                return Card(
-                                  elevation: 2, margin: const EdgeInsets.only(bottom: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  child: InkWell(
-                                    onTap: () => _mostrarFichaTecnica(data),
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Row(
-                                        children: [
-                                          CircleAvatar(radius: 28, backgroundColor: Colors.orange.shade100, child: Text(data['id']?.toString() ?? '', style: TextStyle(color: Colors.orange.shade900, fontWeight: FontWeight.bold, fontSize: 16))),
-                                          const SizedBox(width: 16),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(data['endereco'] ?? 'Sem endereço', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87), maxLines: 2, overflow: TextOverflow.ellipsis),
-                                                const SizedBox(height: 4),
-                                                Row(
-                                                  children: [
-                                                    Icon(Icons.route, size: 14, color: Colors.grey.shade600), const SizedBox(width: 4), Text('Rota $rota', style: TextStyle(color: Colors.grey.shade700, fontSize: 13, fontWeight: FontWeight.bold)),
-                                                    const SizedBox(width: 12),
-                                                    Icon(Icons.location_city, size: 14, color: Colors.grey.shade600), const SizedBox(width: 4), Expanded(child: Text(data['bairro'] ?? '-', style: TextStyle(color: Colors.grey.shade700, fontSize: 13), overflow: TextOverflow.ellipsis)),
-                                                  ],
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.directions, color: georef.isNotEmpty ? Colors.blue.shade700 : Colors.grey, size: 28),
-                                            tooltip: 'Como Chegar',
-                                            onPressed: () => _mostrarOpcoesGPS(context, georef),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                        flex: 3,
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: 'Rota', // AJUSTADO: Placeholder adicionado aqui
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+                            isDense: true,
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _rotaSelecionada,
+                              style: const TextStyle(color: Colors.black87, fontSize: 13.5, fontWeight: FontWeight.w500),
+                              isExpanded: true,
+                              icon: const Icon(Icons.arrow_drop_down),
+                              items: _listaRotasDisponiveis.map((String rotaItem) {
+                                return DropdownMenuItem<String>(
+                                  value: rotaItem,
+                                  child: Text(rotaItem),
                                 );
+                              }).toList(),
+                              onChanged: (novoValor) {
+                                if (novoValor != null) {
+                                  _rotaSelecionada = novoValor;
+                                  _aplicarFiltrosCombinados();
+                                }
                               },
-                            )
+                            ),
+                          ),
+                        ),
                       ),
                     ],
-                  );
-                }
-              ),
-
-              // ================= ABA 2: MAPA E FILTROS =================
-              SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text('Visualizar Semáforos no Mapa', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.orange)),
-                    const SizedBox(height: 8),
-                    const Text('Filtre a rota e o grupo desejado para criar uma visualização customizada no mapa.', style: TextStyle(color: Colors.grey)),
-                    const SizedBox(height: 32),
-
-                    InputDecorator(
-                      decoration: InputDecoration(labelText: 'Filtrar por Rota', filled: true, fillColor: Colors.white, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: listaRotas.contains(_filtroRota) ? _filtroRota : 'Todas',
-                          items: [
-                            const DropdownMenuItem(value: 'Todas', child: Text('Todas as Rotas')),
-                            ...listaRotas.map((r) => DropdownMenuItem(value: r, child: Text('Rota $r')))
-                          ],
-                          onChanged: (val) => setState(() => _filtroRota = val!),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    InputDecorator(
-                      decoration: InputDecoration(labelText: 'Filtrar por Grupo', filled: true, fillColor: Colors.white, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: _filtroGrupo,
-                          items: const [
-                            DropdownMenuItem(value: 'Todos', child: Text('Todos os Grupos')),
-                            DropdownMenuItem(value: 'A', child: Text('Grupo A')),
-                            DropdownMenuItem(value: 'B', child: Text('Grupo B')),
-                          ],
-                          onChanged: (val) => setState(() => _filtroGrupo = val!),
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 48),
-
-                    SizedBox(
-                      height: 60,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                        icon: const Icon(Icons.map, size: 28),
-                        label: const Text('ABRIR MAPA COM FILTROS', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        onPressed: () {
-                          List<Map<String, dynamic>> listaFiltradaParaMapa = todosSemaforos.where((sem) {
-                            String rotaLimpa = (sem['rota'] ?? '').toString().replaceFirst(RegExp(r'^0+'), '');
-                            String grupo = (sem['grupo'] ?? '').toString().toUpperCase();
-
-                            bool passaRota = _filtroRota == 'Todas' || rotaLimpa == _filtroRota;
-                            bool passaGrupo = _filtroGrupo == 'Todos' || grupo == _filtroGrupo;
-
-                            return passaRota && passaGrupo;
-                          }).toList();
-
-                          String tituloMapa = 'Mapa: ${_filtroRota == 'Todas' ? 'Todas Rotas' : 'Rota $_filtroRota'} - Grupo $_filtroGrupo';
-                          _abrirMapaDaRota(tituloMapa, listaFiltradaParaMapa);
-                        },
-                      ),
-                    )
-                  ],
+                  ),
                 ),
-              )
-            ],
-          );
-        },
-      ),
+                
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Mostrando ${_semaforosFiltrados.length} semáforos',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade700),
+                      ),
+                      Text(
+                        'Base: ${_todosSemaforos.length}',
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Expanded(
+                  child: _semaforosFiltrados.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Nenhum semáforo encontrado.',
+                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          itemCount: _semaforosFiltrados.length,
+                          itemBuilder: (context, index) {
+                            final Map<String, dynamic> semaforo = Map<String, dynamic>.from(_semaforosFiltrados[index]);
+                            
+                            String numero = _obterValorCampo(semaforo, "SEMÁFORO");
+                            String endereco = _obterValorCampo(semaforo, "ENDEREÇO");
+                            String bairro = _obterValorCampo(semaforo, "BAIRRO");
+                            String empresa = _obterValorCampo(semaforo, "EMPRESA");
+                            String rotaRaw = _obterValorCampo(semaforo, "ROTA");
+
+                            if (numero.isEmpty) numero = 'N/A';
+                            if (endereco.isEmpty) endereco = 'Sem endereço';
+                            if (empresa.isEmpty) empresa = 'S/E';
+
+                            String rotaFormatada = rotaRaw;
+                            if (rotaRaw.isNotEmpty && !rotaRaw.toLowerCase().contains('rota')) {
+                              rotaFormatada = 'ROTA ${rotaRaw.padLeft(2, '0')}';
+                            } else if (rotaRaw.isEmpty) {
+                              rotaFormatada = 'SEM ROTA';
+                            }
+
+                            final Color corDaRota = _obterCorDaRota(rotaRaw);
+
+                            String tituloCard = "$numero - $endereco${bairro.isNotEmpty ? ' ($bairro)' : ''}";
+                            String subtituloCard = "$empresa - $rotaFormatada";
+
+                            return Card(
+                              elevation: 2,
+                              margin: const EdgeInsets.symmetric(vertical: 6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(12),
+                                onTap: () => _mostrarDetalhesSemaforo(semaforo, numero, corDaRota),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundColor: corDaRota,
+                                        radius: 24,
+                                        child: Text(
+                                          numero,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              tituloCard,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14.5,
+                                                color: Colors.black87,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              subtituloCard,
+                                              style: TextStyle(
+                                                color: Colors.grey.shade700, 
+                                                fontSize: 12.5,
+                                                fontWeight: FontWeight.w500
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade400),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
     );
   }
 }
 
-// =======================================================================
-// TELA NOVA: MAPA INTERNO PARA VISUALIZAR OS SEMÁFOROS
-// =======================================================================
-class TelaMapaRota extends StatelessWidget {
-  final String titulo;
-  final List<Map<String, dynamic>> semaforosDaRota;
+// =========================================================================
+// TELA MAPA COMPLETA COM FILTROS DE ROTA E EMPRESA DINÂMICOS
+// =========================================================================
+class TelaMapa extends StatefulWidget {
+  final List<dynamic> todosSemaforos;
+  final List<String> listaRotasDisponiveis;
+  final List<String> ordemCamposExibicao;
 
-  const TelaMapaRota({super.key, required this.titulo, required this.semaforosDaRota});
+  const TelaMapa({
+    super.key, 
+    required this.todosSemaforos, 
+    required this.listaRotasDisponiveis,
+    required this.ordemCamposExibicao
+  });
 
   @override
-  Widget build(BuildContext context) {
-    List<Marker> marcadores = [];
-    LatLng centroDoMapa = const LatLng(-8.05428, -34.8813); 
+  State<TelaMapa> createState() => _TelaMapaState();
+}
 
-    for (var semaforo in semaforosDaRota) {
-      String geoStr = (semaforo['georeferencia'] ?? '').toString().trim();
-      String empresa = (semaforo['empresa'] ?? '').toString().toUpperCase();
+class _TelaMapaState extends State<TelaMapa> {
+  List<dynamic> _semaforosFiltradosNoMapa = [];
+  List<String> _listaEmpresasDisponiveis = ['Todas']; 
+  String _textoPesquisa = '';
+  String _rotaSelecionada = 'Todas';
+  String _empresaSelecionada = 'Todas'; 
+  final TextEditingController _mapPesquisaController = TextEditingController();
 
-      String iconeCaminho = 'assets/images/semaforo.png';
-      if (empresa.contains('SERTTEL')) {
-        iconeCaminho = 'assets/images/serttel.png';
-      } else if (empresa.contains('SINALVIDA')) {
-        iconeCaminho = 'assets/images/sinalvida.png';
+  @override
+  void initState() {
+    super.initState();
+    _semaforosFiltradosNoMapa = widget.todosSemaforos;
+    _atualizarListaDeEmpresas(); 
+  }
+
+  @override
+  void dispose() {
+    _mapPesquisaController.dispose();
+    super.dispose();
+  }
+
+  String _obterValorCampo(Map<String, dynamic> semaforo, String chaveOriginal) {
+    if (semaforo.containsKey(chaveOriginal)) return semaforo[chaveOriginal].toString();
+    String chaveMinuscula = chaveOriginal.toLowerCase();
+    if (semaforo.containsKey(chaveMinuscula)) return semaforo[chaveMinuscula].toString();
+    for (var entry in semaforo.entries) {
+      if (entry.key.trim().toLowerCase() == chaveMinuscula) return entry.value.toString();
+    }
+    if (chaveMinuscula == 'semáforo' || chaveMinuscula == 'semaforo') {
+      return (semaforo['id'] ?? semaforo['semáforo'] ?? semaforo['semaforo'] ?? '').toString();
+    }
+    if (chaveMinuscula == 'endereço' || chaveMinuscula == 'endereco') {
+      return (semaforo['endereco'] ?? semaforo['endereço'] ?? '').toString();
+    }
+    if (chaveMinuscula == 'empresa') {
+      return (semaforo['empresa'] ?? '').toString();
+    }
+    return '';
+  }
+
+  Color _obterCorDaRota(String rota) {
+    String r = rota.trim().toUpperCase().replaceAll('ROTA', '').replaceAll(' ', '');
+    if (r.isEmpty) return Colors.grey.shade600;
+    switch (r) {
+      case '1': case '01': return Colors.blue.shade700;
+      case '2': case '02': return Colors.green.shade700;
+      case '3': case '03': return Colors.red.shade700;
+      case '4': case '04': return Colors.purple.shade700;
+      case '5': case '05': return Colors.amber.shade800;
+      case '6': case '06': return Colors.teal.shade700;
+      case '7': case '07': return Colors.indigo.shade700;
+      case '8': case '08': return Colors.pink.shade700;
+      case '9': case '09': return Colors.cyan.shade800;
+      case '10': return Colors.deepOrange.shade700;
+      default:
+        return Colors.blueGrey.shade700;
+    }
+  }
+
+  void _atualizarListaDeEmpresas() {
+    Set<String> empresasSet = {};
+    for (var item in widget.todosSemaforos) {
+      final Map<String, dynamic> s = Map<String, dynamic>.from(item);
+      String emp = _obterValorCampo(s, "EMPRESA").trim();
+      if (emp.isNotEmpty && emp != "S/E") {
+        empresasSet.add(emp);
       }
+    }
+    List<String> ordenadas = empresasSet.toList()..sort();
+    setState(() {
+      _listaEmpresasDisponiveis = ['Todas', ...ordenadas];
+    });
+  }
 
-      if (geoStr.isNotEmpty && geoStr.contains(' ')) {
-        var partes = geoStr.split(' ');
-        if (partes.length >= 2) {
-          double lat = double.tryParse(partes[0]) ?? 0;
-          double lng = double.tryParse(partes[1]) ?? 0;
+  void _aplicarFiltrosCombinadosNoMapa() {
+    setState(() {
+      _semaforosFiltradosNoMapa = widget.todosSemaforos.where((item) {
+        final Map<String, dynamic> semaforo = Map<String, dynamic>.from(item);
+        
+        bool passaRota = false;
+        if (_rotaSelecionada == 'Todas') {
+          passaRota = true;
+        } else {
+          String rotaRaw = _obterValorCampo(semaforo, "ROTA").trim();
+          String rotaFormatadaItem = rotaRaw;
+          if (rotaRaw.isNotEmpty && !rotaRaw.toLowerCase().contains('rota')) {
+            rotaFormatadaItem = 'Rota ${rotaRaw.padLeft(2, '0')}';
+          }
+          passaRota = (rotaFormatadaItem.toLowerCase() == _rotaSelecionada.toLowerCase());
+        }
 
-          if (lat != 0 && lng != 0) {
-            LatLng posicao = LatLng(lat, lng);
-            centroDoMapa = posicao;
+        bool passaEmpresa = false;
+        if (_empresaSelecionada == 'Todas') {
+          passaEmpresa = true;
+        } else {
+          String empRaw = _obterValorCampo(semaforo, "EMPRESA").trim();
+          passaEmpresa = (empRaw.toLowerCase() == _empresaSelecionada.toLowerCase());
+        }
 
-            final String caminhoIcone = iconeCaminho;
-            final Map<String, dynamic> semaforoAtual = semaforo;
+        bool passaTexto = false;
+        if (_textoPesquisa.isEmpty) {
+          passaTexto = true;
+        } else {
+          String numero = _obterValorCampo(semaforo, "SEMÁFORO").toLowerCase();
+          String endereco = _obterValorCampo(semaforo, "ENDEREÇO").toLowerCase();
+          String bairro = _obterValorCampo(semaforo, "BAIRRO").toLowerCase();
 
-            marcadores.add(
-              Marker(
-                point: posicao,
-                width: 30,
-                height: 30,
-                child: GestureDetector(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: Text('Semáforo Nº ${semaforoAtual['id']}', style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
-                        content: Text('${semaforoAtual['endereco']}\n\nBairro: ${semaforoAtual['bairro']}\nGrupo: ${semaforoAtual['grupo'] ?? '-'}\nEmpresa: ${semaforoAtual['empresa']}'),
-                        actions: [
-                          TextButton.icon(
-                            icon: const Icon(Icons.directions, color: Colors.blue),
-                            label: const Text('Traçar Rota', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
-                            onPressed: () => _mostrarOpcoesGPS(context, geoStr),
-                          ),
-                          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Fechar', style: TextStyle(color: Colors.grey))),
-                        ],
-                      ),
-                    );
-                  },
-                  child: Image.asset(caminhoIcone, width: 30, height: 30),
+          passaTexto = numero.contains(_textoPesquisa) || 
+                       endereco.contains(_textoPesquisa) || 
+                       bairro.contains(_textoPesquisa);
+        }
+
+        return passaRota && passaEmpresa && passaTexto;
+      }).toList();
+    });
+  }
+
+  void _mostrarOpcoesGPS(BuildContext context, String georeferencia) {
+    if (georeferencia.trim().isEmpty || !georeferencia.contains(',')) return;
+    List<String> partes = georeferencia.split(',');
+    String lat = partes[0].trim();
+    String lng = partes[1].trim();
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade400, foregroundColor: Colors.white),
+                    onPressed: () => launchUrl(Uri.parse('https://waze.com/ul?ll=$lat,$lng&navigate=yes'), mode: LaunchMode.externalApplication),
+                    child: const Text('Waze'),
+                  ),
                 ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade600, foregroundColor: Colors.white),
+                    onPressed: () => launchUrl(Uri.parse('http://maps.google.com/maps?daddr=$lat,$lng'), mode: LaunchMode.externalApplication),
+                    child: const Text('Google Maps'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
+
+  void _mostrarDetalhesSemaforoNoMapa(Map<String, dynamic> semaforo, String numero, Color corRota) {
+    String endereco = _obterValorCampo(semaforo, "ENDEREÇO");
+    String bairro = _obterValorCampo(semaforo, "BAIRRO");
+    String georef = _obterValorCampo(semaforo, "GEOREFERÊNCIA").trim();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.75, 
+          builder: (_, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+              child: Column(
+                children: [
+                  Container(margin: const EdgeInsets.symmetric(vertical: 12), height: 5, width: 50, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10))),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: Row(
+                      children: [
+                        CircleAvatar(backgroundColor: corRota, radius: 26, child: Text(numero, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                        const SizedBox(width: 16),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(endereco.isNotEmpty ? endereco : 'Semáforo Nº $numero', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.5), maxLines: 2, overflow: TextOverflow.ellipsis),
+                          Text(bairro.isNotEmpty ? bairro : 'Bairro não informado', style: TextStyle(color: Colors.grey.shade600, fontSize: 13.5)),
+                        ])),
+                        IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context))
+                      ],
+                    ),
+                  ),
+                  const Divider(thickness: 1, height: 20),
+                  if (georef.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 12.0),
+                      child: SizedBox(
+                        width: double.infinity, height: 48,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(backgroundColor: corRota, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                          icon: const Icon(Icons.directions),
+                          label: const Text('COMO CHEGAR (GPS)', style: TextStyle(fontWeight: FontWeight.bold)),
+                          onPressed: () => _mostrarOpcoesGPS(context, georef),
+                        ),
+                      ),
+                    ),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: scrollController,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: widget.ordemCamposExibicao.length,
+                      itemBuilder: (context, index) {
+                        final String chaveOriginal = widget.ordemCamposExibicao[index];
+                        String valor = _obterValorCampo(semaforo, chaveOriginal).trim();
+                        if (valor.isEmpty) valor = "-";
+
+                        return Container(
+                          margin: const EdgeInsets.symmetric(vertical: 4), padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.grey.shade200)),
+                          child: Row(
+                            children: [
+                              Icon(Icons.label_important_outline, size: 18, color: corRota),
+                              const SizedBox(width: 10),
+                              Expanded(child: RichText(text: TextSpan(style: const TextStyle(color: Colors.black87, fontSize: 14), children: [
+                                TextSpan(text: '${chaveOriginal.toUpperCase()}\n', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey, fontSize: 11.5)),
+                                TextSpan(text: valor, style: TextStyle(color: valor == "-" ? Colors.grey : Colors.black87)),
+                              ]))),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             );
-          }
+          },
+        );
+      },
+    );
+  }
+
+  List<Marker> _construirMarcadoresDoMapa() {
+    List<Marker> marcadores = [];
+    for (var item in _semaforosFiltradosNoMapa) {
+      final Map<String, dynamic> semaforo = Map<String, dynamic>.from(item);
+      String georef = _obterValorCampo(semaforo, "GEOREFERÊNCIA").trim();
+      
+      if (georef.contains(',')) {
+        List<String> partes = georef.split(',');
+        double? lat = double.tryParse(partes[0].trim());
+        double? lng = double.tryParse(partes[1].trim());
+
+        if (lat != null && lng != null) {
+          String numero = _obterValorCampo(semaforo, "SEMÁFORO");
+          String rotaRaw = _obterValorCampo(semaforo, "ROTA");
+          Color corDaRota = _obterCorDaRota(rotaRaw);
+
+          marcadores.add(
+            Marker(
+              point: LatLng(lat, lng),
+              width: 38,
+              height: 38,
+              child: GestureDetector(
+                onTap: () => _mostrarDetalhesSemaforoNoMapa(semaforo, numero, corDaRota),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: corDaRota,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
+                  ),
+                  child: Center(
+                    child: Text(
+                      numero,
+                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
         }
       }
     }
+    return marcadores;
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(titulo, style: const TextStyle(fontSize: 16)),
-        backgroundColor: Colors.orange.shade300,
+        title: const Text('Visão do Mapa', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.orange.shade500,
+        foregroundColor: Colors.white,
       ),
-      body: FlutterMap(
-        options: MapOptions(
-          initialCenter: centroDoMapa,
-          initialZoom: 13.0,
-        ),
+      body: Column(
         children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.vistoria.cttu',
+          Container(
+            color: Colors.orange.shade50,
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _mapPesquisaController,
+                  onChanged: (busca) {
+                    _textoPesquisa = busca.toLowerCase();
+                    _aplicarFiltrosCombinadosNoMapa();
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Pesquisar semáforo, endereço ou bairro...',
+                    prefixIcon: const Icon(Icons.search, color: Colors.orange),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    filled: true, fillColor: Colors.white, isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    // Dropdown de Rotas
+                    Expanded(
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'Rota', // AJUSTADO: Placeholder adicionado aqui no mapa
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                          filled: true, fillColor: Colors.white, isDense: true,
+                          contentPadding: const EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _rotaSelecionada,
+                            style: const TextStyle(color: Colors.black87, fontSize: 13.5, fontWeight: FontWeight.w500),
+                            isExpanded: true,
+                            icon: const Icon(Icons.arrow_drop_down),
+                            items: widget.listaRotasDisponiveis.map((String rota) => DropdownMenuItem(value: rota, child: Text(rota))).toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                _rotaSelecionada = val;
+                                _aplicarFiltrosCombinadosNoMapa();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Dropdown de Empresas
+                    Expanded(
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'Empresa', // AJUSTADO: Placeholder adicionado aqui no mapa
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                          filled: true, fillColor: Colors.white, isDense: true,
+                          contentPadding: const EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _empresaSelecionada,
+                            style: const TextStyle(color: Colors.black87, fontSize: 13.5, fontWeight: FontWeight.w500),
+                            isExpanded: true,
+                            icon: const Icon(Icons.arrow_drop_down),
+                            items: _listaEmpresasDisponiveis.map((String empresa) => DropdownMenuItem(value: empresa, child: Text(empresa))).toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                _empresaSelecionada = val;
+                                _aplicarFiltrosCombinadosNoMapa();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          MarkerLayer(markers: marcadores),
+          Expanded(
+            child: FlutterMap(
+              options: const MapOptions(
+                initialCenter: LatLng(-8.05428, -34.8813), 
+                initialZoom: 13.0,
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.vistoria.cttu',
+                ),
+                MarkerLayer(markers: _construirMarcadoresDoMapa()),
+              ],
+            ),
+          ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.pop(context),
-        icon: const Icon(Icons.arrow_back),
-        label: Text('Voltar (${marcadores.length} Pinos)'),
       ),
     );
   }
