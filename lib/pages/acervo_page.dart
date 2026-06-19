@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'dart:io'; // Adicionado para manipulação de arquivos locais
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
@@ -5,6 +7,12 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart'; 
 import 'package:flutter_map/flutter_map.dart'; 
 import 'package:latlong2/latlong.dart'; 
+// Novas bibliotecas de suporte para a aba de relatórios
+import 'package:pdf/pdf.dart'; 
+import 'package:pdf/widgets.dart' as pw; 
+import 'package:printing/printing.dart'; 
+import 'package:path_provider/path_provider.dart'; 
+import 'package:share_plus/share_plus.dart';
 
 class AcervoPage extends StatefulWidget {
   const AcervoPage({super.key});
@@ -21,6 +29,7 @@ class _AcervoPageState extends State<AcervoPage> {
   bool _sincronizandoComPlanilha = false; 
   String _textoPesquisa = '';
   String _rotaSelecionada = 'Todas'; 
+  String _rotaSelecionadaRelatorio = 'Todas'; // Nova variável de estado para a aba de relatórios
   final TextEditingController _pesquisaController = TextEditingController();
 
   // SEQUÊNCIA EXATA DAS COLUNAS SOLICITADAS PARA EXIBIÇÃO NO POPUP
@@ -282,6 +291,7 @@ class _AcervoPageState extends State<AcervoPage> {
     return rows;
   }
 
+  // FILTRAGEM COMBINADA RESTRITA APENAS A NÚMERO, ENDEREÇO E BAIRRO
   void _aplicarFiltrosCombinados() {
     setState(() {
       _semaforosFiltrados = _todosSemaforos.where((item) {
@@ -525,8 +535,8 @@ class _AcervoPageState extends State<AcervoPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                       itemCount: _ordemCamposExibicao.length,
                       itemBuilder: (context, index) {
-                        final String chaveOriginal = _ordemCamposExibicao[index];
-                        String valor = _obterValorCampo(semaforo, chaveOriginal).trim();
+                        final String StringchaveOriginal = _ordemCamposExibicao[index];
+                        String valor = _obterValorCampo(semaforo, StringchaveOriginal).trim();
 
                         if (valor.isEmpty) {
                           valor = "-";
@@ -551,7 +561,7 @@ class _AcervoPageState extends State<AcervoPage> {
                                     style: const TextStyle(color: Colors.black87, fontSize: 14, height: 1.4),
                                     children: [
                                       TextSpan(
-                                        text: '${chaveOriginal.toUpperCase()}\n',
+                                        text: '${StringchaveOriginal.toUpperCase()}\n',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.blueGrey,
@@ -585,256 +595,569 @@ class _AcervoPageState extends State<AcervoPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Acervo de Semáforos', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.orange.shade500,
-        foregroundColor: Colors.white,
-        elevation: 2,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.map, size: 26),
-            tooltip: 'Abrir Visão do Mapa',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TelaMapa(
-                    todosSemaforos: _todosSemaforos,
-                    listaRotasDisponiveis: _listaRotasDisponiveis,
-                    ordemCamposExibicao: _ordemCamposExibicao,
+  // =========================================================================
+  // MODIFICADO: NOVAS FUNÇÕES PARA EXPORTAÇÃO EXCLUSIVAS DA ABA DE RELATÓRIOS
+  // =========================================================================
+  List<dynamic> _filtrarDadosParaRelatorio() {
+    if (_rotaSelecionadaRelatorio == 'Todas') {
+      return _todosSemaforos;
+    }
+    return _todosSemaforos.where((item) {
+      final Map<String, dynamic> semaforo = Map<String, dynamic>.from(item);
+      String rotaRaw = _obterValorCampo(semaforo, "ROTA").trim();
+      String rotaFormatadaItem = rotaRaw;
+      if (rotaRaw.isNotEmpty && !rotaRaw.toLowerCase().contains('rota')) {
+        rotaFormatadaItem = 'Rota ${rotaRaw.padLeft(2, '0')}';
+      }
+      return (rotaFormatadaItem.toLowerCase() == _rotaSelecionadaRelatorio.toLowerCase());
+    }).toList();
+  }
+
+Future<void> _exportarRelatorioPDF(List<dynamic> dados) async {
+    if (dados.isEmpty) {
+      _mostrarSnackBar('Nenhum semáforo encontrado para exportação.', Colors.orange);
+      return;
+    }
+    _mostrarSnackBar('Gerando PDF do Relatório...', Colors.teal);
+
+    try {
+      final now = DateTime.now();
+      final String dataHoraAtual = "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
+      
+      await Printing.layoutPdf(
+        name: 'Relatorio_${_rotaSelecionadaRelatorio.replaceAll(' ', '_')}.pdf',
+        onLayout: (PdfPageFormat format) async {
+          final pdf = pw.Document();
+          pdf.addPage(
+            pw.MultiPage(
+              pageFormat: format, 
+              margin: const pw.EdgeInsets.all(24),
+              footer: (pw.Context context) {
+                return pw.Column(
+                  children: [
+                    pw.Divider(thickness: 1, color: PdfColors.grey400),
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text('Gerado pelo sistema de vistoria da CTTU em $dataHoraAtual', style: const pw.TextStyle(fontSize: 9)),
+                        pw.Text('Pág. ${context.pageNumber} / ${context.pagesCount}', style: const pw.TextStyle(fontSize: 9)),
+                      ]
+                    )
+                  ]
+                );
+              },
+              build: (pw.Context context) {
+                return [
+                  pw.Header(
+                    level: 0, 
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text('Semáforos da Rota - CTTU', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                        pw.Text('Filtro: $_rotaSelecionadaRelatorio | Total de registros: ${dados.length}', style: const pw.TextStyle(fontSize: 12)),
+                      ]
+                    )
                   ),
-                ),
-              );
-            },
-          ),
-          _sincronizandoComPlanilha
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Center(
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                    ),
+                  pw.SizedBox(height: 16),
+                  pw.TableHelper.fromTextArray(
+                    context: context,
+                    headers: ['SEMÁFORO', 'ENDEREÇO', 'BAIRRO', 'EMPRESA', 'ROTA'],
+                    data: dados.map((item) {
+                      final s = Map<String, dynamic>.from(item);
+                      return [
+                        _obterValorCampo(s, "SEMÁFORO"),
+                        _obterValorCampo(s, "ENDEREÇO"),
+                        _obterValorCampo(s, "BAIRRO"),
+                        _obterValorCampo(s, "EMPRESA"),
+                        _obterValorCampo(s, "ROTA"),
+                      ];
+                    }).toList(),
+                    // CENTRALIZAÇÃO HORIZONTAL E VERTICAL NO MEIO DA CÉLULA
+                    cellAlignment: pw.Alignment.center,
+                    headerAlignment: pw.Alignment.center,
+                    // DIMINUIÇÃO DA FONTE PARA EVITAR QUEBRAS DE LINHA
+                    headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8),
+                    headerDecoration: const pw.BoxDecoration(color: PdfColors.orange700),
+                    cellStyle: const pw.TextStyle(fontSize: 7),
                   ),
-                )
-              : IconButton(
-                  icon: const Icon(Icons.cloud_sync, size: 28),
-                  tooltip: 'Sincronizar com Planilha',
-                  onPressed: _sincronizarComGoogleDrive,
-                ),
-        ],
-      ),
-      body: _carregando
-          ? const Center(
+                ];
+              }
+            )
+          );
+          return pdf.save();
+        }
+      );
+    } catch (e) {
+      _mostrarSnackBar('Erro ao gerar PDF!', Colors.red);
+    }
+  }
+
+Future<void> _exportarRelatorioExcel(List<dynamic> dados) async {
+    if (dados.isEmpty) {
+      _mostrarSnackBar('Nenhum semáforo encontrado para exportação.', Colors.orange);
+      return;
+    }
+    _mostrarSnackBar('Gerando Planilha Excel...', Colors.green);
+
+    try {
+      // Monta a estrutura da planilha em formato SpreadsheetML/HTML reconhecido nativamente pelo Excel
+      StringBuffer excelBuffer = StringBuffer();
+      excelBuffer.write('<!DOCTYPE html>');
+      excelBuffer.write('<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">');
+      excelBuffer.write('<head><meta charset="utf-8"></head>');
+      excelBuffer.write('<body>');
+      excelBuffer.write('<table border="1">');
+      
+      // Cabeçalho Oficial com estilização de cor
+      excelBuffer.write('<tr style="background-color: #E65100; color: white; font-weight: bold; text-align: center;">');
+      excelBuffer.write('<td>SEMÁFORO</td>');
+      excelBuffer.write('<td>ENDEREÇO</td>');
+      excelBuffer.write('<td>BAIRRO</td>');
+      excelBuffer.write('<td>EMPRESA</td>');
+      excelBuffer.write('<td>ROTA</td>');
+      excelBuffer.write('<td>GEOREFERÊNCIA</td>');
+      excelBuffer.write('</tr>');
+
+      // Alimentando as linhas da planilha célula por célula
+      for (var item in dados) {
+        if (item is! Map) continue;
+        final s = Map<String, dynamic>.from(item);
+        
+        String num = _obterValorCampo(s, "SEMÁFORO");
+        String endereco = _obterValorCampo(s, "ENDEREÇO"); 
+        String bairro = _obterValorCampo(s, "BAIRRO");
+        String empresa = _obterValorCampo(s, "EMPRESA");
+        String rota = _obterValorCampo(s, "ROTA");
+        String coords = _obterValorCampo(s, "GEOREFERÊNCIA");
+        
+        excelBuffer.write('<tr>');
+        excelBuffer.write('<td style="text-align: center;">$num</td>');
+        excelBuffer.write('<td>$endereco</td>');
+        excelBuffer.write('<td>$bairro</td>');
+        excelBuffer.write('<td>$empresa</td>');
+        excelBuffer.write('<td style="text-align: center;">$rota</td>');
+        excelBuffer.write('<td style="text-align: center;">$coords</td>');
+        excelBuffer.write('</tr>');
+      }
+
+      excelBuffer.write('</table>');
+      excelBuffer.write('</body>');
+      excelBuffer.write('</html>');
+
+      // Define o nome correto com a extensão .xls do Excel
+      final String nomeArquivo = 'Relatorio_${_rotaSelecionadaRelatorio.replaceAll(' ', '_')}.xls';
+      
+      // Converte os dados em bytes diretamente na memória (Cross-platform: Web, Android, iOS)
+      final bytes = utf8.encode(excelBuffer.toString());
+      final xFile = XFile.fromData(
+        Uint8List.fromList(bytes),
+        name: nomeArquivo,
+        mimeType: 'application/vnd.ms-excel', // Tipo MIME oficial do Excel
+      );
+
+      // Dispara o download nativo na Web ou a folha de compartilhamento em dispositivos móveis
+      await Share.shareXFiles(
+        [xFile], 
+        text: 'Relatório CTTU - Rota $_rotaSelecionadaRelatorio'
+      );
+    } catch (e) {
+      debugPrint('Erro detalhado da Planilha: $e');
+      _mostrarSnackBar('Erro ao gerar Planilha: $e', Colors.red);
+    }
+  }
+
+  // WIDGET CONSTRUTOR DA NOVA INTERFACE DE RELATÓRIOS
+  Widget _construirAbaRelatorios() {
+    final dadosRelatorio = _filtrarDadosParaRelatorio();
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Card(
+            elevation: 1,
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircularProgressIndicator(color: Colors.orange),
-                  SizedBox(height: 16),
-                  Text('Carregando acervo básico...'),
+                  Text(
+                    'Exportação de Relatórios Gerenciais',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Selecione uma rota específica ou exporte toda a base de semáforos consolidada.',
+                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
                 ],
               ),
-            )
-          : Column(
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          // Seletor de Rota do Relatório
+          InputDecorator(
+            decoration: InputDecoration(
+              labelText: 'Selecione a Rota para o Relatório',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _rotaSelecionadaRelatorio,
+                style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500),
+                isExpanded: true,
+                items: _listaRotasDisponiveis.map((String rota) {
+                  return DropdownMenuItem(value: rota, child: Text(rota));
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() {
+                      _rotaSelecionadaRelatorio = val;
+                    });
+                  }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          
+          // Badge Informativo do volume de dados
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  color: Colors.orange.shade50,
-                  padding: const EdgeInsets.all(12.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 4,
-                        child: TextField(
-                          controller: _pesquisaController,
-                          onChanged: (busca) {
-                            _textoPesquisa = busca.toLowerCase();
-                            _aplicarFiltrosCombinados();
-                          },
-                          decoration: InputDecoration(
-                            labelText: 'Pesquisar...',
-                            prefixIcon: const Icon(Icons.search, color: Colors.orange),
-                            suffixIcon: _textoPesquisa.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(Icons.clear, size: 20),
-                                    onPressed: () {
-                                      _pesquisaController.clear();
-                                      _textoPesquisa = '';
-                                      _aplicarFiltrosCombinados();
-                                    },
-                                  )
-                                : null,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            isDense: true,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        flex: 3,
-                        child: InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: 'Rota', // AJUSTADO: Placeholder adicionado aqui
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                            contentPadding: const EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
-                            isDense: true,
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: _rotaSelecionada,
-                              style: const TextStyle(color: Colors.black87, fontSize: 13.5, fontWeight: FontWeight.w500),
-                              isExpanded: true,
-                              icon: const Icon(Icons.arrow_drop_down),
-                              items: _listaRotasDisponiveis.map((String rotaItem) {
-                                return DropdownMenuItem<String>(
-                                  value: rotaItem,
-                                  child: Text(rotaItem),
-                                );
-                              }).toList(),
-                              onChanged: (novoValor) {
-                                if (novoValor != null) {
-                                  _rotaSelecionada = novoValor;
-                                  _aplicarFiltrosCombinados();
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Mostrando ${_semaforosFiltrados.length} semáforos',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade700),
-                      ),
-                      Text(
-                        'Base: ${_todosSemaforos.length}',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                ),
-
-                Expanded(
-                  child: _semaforosFiltrados.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'Nenhum semáforo encontrado.',
-                            style: TextStyle(color: Colors.grey, fontSize: 16),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          itemCount: _semaforosFiltrados.length,
-                          itemBuilder: (context, index) {
-                            final Map<String, dynamic> semaforo = Map<String, dynamic>.from(_semaforosFiltrados[index]);
-                            
-                            String numero = _obterValorCampo(semaforo, "SEMÁFORO");
-                            String endereco = _obterValorCampo(semaforo, "ENDEREÇO");
-                            String bairro = _obterValorCampo(semaforo, "BAIRRO");
-                            String empresa = _obterValorCampo(semaforo, "EMPRESA");
-                            String rotaRaw = _obterValorCampo(semaforo, "ROTA");
-
-                            if (numero.isEmpty) numero = 'N/A';
-                            if (endereco.isEmpty) endereco = 'Sem endereço';
-                            if (empresa.isEmpty) empresa = 'S/E';
-
-                            String rotaFormatada = rotaRaw;
-                            if (rotaRaw.isNotEmpty && !rotaRaw.toLowerCase().contains('rota')) {
-                              rotaFormatada = 'ROTA ${rotaRaw.padLeft(2, '0')}';
-                            } else if (rotaRaw.isEmpty) {
-                              rotaFormatada = 'SEM ROTA';
-                            }
-
-                            final Color corDaRota = _obterCorDaRota(rotaRaw);
-
-                            String tituloCard = "$numero - $endereco${bairro.isNotEmpty ? ' ($bairro)' : ''}";
-                            String subtituloCard = "$empresa - $rotaFormatada";
-
-                            return Card(
-                              elevation: 2,
-                              margin: const EdgeInsets.symmetric(vertical: 6),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(12),
-                                onTap: () => _mostrarDetalhesSemaforo(semaforo, numero, corDaRota),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                  child: Row(
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundColor: corDaRota,
-                                        radius: 24,
-                                        child: Text(
-                                          numero,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              tituloCard,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14.5,
-                                                color: Colors.black87,
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              subtituloCard,
-                                              style: TextStyle(
-                                                color: Colors.grey.shade700, 
-                                                fontSize: 12.5,
-                                                fontWeight: FontWeight.w500
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade400),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                Icon(Icons.info_outline, color: Colors.orange.shade800, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Registros encontrados para exportação: ${dadosRelatorio.length}',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900, fontSize: 13.5),
                 ),
               ],
             ),
+          ),
+          const Spacer(),
+          
+          // Botões de Ação de Download/Compartilhamento
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.picture_as_pdf),
+                  label: const Text('EXPORTAR PDF', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onPressed: () => _exportarRelatorioPDF(dadosRelatorio),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.grid_on),
+                  label: const Text('EXPORTAR EXCEL', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onPressed: () => _exportarRelatorioExcel(dadosRelatorio),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // MODIFICADO: Inclusão do DefaultTabController englobando o Scaffold
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Acervo de Semáforos', style: TextStyle(fontWeight: FontWeight.bold)),
+          backgroundColor: Colors.orange.shade500,
+          foregroundColor: Colors.white,
+          elevation: 2,
+          // MODIFICADO: Barra de Abas adicionada na parte inferior da AppBar
+          bottom: const TabBar(
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            indicatorColor: Colors.white,
+            tabs: [
+              Tab(icon: Icon(Icons.list), text: 'Lista Geral'),
+              Tab(icon: Icon(Icons.analytics_outlined), text: 'Relatórios'),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.map, size: 26),
+              tooltip: 'Abrir Visão do Mapa',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TelaMapa(
+                      todosSemaforos: _todosSemaforos,
+                      listaRotasDisponiveis: _listaRotasDisponiveis,
+                      ordemCamposExibicao: _ordemCamposExibicao,
+                    ),
+                  ),
+                );
+              },
+            ),
+            _sincronizandoComPlanilha
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      ),
+                    ),
+                  )
+                : IconButton(
+                    icon: const Icon(Icons.cloud_sync, size: 28),
+                    tooltip: 'Sincronizar com Planilha',
+                    onPressed: _sincronizarComGoogleDrive,
+                  ),
+          ],
+        ),
+        body: _carregando
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: Colors.orange),
+                    SizedBox(height: 16),
+                    Text('Carregando acervo básico...'),
+                  ],
+                ),
+              )
+            : TabBarView(
+                // MODIFICADO: TabBarView alternando entre a Lista Geral e a Aba de Relatórios
+                children: [
+                  // ABA 1: LISTA GERAL EXISTENTE
+                  Column(
+                    children: [
+                      Container(
+                        color: Colors.orange.shade50,
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 4,
+                              child: TextField(
+                                controller: _pesquisaController,
+                                onChanged: (busca) {
+                                  _textoPesquisa = busca.toLowerCase();
+                                  _aplicarFiltrosCombinados();
+                                },
+                                decoration: InputDecoration(
+                                  labelText: 'Pesquisar...',
+                                  prefixIcon: const Icon(Icons.search, color: Colors.orange),
+                                  suffixIcon: _textoPesquisa.isNotEmpty
+                                      ? IconButton(
+                                          icon: const Icon(Icons.clear, size: 20),
+                                          onPressed: () {
+                                            _pesquisaController.clear();
+                                            _textoPesquisa = '';
+                                            _aplicarFiltrosCombinados();
+                                          },
+                                        )
+                                      : null,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                  isDense: true,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              flex: 3,
+                              child: InputDecorator(
+                                decoration: InputDecoration(
+                                  labelText: 'Rota', 
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: const EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+                                  isDense: true,
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    value: _rotaSelecionada,
+                                    style: const TextStyle(color: Colors.black87, fontSize: 13.5, fontWeight: FontWeight.w500),
+                                    isExpanded: true,
+                                    icon: const Icon(Icons.arrow_drop_down),
+                                    items: _listaRotasDisponiveis.map((String rotaItem) {
+                                      return DropdownMenuItem<String>(
+                                        value: rotaItem,
+                                        child: Text(rotaItem),
+                                      );
+                                    }).toList(),
+                                    onChanged: (novoValor) {
+                                      if (novoValor != null) {
+                                        _rotaSelecionada = novoValor;
+                                        _aplicarFiltrosCombinados();
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Mostrando ${_semaforosFiltrados.length} semáforos',
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade700),
+                            ),
+                            Text(
+                              'Base: ${_todosSemaforos.length}',
+                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Expanded(
+                        child: _semaforosFiltrados.isEmpty
+                            ? const Center(
+                                child: Text(
+                                  'Nenhum semáforo encontrado.',
+                                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                                ),
+                              )
+                            : ListView.builder(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                itemCount: _semaforosFiltrados.length,
+                                itemBuilder: (context, index) {
+                                  final Map<String, dynamic> semaforo = Map<String, dynamic>.from(_semaforosFiltrados[index]);
+                                  
+                                  String numero = _obterValorCampo(semaforo, "SEMÁFORO");
+                                  String endereco = _obterValorCampo(semaforo, "ENDEREÇO");
+                                  String bairro = _obterValorCampo(semaforo, "BAIRRO");
+                                  String empresa = _obterValorCampo(semaforo, "EMPRESA");
+                                  String rotaRaw = _obterValorCampo(semaforo, "ROTA");
+
+                                  if (numero.isEmpty) numero = 'N/A';
+                                  if (endereco.isEmpty) endereco = 'Sem endereço';
+                                  if (empresa.isEmpty) empresa = 'S/E';
+
+                                  String rotaFormatada = rotaRaw;
+                                  if (rotaRaw.isNotEmpty && !rotaRaw.toLowerCase().contains('rota')) {
+                                    rotaFormatada = 'ROTA ${rotaRaw.padLeft(2, '0')}';
+                                  } else if (rotaRaw.isEmpty) {
+                                    rotaFormatada = 'SEM ROTA';
+                                  }
+
+                                  final Color corDaRota = _obterCorDaRota(rotaRaw);
+
+                                  String tituloCard = "$numero - $endereco${bairro.isNotEmpty ? ' ($bairro)' : ''}";
+                                  String subtituloCard = "$empresa - $rotaFormatada";
+
+                                  return Card(
+                                    elevation: 2,
+                                    margin: const EdgeInsets.symmetric(vertical: 6),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(12),
+                                      onTap: () => _mostrarDetalhesSemaforo(semaforo, numero, corDaRota),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                        child: Row(
+                                          children: [
+                                            CircleAvatar(
+                                              backgroundColor: corDaRota,
+                                              radius: 24,
+                                              child: Text(
+                                                numero,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 16),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    tituloCard,
+                                                    style: const TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 14.5,
+                                                      color: Colors.black87,
+                                                    ),
+                                                    maxLines: 2,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    subtituloCard,
+                                                    style: TextStyle(
+                                                      color: Colors.grey.shade700, 
+                                                      fontSize: 12.5,
+                                                      fontWeight: FontWeight.w500
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade400),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
+                  
+                  // ABA 2: NOVA SEÇÃO DE RELATÓRIOS CONSTRUÍDA
+                  _construirAbaRelatorios(),
+                ],
+              ),
+      ),
     );
   }
 }
@@ -1173,11 +1496,10 @@ class _TelaMapaState extends State<TelaMapa> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    // Dropdown de Rotas
                     Expanded(
                       child: InputDecorator(
                         decoration: InputDecoration(
-                          labelText: 'Rota', // AJUSTADO: Placeholder adicionado aqui no mapa
+                          labelText: 'Rota', 
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                           filled: true, fillColor: Colors.white, isDense: true,
                           contentPadding: const EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
@@ -1200,11 +1522,10 @@ class _TelaMapaState extends State<TelaMapa> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Dropdown de Empresas
                     Expanded(
                       child: InputDecorator(
                         decoration: InputDecoration(
-                          labelText: 'Empresa', // AJUSTADO: Placeholder adicionado aqui no mapa
+                          labelText: 'Empresa', 
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                           filled: true, fillColor: Colors.white, isDense: true,
                           contentPadding: const EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
