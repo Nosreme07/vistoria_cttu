@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_page.dart'; 
 import 'cadastro_page.dart';
 import 'vistoria/vistoria_page.dart'; 
-import 'acervo_page.dart'; // <-- NOVO IMPORT ADICIONADO
+import 'acervo/acervo_page.dart'; // <-- NOVO IMPORT ADICIONADO
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

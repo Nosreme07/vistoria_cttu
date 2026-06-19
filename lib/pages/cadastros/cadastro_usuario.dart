@@ -1,3 +1,4 @@
+import 'dart:io'; // ==== MODIFICADO: Necessário para lidar com arquivos físicos de imagem ====
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,7 +6,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart'; 
 import 'package:cloud_functions/cloud_functions.dart';
 
-// Importações novas para o PDF
+// ==== MODIFICADO: Importações novas para lidar com a Câmera e Storage da Foto ====
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+// Importações para o PDF
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -26,6 +31,12 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
   bool _ocultarSenha = true;
   bool _estaCarregando = false; 
   String? _perfilSelecionado;
+
+  // ==== MODIFICADO: Variáveis de estado para a Foto do Vistoriador ====
+  File? _fotoVistoriador;
+  String? _fotoUrlVistoriador;
+  final ImagePicker _picker = ImagePicker();
+  // ====================================================================
 
   late TabController _tabController; 
 
@@ -55,7 +66,46 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
     super.dispose();
   }
 
-  // ==== NOVA FUNÇÃO DE RESET CONECTADA AO CLOUD FUNCTIONS ====
+  // ==== MODIFICADO: FUNÇÃO PARA ESCOLHER FOTO (CÂMERA OU GALERIA) ====
+  Future<void> _selecionarFoto(StateSetter setModalState) async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text('Anexar Foto do Vistoriador', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Colors.deepPurple),
+              title: const Text('Tirar Foto da Câmera'),
+              onTap: () async {
+                Navigator.pop(context);
+                final XFile? foto = await _picker.pickImage(source: ImageSource.camera, imageQuality: 70);
+                if (foto != null) setModalState(() => _fotoVistoriador = File(foto.path));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: Colors.deepPurple),
+              title: const Text('Escolher da Galeria'),
+              onTap: () async {
+                Navigator.pop(context);
+                final XFile? foto = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+                if (foto != null) setModalState(() => _fotoVistoriador = File(foto.path));
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+  // ==================================================================
+
+  // FUNÇÃO DE RESET CONECTADA AO CLOUD FUNCTIONS
   Future<void> _resetarSenha123456(String usuarioId, StateSetter setModalState) async {
     bool confirmacao = await showDialog(
       context: context,
@@ -78,13 +128,9 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
     setModalState(() => _estaCarregando = true);
 
     try {
-      // 1. Força o Flutter a dar um "F5" na sua sessão atual para evitar bugs de token
       await FirebaseAuth.instance.currentUser?.getIdToken(true);
-
-      // 2. Chama a função lá do servidor
       final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('resetarSenha');
       
-      // 3. Envia os dados COM O FORMATO FORÇADO <String, dynamic>
       final response = await callable.call(<String, dynamic>{
         'uid': usuarioId,
         'senha': '123456',
@@ -106,12 +152,17 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
     }
   }
 
-  void _abrirFormulario({String? usuarioId, String? nomeAtual, String? telefoneAtual, String? perfilAtual, String? empresaAtual}) {
+  // ==== MODIFICADO: A FUNÇÃO AGORA RECEBE A FOTO ATUAL DO VISTORIADOR ====
+  void _abrirFormulario({String? usuarioId, String? nomeAtual, String? telefoneAtual, String? perfilAtual, String? empresaAtual, String? fotoAtual}) {
     _nomeController.text = nomeAtual ?? '';
     _telefoneController.text = telefoneAtual ?? '';
     _empresaController.text = empresaAtual ?? '';
     _senhaController.text = ''; 
     _perfilSelecionado = perfilAtual;
+    
+    // Reseta a foto toda vez que abre o modal
+    _fotoVistoriador = null;
+    _fotoUrlVistoriador = fotoAtual;
     
     bool isEdicao = usuarioId != null;
 
@@ -168,6 +219,44 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
                     ),
                     const SizedBox(height: 16),
 
+                    // ==== MODIFICADO: MOSTRAR BLOCO DE FOTO SE FOR VISTORIADOR ====
+                    if (_perfilSelecionado == 'Vistoriador') ...[
+                      const Text('Foto do Vistoriador (Obrigatória)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.deepPurple)),
+                      const SizedBox(height: 8),
+                      Center(
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 55,
+                              backgroundColor: Colors.grey.shade200,
+                              backgroundImage: _fotoVistoriador != null
+                                  ? FileImage(_fotoVistoriador!) as ImageProvider
+                                  : (_fotoUrlVistoriador != null && _fotoUrlVistoriador!.isNotEmpty
+                                      ? NetworkImage(_fotoUrlVistoriador!)
+                                      : null),
+                              child: _fotoVistoriador == null && (_fotoUrlVistoriador == null || _fotoUrlVistoriador!.isEmpty)
+                                  ? const Icon(Icons.person, size: 50, color: Colors.grey)
+                                  : null,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: CircleAvatar(
+                                backgroundColor: Colors.deepPurple,
+                                radius: 20,
+                                child: IconButton(
+                                  icon: const Icon(Icons.camera_alt, size: 20, color: Colors.white),
+                                  onPressed: () => _selecionarFoto(setModalState),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    // ============================================================
+
                     TextField(
                       controller: _empresaController,
                       textCapitalization: TextCapitalization.characters,
@@ -212,7 +301,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
                       ),
                     ),
                     
-                    // ==== NOVO BOTÃO DE RESET (Só aparece na edição) ====
+                    // BOTÃO DE RESET (Só aparece na edição)
                     if (isEdicao) ...[
                       const SizedBox(height: 12),
                       SizedBox(
@@ -250,6 +339,17 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
       return;
     }
     
+    // ==== MODIFICADO: TRAVA DE VALIDAÇÃO DA FOTO DO VISTORIADOR ====
+    if (_perfilSelecionado == 'Vistoriador') {
+      if (_fotoVistoriador == null && (_fotoUrlVistoriador == null || _fotoUrlVistoriador!.isEmpty)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('É OBRIGATÓRIO anexar ou tirar a foto do Vistoriador!'), backgroundColor: Colors.red)
+        );
+        return;
+      }
+    }
+    // ===============================================================
+
     if (!isEdicao) {
       final telefoneLimpo = telefoneFormatter.getUnmaskedText();
       if (telefoneLimpo.length < 10) {
@@ -265,34 +365,61 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
     setModalState(() => _estaCarregando = true);
 
     try {
-      if (isEdicao) {
-        await FirebaseFirestore.instance.collection('usuarios').doc(usuarioId).update({
-          'nome': _nomeController.text.toUpperCase(),
-          'perfil': _perfilSelecionado,
-          'empresa': _empresaController.text.toUpperCase(),
-        });
-      } else {
-        final telefoneLimpo = telefoneFormatter.getUnmaskedText();
+      String uid = isEdicao ? usuarioId : '';
+      final telefoneLimpo = telefoneFormatter.getUnmaskedText();
+      
+      // Se for novo usuário, cria a Autenticação no Firebase primeiro para pegarmos o UID
+      FirebaseApp? appSecundario;
+      if (!isEdicao) {
         String emailFicticio = "$telefoneLimpo@cttu.com";
 
-        FirebaseApp appSecundario = await Firebase.initializeApp(
+        appSecundario = await Firebase.initializeApp(
           name: 'CadastroTemporario',
           options: Firebase.app().options,
         );
 
         UserCredential userCredential = await FirebaseAuth.instanceFor(app: appSecundario)
             .createUserWithEmailAndPassword(email: emailFicticio, password: _senhaController.text);
+        
+        uid = userCredential.user!.uid;
+      }
 
-        await FirebaseFirestore.instance.collection('usuarios').doc(userCredential.user!.uid).set({
-          'nome': _nomeController.text.toUpperCase(),
-          'telefone': _telefoneController.text,
-          'telefone_limpo': telefoneLimpo,
-          'perfil': _perfilSelecionado,
-          'empresa': _empresaController.text.toUpperCase(),
-          'criado_em': FieldValue.serverTimestamp(),
-        });
+      // ==== MODIFICADO: LÓGICA DE UPLOAD DA FOTO NO STORAGE ====
+      String? fotoUrlFinal = _fotoUrlVistoriador;
+      if (_perfilSelecionado == 'Vistoriador' && _fotoVistoriador != null) {
+        // Envia a foto para a pasta fotos_vistoriadores com o nome do ID do usuário
+        final storageRef = FirebaseStorage.instance.ref().child('fotos_vistoriadores').child('$uid.jpg');
+        await storageRef.putFile(_fotoVistoriador!);
+        fotoUrlFinal = await storageRef.getDownloadURL();
+      }
+      // =========================================================
 
-        await appSecundario.delete();
+      // Monta os dados finais para enviar ao Firestore
+      Map<String, dynamic> dadosMapeados = {
+        'nome': _nomeController.text.toUpperCase(),
+        'perfil': _perfilSelecionado,
+        'empresa': _empresaController.text.toUpperCase(),
+      };
+
+      // ==== MODIFICADO: ADICIONA A URL DA FOTO NO BANCO ====
+      if (_perfilSelecionado == 'Vistoriador') {
+        dadosMapeados['foto_url'] = fotoUrlFinal ?? '';
+      } else if (isEdicao) {
+        // Se mudarem o perfil para Admin, removemos o campo da foto
+        dadosMapeados['foto_url'] = FieldValue.delete();
+      }
+      // =====================================================
+
+      if (isEdicao) {
+        await FirebaseFirestore.instance.collection('usuarios').doc(uid).update(dadosMapeados);
+      } else {
+        dadosMapeados['telefone'] = _telefoneController.text;
+        dadosMapeados['telefone_limpo'] = telefoneLimpo;
+        dadosMapeados['criado_em'] = FieldValue.serverTimestamp();
+        await FirebaseFirestore.instance.collection('usuarios').doc(uid).set(dadosMapeados);
+        
+        // Deleta o app temporário que gerou o Auth
+        await appSecundario?.delete();
       }
 
       if (mounted) {
@@ -324,20 +451,17 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
     await FirebaseFirestore.instance.collection('usuarios').doc(userId).delete();
   }
 
-  // ==== MAGIA DO PDF ACONTECENDO AQUI ====
+  // MAGIA DO PDF ACONTECENDO AQUI
   Future<void> _gerarPDF() async {
-    // Mostra aviso de carregamento
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando PDF... Aguarde!'), backgroundColor: Colors.blue));
 
     try {
-      // 1. Busca todos os usuários do banco de dados na hora
       final snapshot = await FirebaseFirestore.instance.collection('usuarios').orderBy('nome').get();
       final usuarios = snapshot.docs;
 
       List<Map<String, dynamic>> admins = [];
       Map<String, List<Map<String, dynamic>>> vistoriadoresPorEmpresa = {};
 
-      // 2. Separa os dados igual no Dashboard
       for (var user in usuarios) {
         final data = user.data();
         final perfil = data['perfil'] ?? '';
@@ -353,17 +477,14 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
         }
       }
 
-      // 3. Cria o documento PDF em branco
       final pdf = pw.Document();
 
-      // 4. Desenha a página e o conteúdo
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4,
           margin: const pw.EdgeInsets.all(32),
           build: (pw.Context context) {
             return [
-              // Cabeçalho
               pw.Header(
                 level: 0,
                 child: pw.Row(
@@ -376,7 +497,6 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
               ),
               pw.SizedBox(height: 24),
 
-              // Bloco de Administradores
               pw.Text('Administradores (${admins.length}):', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
               pw.Divider(),
               pw.SizedBox(height: 8),
@@ -388,7 +508,6 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
               
               pw.SizedBox(height: 32),
 
-              // Bloco de Vistoriadores divididos por Empresa
               pw.Text('Vistoriadores por Empresa:', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
               pw.Divider(),
               if (vistoriadoresPorEmpresa.isEmpty) pw.Text('Nenhum vistoriador cadastrado.'),
@@ -411,7 +530,6 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
         )
       );
 
-      // 5. Abre a tela de visualização/impressão do celular
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save(),
         name: 'Relatorio_Equipe_CTTU.pdf',
@@ -464,7 +582,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
           if (_tabController.index == 1) 
             FloatingActionButton(
               heroTag: 'btnPDF', 
-              onPressed: _gerarPDF, // Chama a função real agora
+              onPressed: _gerarPDF, 
               backgroundColor: Colors.redAccent,
               child: const Icon(Icons.picture_as_pdf, color: Colors.white),
             ),
@@ -490,11 +608,19 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
         final user = usuarios[index];
         final data = user.data() as Map<String, dynamic>;
 
+        // ==== MODIFICADO: Captura da URL da foto para exibir no Avatar ====
+        final fotoUrl = data['foto_url'] as String?;
+
         return Card(
           elevation: 2,
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
-            leading: const CircleAvatar(backgroundColor: Colors.deepPurple, child: Icon(Icons.person, color: Colors.white)),
+            leading: CircleAvatar(
+              backgroundColor: Colors.deepPurple,
+              backgroundImage: fotoUrl != null && fotoUrl.isNotEmpty ? NetworkImage(fotoUrl) : null,
+              child: fotoUrl == null || fotoUrl.isEmpty ? const Icon(Icons.person, color: Colors.white) : null,
+            ),
+            // =================================================================
             title: Text(data['nome'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text('Login: ${data['telefone'] ?? ''}\nPerfil: ${data['perfil'] ?? ''} | Empresa: ${data['empresa'] ?? ''}'),
             isThreeLine: true,
@@ -509,6 +635,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
                     telefoneAtual: data['telefone'],
                     perfilAtual: data['perfil'],
                     empresaAtual: data['empresa'],
+                    fotoAtual: data['foto_url'], // ==== MODIFICADO: Passa a URL atual para a edição
                   ),
                 ),
                 IconButton(
@@ -652,11 +779,19 @@ class _CadastroUsuarioState extends State<CadastroUsuario> with SingleTickerProv
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Text(empresa, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple)),
                         ),
-                        ...vistoriadores.map((vistor) => ListTile(
-                          leading: const Icon(Icons.person, color: Colors.orange),
-                          title: Text(vistor['nome'] ?? ''),
-                          subtitle: Text('Login: ${vistor['telefone']}'),
-                        )),
+                        ...vistoriadores.map((vistor) {
+                          // ==== MODIFICADO: Mostra a fotinha do Vistoriador no Dashboard também ====
+                          final fotoDash = vistor['foto_url'] as String?;
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.orange,
+                              backgroundImage: fotoDash != null && fotoDash.isNotEmpty ? NetworkImage(fotoDash) : null,
+                              child: fotoDash == null || fotoDash.isEmpty ? const Icon(Icons.person, color: Colors.white) : null,
+                            ),
+                            title: Text(vistor['nome'] ?? ''),
+                            subtitle: Text('Login: ${vistor['telefone']}'),
+                          );
+                        }),
                         const Divider(),
                       ],
                     );

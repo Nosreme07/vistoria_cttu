@@ -1,27 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:vistoria_cttu/pages/cadastros/cadastro_usuario.dart';
 import 'package:vistoria_cttu/pages/cadastros/cadastro_veiculo.dart';
-import 'package:vistoria_cttu/pages/cadastros/cadastro_rotas.dart';
 import 'package:vistoria_cttu/pages/cadastros/cadastro_falhas.dart';
-import 'package:vistoria_cttu/pages/cadastros/cadastro_semaforos.dart' as semaforo_page;
+// REMOVIDO: imports de Rotas e Semáforos
 
 class CadastroPage extends StatelessWidget {
   const CadastroPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // =========================================================================
+    // IDENTIFICAÇÃO DO DISPOSITIVO (CELULAR OU WEB)
+    // =========================================================================
+    final double larguraTela = MediaQuery.of(context).size.width;
+    final bool ehWeb = larguraTela > 600;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Menu de Cadastros', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.blue.shade100,
       ),
+      // =========================================================================
+      // GRIDVIEW ADAPTÁVEL SEM ROLAGEM
+      // =========================================================================
       body: GridView.count(
-        crossAxisCount: 2,
+        physics: const NeverScrollableScrollPhysics(), // Trava a rolagem da página
+        crossAxisCount: ehWeb ? 3 : 2, // 3 colunas na Web (monitor) ou 2 no Celular
         padding: const EdgeInsets.all(16.0),
         crossAxisSpacing: 16, 
         mainAxisSpacing: 16, 
-        childAspectRatio: 1.1, 
+        childAspectRatio: ehWeb ? 1.6 : 1.1, // Adapta o formato do botão para não esticar na Web
         children: [
           _buildDashboardButton(
             context,
@@ -39,30 +48,18 @@ class CadastroPage extends StatelessWidget {
           ),
           _buildDashboardButton(
             context,
-            title: 'Rotas',
-            icon: Icons.route,
-            color: Colors.brown,
-            page: const CadastroRotas(),
-          ),
-          _buildDashboardButton(
-            context,
-            title: 'Semáforos',
-            icon: Icons.traffic,
-            color: Colors.red,
-            page: const semaforo_page.CadastroSemaforos(),
-          ),
-          _buildDashboardButton(
-            context,
             title: 'Tipos de Falhas',
             icon: Icons.warning_amber_rounded,
             color: Colors.orange,
             page: const CadastroTiposFalha(),
           ),
+          // REMOVIDO: Botões de Rotas e Semáforos
         ],
       ),
     );
   }
 
+  // MANTIDO: O SEU DESIGN ORIGINAL DO BOTÃO INTACTO
   Widget _buildDashboardButton(BuildContext context, {required String title, required IconData icon, required Color color, required Widget? page}) {
     return InkWell( 
       onTap: () {
