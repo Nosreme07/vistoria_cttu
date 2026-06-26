@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-import 'dart:io'; // Adicionado para manipulação de arquivos locais
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
@@ -11,8 +9,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:pdf/pdf.dart'; 
 import 'package:pdf/widgets.dart' as pw; 
 import 'package:printing/printing.dart'; 
-import 'package:path_provider/path_provider.dart'; 
 import 'package:share_plus/share_plus.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // ADICIONADO: Para salvar os dados no Firebase
 
 class AcervoPage extends StatefulWidget {
   const AcervoPage({super.key});
@@ -192,12 +190,12 @@ class _AcervoPageState extends State<AcervoPage> {
     }
   }
 
-  // 2. BUSCA AS ATUALIZAÇÕES DIRETO DA PLANILHA
+  // 2. BUSCA AS ATUALIZAÇÕES DIRETO DA PLANILHA E ATUALIZA O FIREBASE JUNTOS
   Future<void> _sincronizarComGoogleDrive() async {
     if (_sincronizandoComPlanilha) return;
 
     setState(() => _sincronizandoComPlanilha = true);
-    _mostrarSnackBar('Buscando atualizações na planilha do Drive...', Colors.blueGrey);
+    _mostrarSnackBar('Sincronizando Planilha com o Firebase...', Colors.blueGrey);
 
     try {
       final url = Uri.parse(
@@ -210,13 +208,49 @@ class _AcervoPageState extends State<AcervoPage> {
         List<Map<String, dynamic>> novosDados = _converterCsvParaLista(csvDados);
 
         if (novosDados.isNotEmpty) {
+          
+          // ==== BLOCO NOVO: GRAVAÇÃO DOS DADOS NO FIREBASE FIRESTORE ====
+          int contadorLote = 0;
+          WriteBatch batch = FirebaseFirestore.instance.batch();
+          final colecaoSemaforos = FirebaseFirestore.instance.collection('semaforos');
+
+          for (var mapaSemaforo in novosDados) {
+            String idSemaforo = _obterValorCampo(mapaSemaforo, "SEMÁFORO").trim();
+            if (idSemaforo.isNotEmpty) {
+              
+              // Mapeia os dados em minúsculo exatamente como a tela de vistoria espera
+              Map<String, dynamic> dadosMapeadosParaFirebase = {
+                'id': idSemaforo,
+                'rota': _obterValorCampo(mapaSemaforo, "ROTA").trim(),
+                'endereco': _obterValorCampo(mapaSemaforo, "ENDEREÇO").trim(),
+                'georeferencia': _obterValorCampo(mapaSemaforo, "GEOREFERÊNCIA").trim(),
+              };
+
+              // Define o documento utilizando o próprio número do semáforo como ID único
+              batch.set(colecaoSemaforos.doc(idSemaforo), dadosMapeadosParaFirebase);
+              contadorLote++;
+
+              // O Firestore limita blocos (batch) em até 500 operações por commit.
+              if (contadorLote == 400) {
+                await batch.commit();
+                batch = FirebaseFirestore.instance.batch();
+                contadorLote = 0;
+              }
+            }
+          }
+          // Envia o restante dos semáforos se sobrar algum no lote final
+          if (contadorLote > 0) {
+            await batch.commit();
+          }
+          // ==============================================================
+
           setState(() {
             _todosSemaforos = novosDados;
             _sincronizandoComPlanilha = false;
           });
           _atualizarListaDeRotas();
           _aplicarFiltrosCombinados();
-          _mostrarSnackBar('Sincronizado! ${_todosSemaforos.length} semáforos atualizados.', Colors.green);
+          _mostrarSnackBar('Sucesso! Semáforos salvos no App e no Firebase.', Colors.green);
         } else {
           throw Exception('Planilha retornou vazia ou formato inválido.');
         }
@@ -225,7 +259,7 @@ class _AcervoPageState extends State<AcervoPage> {
       }
     } catch (e) {
       setState(() => _sincronizandoComPlanilha = false);
-      _mostrarSnackBar('Falha na sincronização. Verifique a internet!', Colors.red);
+      _mostrarSnackBar('Falha na sincronização: $e', Colors.red);
     }
   }
 
@@ -535,8 +569,8 @@ class _AcervoPageState extends State<AcervoPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                       itemCount: _ordemCamposExibicao.length,
                       itemBuilder: (context, index) {
-                        final String StringchaveOriginal = _ordemCamposExibicao[index];
-                        String valor = _obterValorCampo(semaforo, StringchaveOriginal).trim();
+                        final String chaveOriginal = _ordemCamposExibicao[index];
+                        String valor = _obterValorCampo(semaforo, chaveOriginal).trim();
 
                         if (valor.isEmpty) {
                           valor = "-";
@@ -561,7 +595,7 @@ class _AcervoPageState extends State<AcervoPage> {
                                     style: const TextStyle(color: Colors.black87, fontSize: 14, height: 1.4),
                                     children: [
                                       TextSpan(
-                                        text: '${StringchaveOriginal.toUpperCase()}\n',
+                                        text: '${chaveOriginal.toUpperCase()}\n',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.blueGrey,
@@ -613,7 +647,7 @@ class _AcervoPageState extends State<AcervoPage> {
     }).toList();
   }
 
-Future<void> _exportarRelatorioPDF(List<dynamic> dados) async {
+  Future<void> _exportarRelatorioPDF(List<dynamic> dados) async {
     if (dados.isEmpty) {
       _mostrarSnackBar('Nenhum semáforo encontrado para exportação.', Colors.orange);
       return;
@@ -692,7 +726,7 @@ Future<void> _exportarRelatorioPDF(List<dynamic> dados) async {
     }
   }
 
-Future<void> _exportarRelatorioExcel(List<dynamic> dados) async {
+  Future<void> _exportarRelatorioExcel(List<dynamic> dados) async {
     if (dados.isEmpty) {
       _mostrarSnackBar('Nenhum semáforo encontrado para exportação.', Colors.orange);
       return;
@@ -967,6 +1001,7 @@ Future<void> _exportarRelatorioExcel(List<dynamic> dados) async {
                               flex: 4,
                               child: TextField(
                                 controller: _pesquisaController,
+                                textInputAction: TextInputAction.search, // CORRIGIDO
                                 onChanged: (busca) {
                                   _textoPesquisa = busca.toLowerCase();
                                   _aplicarFiltrosCombinados();

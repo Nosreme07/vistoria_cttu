@@ -31,16 +31,30 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
   String _textoPesquisaAndamento = '';
   String _textoPesquisaConcluidos = '';
   
-  // Controle de Perfil
   String _nomeDoVistoriadorLogado = 'Carregando...';
   bool _isAdmin = false;
   bool _carregandoPerfil = true;
   
-  // Para o Admin navegar entre a lista e a rota
+  // Dados Mestre do Acervo (Puxados do Firebase agora!)
+  List<Map<String, dynamic>> _todosSemaforosAcervo = [];
+  List<String> _todasAsRotasAcervo = [];
+  bool _carregandoRotas = true;
+  bool _iniciandoTurno = false;
+  
+  String? _veiculoSelecionadoId;
+  String? _veiculoSelecionadoPlaca;
+  String? _rotaSelecionada;
+  final TextEditingController _kmInicialController = TextEditingController();
+  bool _confirmouTermoInicio = false;
+
   DocumentSnapshot? _turnoSelecionadoAdmin;
 
-  // O texto resumido do checklist
   final String textoConfirmacaoChecklist = 'Confirmo que verifiquei a integridade física, elétrica e de funcionamento de todos os equipamentos (focos, estruturas, controladores, kit de energia e acessórios), bem como a visibilidade, sinalização associada e ausência de interferências externas.';
+
+  // Filtros ABA Admin
+  DateTime? _dataInicioFiltro;
+  DateTime? _dataFimFiltro;
+  String _rotaFiltro = 'Todas';
 
   @override
   void initState() {
@@ -55,7 +69,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       setState(() => _textoPesquisaConcluidos = _pesquisaConcluidosController.text.toLowerCase());
     });
 
-    _buscarDadosIniciais();
+    _baixarDadosIniciais();
   }
 
   @override
@@ -63,36 +77,98 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     _tabController.dispose();
     _pesquisaAndamentoController.dispose();
     _pesquisaConcluidosController.dispose();
+    _kmInicialController.dispose();
     super.dispose();
   }
 
-  // BUSCA DADOS DO USUÁRIO E VERIFICA SE É ADMIN
-  Future<void> _buscarDadosIniciais() async {
+  // ==== MODIFICADO: PUXA DO FIRESTORE EM VEZ DA INTERNET ====
+  Future<void> _baixarDadosIniciais() async {
     if (user == null) return;
 
     try {
-      var doc = await FirebaseFirestore.instance.collection('usuarios').doc(user!.uid).get();
-      if (doc.exists && doc.data() != null) {
-        var data = doc.data()!;
-        String perfil = (data['perfil'] ?? '').toString().toLowerCase();
-        
-        if (mounted) {
-          setState(() {
-            _isAdmin = perfil.contains('admin') || perfil.contains('administrador');
-            _nomeDoVistoriadorLogado = data['nome'] ?? data['nome_completo'] ?? user!.email?.split('@').first.toUpperCase() ?? 'Vistoriador';
-            _carregandoPerfil = false;
-          });
-        }
-        return;
+      var docUsuario = await FirebaseFirestore.instance.collection('usuarios').doc(user!.uid).get();
+      if (docUsuario.exists && docUsuario.data() != null) {
+        var dataUsuario = docUsuario.data()!;
+        String perfil = (dataUsuario['perfil'] ?? '').toString().toLowerCase();
+        _isAdmin = perfil.contains('admin') || perfil.contains('administrador');
+        _nomeDoVistoriadorLogado = dataUsuario['nome'] ?? dataUsuario['nome_completo'] ?? user!.email?.split('@').first.toUpperCase() ?? 'Vistoriador';
       }
+
+      // Lê a coleção de semáforos que a sua Planilha alimentou no Firebase
+      var snapshotSemaforos = await FirebaseFirestore.instance.collection('semaforos').get();
+      
+      List<Map<String, dynamic>> semaforosTemp = [];
+      Set<String> rotasSet = {};
+
+      for (var doc in snapshotSemaforos.docs) {
+        var item = doc.data();
+        if (item['id'] != null && item['id'].toString().isNotEmpty) {
+          semaforosTemp.add(item);
+          
+          // CORREÇÃO: Extrai Apenas os NÚMEROS da Rota vinda do Banco/Planilha
+          String rotaLimpa = (item['rota'] ?? '').toString().replaceAll(RegExp(r'[^0-9]'), '');
+          
+          if (rotaLimpa.isNotEmpty) {
+            rotasSet.add(rotaLimpa);
+          }
+        }
+      }
+
+      List<String> listaRotas = rotasSet.toList();
+      listaRotas.sort((a, b) {
+        int numA = int.tryParse(a) ?? 0;
+        int numB = int.tryParse(b) ?? 0;
+        return numA.compareTo(numB);
+      });
+
+      if (!mounted) return;
+      setState(() {
+        _todosSemaforosAcervo = semaforosTemp;
+        _todasAsRotasAcervo = listaRotas;
+        _carregandoPerfil = false;
+        _carregandoRotas = false;
+      });
     } catch (e) {
-      debugPrint('Erro ao buscar perfil: $e');
+      if (!mounted) return;
+      setState(() {
+        _carregandoPerfil = false;
+        _carregandoRotas = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao baixar os semáforos do banco de dados.'), backgroundColor: Colors.red));
     }
-    
-    if(mounted) setState(() {
-      _nomeDoVistoriadorLogado = user!.displayName ?? user!.email?.split('@').first.toUpperCase() ?? 'Vistoriador';
-      _carregandoPerfil = false;
-    });
+  }
+
+  Future<void> _iniciarTurno() async {
+    if (_veiculoSelecionadoId == null || _rotaSelecionada == null || _kmInicialController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Preencha a Moto, o KM e a Rota para iniciar!'), backgroundColor: Colors.red));
+      return;
+    }
+    if (!_confirmouTermoInicio) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Você deve confirmar que é o vistoriador responsável!'), backgroundColor: Colors.orange));
+      return;
+    }
+
+    setState(() => _iniciandoTurno = true);
+
+    try {
+      await FirebaseFirestore.instance.collection('turnos').add({
+        'vistoriador_uid': user!.uid,
+        'vistoriador_nome': _nomeDoVistoriadorLogado,
+        'veiculo_id': _veiculoSelecionadoId,
+        'placa': _veiculoSelecionadoPlaca,
+        'km_inicial': _kmInicialController.text.trim(),
+        'km_final': null,
+        'rota_numero': _rotaSelecionada,
+        'status': 'ativo',
+        'data_inicio': FieldValue.serverTimestamp(),
+      });
+
+      await FirebaseFirestore.instance.collection('veiculos').doc(_veiculoSelecionadoId).update({'em_uso': true});
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao iniciar: $e'), backgroundColor: Colors.red));
+    } finally {
+      if (mounted) setState(() => _iniciandoTurno = false);
+    }
   }
 
   Future<Position> _determinarPosicao() async {
@@ -109,7 +185,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
-  // ==== NOVO: MENU DE OPÇÕES DE GPS (WAZE OU MAPS) ====
   void _mostrarOpcoesGPS(String georeferencia) {
     if (georeferencia.trim().isEmpty || !georeferencia.contains(' ')) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Semáforo sem coordenadas cadastradas!'), backgroundColor: Colors.orange));
@@ -173,7 +248,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     );
   }
 
-  // Abre o aplicativo escolhido via URL Universal
   Future<void> _abrirAppNavegacao(String georeferencia, String app) async {
     try {
       var partes = georeferencia.trim().split(RegExp(r'\s+'));
@@ -188,17 +262,13 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       }
 
       bool abriu = await launchUrl(url, mode: LaunchMode.externalApplication);
-      if (!abriu) {
-        throw 'Não foi possível abrir o aplicativo.';
-      }
+      if (!abriu) throw 'Não foi possível abrir o aplicativo.';
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao abrir o $app. Verifique se ele está instalado!'), backgroundColor: Colors.red));
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao abrir o $app. Verifique se ele está instalado!'), backgroundColor: Colors.red));
     }
   }
 
-  // ==== COMPARTILHA AS FOTOS FÍSICAS E O TEXTO COM O NOME ====
   Future<void> _enviarOcorrencia(Map<String, dynamic> semaforo, String falha, String detalhes, List<File> fotosLocais) async {
     String idSemaforo = semaforo['id']?.toString() ?? 'S/N';
     String endereco = semaforo['endereco'] ?? 'Endereço não cadastrado';
@@ -218,11 +288,11 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
         await Share.share(mensagem);
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao compartilhar a ocorrência.'), backgroundColor: Colors.red));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao compartilhar a ocorrência.'), backgroundColor: Colors.red));
     }
   }
 
-  // ==== CARIMBO DE FOTOS ====
   Future<File> _carimbarFoto(File arquivoOriginal, String semaforoInfo, String dataColetada, String gpsColetado) async {
     try {
       final bytes = await arquivoOriginal.readAsBytes();
@@ -237,42 +307,24 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       ];
 
       final fonteParaCarimbo = img.arial48;
-      
       int yInicial = imagemDecodificada.height - (linhasTexto.length * fonteParaCarimbo.lineHeight) - 30;
 
       for (int i = 0; i < linhasTexto.length; i++) {
         String texto = linhasTexto[i];
         int posY = yInicial + (i * fonteParaCarimbo.lineHeight);
 
-        img.drawString(
-          imagemDecodificada, 
-          texto, 
-          font: fonteParaCarimbo, 
-          x: 23, 
-          y: posY + 3, 
-          color: img.ColorRgb8(0, 0, 0)
-        );
-        
-        img.drawString(
-          imagemDecodificada, 
-          texto, 
-          font: fonteParaCarimbo, 
-          x: 20, 
-          y: posY, 
-          color: img.ColorRgb8(255, 255, 0)
-        );
+        img.drawString(imagemDecodificada, texto, font: fonteParaCarimbo, x: 23, y: posY + 3, color: img.ColorRgb8(0, 0, 0));
+        img.drawString(imagemDecodificada, texto, font: fonteParaCarimbo, x: 20, y: posY, color: img.ColorRgb8(255, 255, 0));
       }
 
       final novosBytes = img.encodeJpg(imagemDecodificada, quality: 85); 
       await arquivoOriginal.writeAsBytes(novosBytes);
       return arquivoOriginal;
     } catch (e) {
-      debugPrint('Erro ao carimbar foto: $e');
       return arquivoOriginal; 
     }
   }
 
-  // ==== MOSTRAR IMAGEM EM TELA CHEIA ====
   void _mostrarImagemExpandida(BuildContext context, ImageProvider imageProvider) {
     showDialog(
       context: context,
@@ -284,18 +336,12 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
             alignment: Alignment.center,
             children: [
               InteractiveViewer(
-                panEnabled: true,
-                minScale: 0.5,
-                maxScale: 4.0,
+                panEnabled: true, minScale: 0.5, maxScale: 4.0,
                 child: Image(image: imageProvider, fit: BoxFit.contain),
               ),
               Positioned(
-                top: 10,
-                right: 10,
-                child: IconButton(
-                  icon: const Icon(Icons.cancel, color: Colors.white, size: 36),
-                  onPressed: () => Navigator.pop(context),
-                ),
+                top: 10, right: 10,
+                child: IconButton(icon: const Icon(Icons.cancel, color: Colors.white, size: 36), onPressed: () => Navigator.pop(context)),
               ),
             ],
           ),
@@ -304,7 +350,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     );
   }
 
-  // ==== WIDGET DE RODAPÉ DO PDF ====
   pw.Widget _buildRodapePDF(pw.Context context, String dataHora) {
     return pw.Container(
       child: pw.Column(
@@ -317,9 +362,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.SizedBox(width: 50),
-              pw.Expanded(
-                child: pw.Text('Relatório gerado pelo aplicativo Vistoria CTTU ($dataHora)', textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
-              ),
+              pw.Expanded(child: pw.Text('Relatório gerado pelo aplicativo Vistoria CTTU ($dataHora)', textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700))),
               pw.SizedBox(width: 50, child: pw.Text('Pág. ${context.pageNumber} / ${context.pagesCount}', textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700))),
             ]
           )
@@ -328,7 +371,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     );
   }
 
-  // ==== GERADOR DE PDF DA FICHA INDIVIDUAL ====
   Future<void> _exportarPDFIndividual(Map<String, dynamic> vistoria, String nomeVistoriador) async {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Baixando fotos e gerando PDF...'), backgroundColor: Colors.teal));
     
@@ -342,12 +384,11 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
           final imageBytes = await networkImage(url);
           imagensPdf.add(imageBytes);
         } catch (e) {
-          debugPrint('Erro ao baixar imagem pro pdf: $e');
+          debugPrint('Erro ao baixar imagem: $e');
         }
       }
 
       String dataHoraAtual = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
-
       final pdf = pw.Document();
 
       pdf.addPage(
@@ -409,11 +450,11 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: 'Ficha_Semaforo_$idStr.pdf');
       
     } catch (e) {
-      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF da ficha!'), backgroundColor: Colors.red));
+      if(!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF da ficha!'), backgroundColor: Colors.red));
     }
   }
 
-  // ==== TABELA GLOBAL DE PDF ====
   Future<void> _gerarEMostrarPDF(List<QueryDocumentSnapshot> vistorias, String rotaNumero, String nomeVistoriador) async {
     if (vistorias.isEmpty) return;
     try {
@@ -431,7 +472,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
               pw.SizedBox(height: 16),
               pw.TableHelper.fromTextArray(
                 context: context,
-                headers: ['Semáforo', 'Vistoriador', 'Endereço', 'Início', 'Fim', 'Status', 'Falha', 'Detalhes', 'Fotos (Links)'],
+                headers: ['Semáforo', 'Vistoriador', 'Endereço', 'Início', 'Fim', 'Status', 'Falha', 'Detalhes', 'Fotos'],
                 data: vistorias.map((doc) {
                   var v = doc.data() as Map<String, dynamic>;
                   String status = v['teve_anormalidade'] == true ? 'COM FALHA' : 'OK';
@@ -453,7 +494,8 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       );
       await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: 'Vistorias_Concluidas_Rota$rotaNumero.pdf');
     } catch (e) {
-      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF!'), backgroundColor: Colors.red));
+      if(!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF!'), backgroundColor: Colors.red));
     }
   }
 
@@ -524,12 +566,10 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // ================= TELA ANTES DE INICIAR A VISTORIA =================
                           if (!vistoriaIniciada) ...[
                             const Text('Opções para este semáforo:', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 16)),
                             const SizedBox(height: 24),
                             
-                            // BOTÃO 1: COMO CHEGAR COM ESCOLHA
                             SizedBox(
                               width: double.infinity, height: 55,
                               child: ElevatedButton.icon(
@@ -552,7 +592,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                             ),
                             const SizedBox(height: 16),
 
-                            // BOTÃO 2: INICIAR VISTORIA
                             SizedBox(
                               width: double.infinity, height: 65,
                               child: ElevatedButton.icon(
@@ -572,6 +611,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                     });
                                   } catch (e) {
                                     setModalState(() => salvando = false);
+                                    if(!mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
                                   }
                                 },
@@ -579,7 +619,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                             )
                           ],
 
-                          // ================= TELA APÓS INICIAR A VISTORIA =================
                           if (vistoriaIniciada) ...[
                             Container(
                               padding: const EdgeInsets.all(12),
@@ -611,23 +650,30 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                             const Text('ANORMALIDADES E REGISTRO', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red)),
                             const Divider(thickness: 2),
                             const Text('Foi encontrada alguma anormalidade neste semáforo?', style: TextStyle(fontSize: 16)),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: RadioListTile<String>(
-                                    title: const Text('Não', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    value: 'Não', groupValue: temAnormalidade, activeColor: Colors.green,
-                                    onChanged: (val) => setModalState(() { temAnormalidade = val!; falhaSelecionada = null; fotos.clear(); detalhesController.clear(); }),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: RadioListTile<String>(
-                                    title: const Text('Sim', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    value: 'Sim', groupValue: temAnormalidade, activeColor: Colors.red,
-                                    onChanged: (val) { setModalState(() { temAnormalidade = val!; }); carregarFalhas(); },
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(height: 8),
+                            
+                            InputDecorator(
+                              decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4)),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  isExpanded: true,
+                                  value: temAnormalidade,
+                                  items: const [
+                                    DropdownMenuItem(value: 'Não', child: Text('Não, está tudo OK', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold))),
+                                    DropdownMenuItem(value: 'Sim', child: Text('Sim, há problemas', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))),
+                                  ],
+                                  onChanged: (val) {
+                                    setModalState(() {
+                                      temAnormalidade = val!;
+                                      if (val == 'Não') {
+                                        falhaSelecionada = null; fotos.clear(); detalhesController.clear();
+                                      } else {
+                                        carregarFalhas();
+                                      }
+                                    });
+                                  }
+                                )
+                              )
                             ),
 
                             if (temAnormalidade == 'Sim') ...[
@@ -777,17 +823,16 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                       'criado_em': FieldValue.serverTimestamp(),
                                     });
 
-                                    // ==== COMPARTILHA PARA O WHATSAPP ====
                                     if (temAnormalidade == 'Sim') {
                                       await _enviarOcorrencia(semaforo, falhaSelecionada!, detalhesFinais, fotos);
                                     }
 
-                                    if (mounted) {
-                                      Navigator.pop(context);
-                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vistoria salva com sucesso!'), backgroundColor: Colors.green));
-                                    }
+                                    if (!mounted) return;
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vistoria salva com sucesso!'), backgroundColor: Colors.green));
                                   } catch (e) {
                                     setModalState(() => salvando = false);
+                                    if (!mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao salvar vistoria! Verifique a conexão.'), backgroundColor: Colors.red));
                                   }
                                 },
@@ -820,7 +865,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       for (var doc in vistorias) {
         var v = doc.data() as Map<String, dynamic>;
         String status = v['teve_anormalidade'] == true ? 'COM FALHA' : 'OK';
-        
         List<dynamic> fotos = v['fotos'] ?? [];
         String linksFotos = fotos.join(', ');
 
@@ -833,7 +877,8 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       await file.writeAsString(csv);
       await Share.shareXFiles([XFile(path)], text: 'Planilha de Vistorias Concluídas - Rota $rotaNumero.');
     } catch (e) {
-      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar Excel!'), backgroundColor: Colors.red));
+      if(!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar Excel!'), backgroundColor: Colors.red));
     }
   }
 
@@ -982,7 +1027,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                         children: [
                           const Icon(Icons.warning, color: Colors.red),
                           const SizedBox(width: 8),
-                          Expanded(child: Text('Atenção! Faltam $falta semáforos para concluir a meta de hoje.', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold))),
+                          Expanded(child: Text('Atenção! Faltam $falta semáforos para concluir a meta da rota.', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold))),
                         ],
                       ),
                     )
@@ -994,7 +1039,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                         children: [
                           Icon(Icons.check_circle, color: Colors.green),
                           SizedBox(width: 8),
-                          Expanded(child: Text('Parabéns! Você concluiu 100% da meta de hoje.', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold))),
+                          Expanded(child: Text('Parabéns! Você concluiu 100% da sua rota hoje.', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold))),
                         ],
                       ),
                     ),
@@ -1047,17 +1092,16 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       try {
         await FirebaseFirestore.instance.collection('turnos').doc(turnoId).update({'status': 'finalizado', 'data_fim': FieldValue.serverTimestamp(), 'km_final': kmFinalController.text.trim()});
         await FirebaseFirestore.instance.collection('veiculos').doc(veiculoId).update({'em_uso': false});
-        await FirebaseFirestore.instance.collection('rotas').doc(rotaId).update({'em_uso': false});
         
-        if (mounted) { 
-          if (_isAdmin) {
-            setState(() => _turnoSelecionadoAdmin = null);
-          }
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Turno encerrado! Gerando Relatório PDF...'), backgroundColor: Colors.green)); 
-          await _gerarEMostrarPDF(vistoriasConcluidas, rotaNumero, nomeVistoriador);
+        if (!mounted) return;
+        if (_isAdmin) {
+          setState(() => _turnoSelecionadoAdmin = null);
         }
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Turno encerrado! Gerando Relatório PDF...'), backgroundColor: Colors.green)); 
+        await _gerarEMostrarPDF(vistoriasConcluidas, rotaNumero, nomeVistoriador);
       } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao encerrar: $e'), backgroundColor: Colors.red));
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao encerrar: $e'), backgroundColor: Colors.red));
       }
     }
   }
@@ -1079,83 +1123,91 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
               children: [
                 Icon(Icons.dashboard_customize, size: 48, color: Colors.orange.shade700),
                 const SizedBox(height: 8),
-                const Text('Selecione uma rota para acompanhar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text('Panorama de todas as rotas do Acervo', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('turnos').where('status', isEqualTo: 'ativo').snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-                if (snapshot.hasError) return Center(child: Text('Erro: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
-                
-                final turnos = snapshot.data!.docs.toList();
-                
-                turnos.sort((a, b) {
-                  var dataA = a.data() as Map<String, dynamic>;
-                  var dataB = b.data() as Map<String, dynamic>;
-                  Timestamp? tempoA = dataA['data_inicio'] as Timestamp?;
-                  Timestamp? tempoB = dataB['data_inicio'] as Timestamp?;
-                  if (tempoA == null && tempoB == null) return 0;
-                  if (tempoA == null) return 1;
-                  if (tempoB == null) return -1;
-                  return tempoB.compareTo(tempoA);
-                });
+            child: _carregandoRotas 
+              ? const Center(child: CircularProgressIndicator())
+              : StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('turnos').where('status', isEqualTo: 'ativo').snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+                  
+                  Map<String, DocumentSnapshot> rotasAtivasMap = {};
+                  if (snapshot.hasData) {
+                    for (var t in snapshot.data!.docs) {
+                      rotasAtivasMap[t['rota_numero'].toString()] = t;
+                    }
+                  }
 
-                if (turnos.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.motorcycle_outlined, size: 60, color: Colors.grey.shade400),
-                        const SizedBox(height: 16),
-                        const Text('Nenhuma rota em andamento no momento.', style: TextStyle(color: Colors.grey)),
-                      ],
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: turnos.length,
-                  itemBuilder: (context, index) {
-                    var doc = turnos[index];
-                    var t = doc.data() as Map<String, dynamic>;
-                    String horaInicio = t['data_inicio'] != null ? DateFormat('dd/MM/yy - HH:mm').format((t['data_inicio'] as Timestamp).toDate()) : 'Aguardando...';
-
-                    return Card(
-                      elevation: 2,
-                      margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(16),
-                        leading: CircleAvatar(
-                          radius: 28,
-                          backgroundColor: Colors.orange.shade100, 
-                          child: Text(t['rota_numero'] ?? 'S/R', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900, fontSize: 18))
-                        ),
-                        title: Text(t['vistoriador_nome'] ?? 'Vistoriador', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 8),
-                            Text('Moto: ${t['placa'] ?? 'N/A'}'),
-                            Text('Início: $horaInicio', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-                          ],
-                        ),
-                        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.orange),
-                        onTap: () {
-                          setState(() {
-                            _turnoSelecionadoAdmin = doc;
-                          });
-                        },
+                  if (_todasAsRotasAcervo.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.map_outlined, size: 60, color: Colors.grey.shade400),
+                          const SizedBox(height: 16),
+                          const Text('O Acervo não tem rotas cadastradas.', style: TextStyle(color: Colors.grey)),
+                        ],
                       ),
                     );
-                  },
-                );
-              },
-            ),
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: _todasAsRotasAcervo.length,
+                    itemBuilder: (context, index) {
+                      String rota = _todasAsRotasAcervo[index];
+                      bool estaEmUso = rotasAtivasMap.containsKey(rota);
+                      var t = estaEmUso ? rotasAtivasMap[rota]!.data() as Map<String, dynamic> : null;
+                      
+                      String horaInicio = (t != null && t['data_inicio'] != null) 
+                          ? DateFormat('dd/MM/yy - HH:mm').format((t['data_inicio'] as Timestamp).toDate()) 
+                          : '';
+
+                      return Card(
+                        elevation: 2,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        color: estaEmUso ? Colors.white : Colors.green.shade50,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12), 
+                          side: BorderSide(color: estaEmUso ? Colors.orange : Colors.green.shade200)
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(16),
+                          leading: CircleAvatar(
+                            radius: 28,
+                            backgroundColor: estaEmUso ? Colors.orange.shade100 : Colors.green.shade100, 
+                            child: Text(rota, style: TextStyle(fontWeight: FontWeight.bold, color: estaEmUso ? Colors.orange.shade900 : Colors.green.shade800, fontSize: 18))
+                          ),
+                          title: Text(estaEmUso ? 'Em Vistoria: ${t!['vistoriador_nome']}' : 'Rota Livre', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: estaEmUso ? Colors.black87 : Colors.green.shade700)),
+                          subtitle: estaEmUso 
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 8),
+                                  Text('Moto: ${t!['placa'] ?? 'N/A'}'),
+                                  Text('Início: $horaInicio', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                                ],
+                              )
+                            : const Text('Disponível para os vistoriadores.', style: TextStyle(fontSize: 12)),
+                          trailing: estaEmUso 
+                            ? ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade100, foregroundColor: Colors.orange.shade900, elevation: 0),
+                                onPressed: () {
+                                  setState(() => _turnoSelecionadoAdmin = rotasAtivasMap[rota]);
+                                },
+                                child: const Text('Acompanhar'),
+                              )
+                            : const Icon(Icons.check_circle_outline, color: Colors.green),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
           )
         ],
       )
@@ -1165,7 +1217,9 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
   Widget _buildVisaoDetalheTurno(DocumentSnapshot turnoDoc) {
     var turnoData = turnoDoc.data() as Map<String, dynamic>;
     String rotaNumero = turnoData['rota_numero'] ?? 'S/N';
-    String rotaTurnoLimpa = rotaNumero.replaceFirst(RegExp(r'^0+'), ''); 
+    
+    // CORREÇÃO MESTRE: Extraindo apenas os NÚMEROS do turno atual para matching perfeito
+    String rotaTurnoNumerica = rotaNumero.replaceAll(RegExp(r'[^0-9]'), ''); 
     String nomeDoVistoriadorDesteTurno = turnoData['vistoriador_nome'] ?? 'Desconhecido';
 
     return Scaffold(
@@ -1188,196 +1242,180 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('semaforos').snapshots(),
-        builder: (context, snapshotSemaforo) {
-          if (!snapshotSemaforo.hasData) return const Center(child: CircularProgressIndicator());
-          
-          return StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('vistorias').where('turno_id', isEqualTo: turnoDoc.id).snapshots(),
-            builder: (context, snapshotVistoria) {
-              if (!snapshotVistoria.hasData) return const Center(child: CircularProgressIndicator());
+        stream: FirebaseFirestore.instance.collection('vistorias').where('turno_id', isEqualTo: turnoDoc.id).snapshots(),
+        builder: (context, snapshotVistoria) {
+          if (!snapshotVistoria.hasData) return const Center(child: CircularProgressIndicator());
 
-              List<QueryDocumentSnapshot> vistoriasConcluidas = snapshotVistoria.data!.docs;
-              Set<String> vistoriadosIds = vistoriasConcluidas.map((doc) => doc['semaforo_id'].toString()).toSet();
+          List<QueryDocumentSnapshot> vistoriasConcluidas = snapshotVistoria.data!.docs;
+          Set<String> vistoriadosIds = vistoriasConcluidas.map((doc) => doc['semaforo_id'].toString()).toSet();
 
-              List<DocumentSnapshot> todosDaRota = snapshotSemaforo.data!.docs.where((doc) {
-                return (doc.data() as Map<String, dynamic>)['rota'].toString().replaceFirst(RegExp(r'^0+'), '') == rotaTurnoLimpa;
-              }).toList();
+          // CORREÇÃO MESTRE: Usando .replaceAll para garantir o fit perfeito (ex: Rota 10 == 10)
+          List<Map<String, dynamic>> semaforosDaRota = _todosSemaforosAcervo.where((item) {
+            String rotaDoItemNumerica = (item['rota'] ?? '').toString().replaceAll(RegExp(r'[^0-9]'), '');
+            return rotaDoItemNumerica == rotaTurnoNumerica && rotaTurnoNumerica.isNotEmpty;
+          }).toList();
 
-              DateTime dataBase = DateTime(2024, 1, 1);
-              int diasPassados = DateTime.now().difference(dataBase).inDays;
-              String grupoDeHoje = (diasPassados % 2 == 0) ? 'A' : 'B';
+          int meta = semaforosDaRota.length;
+          int concluidos = semaforosDaRota.where((item) => vistoriadosIds.contains(item['id'].toString())).length;
+          int falta = meta - concluidos;
+          double percentual = meta == 0 ? 0.0 : (concluidos / meta);
 
-              List<DocumentSnapshot> semaforosDoGrupo = todosDaRota.where((doc) {
-                String grupoDb = ((doc.data() as Map)['grupo'] ?? '').toString().toUpperCase();
-                return grupoDb == grupoDeHoje;
-              }).toList();
+          List<Map<String, dynamic>> semaforosPendentes = semaforosDaRota.where((item) {
+            String id = item['id'].toString();
+            return !vistoriadosIds.contains(id); 
+          }).toList();
 
-              int meta = semaforosDoGrupo.length;
-              int concluidos = semaforosDoGrupo.where((doc) => vistoriadosIds.contains((doc.data() as Map)['id'].toString())).length;
-              int falta = meta - concluidos;
-              double percentual = meta == 0 ? 0.0 : (concluidos / meta);
+          var semaforosFiltradosPesquisa = semaforosPendentes.where((data) {
+            if (_textoPesquisaAndamento.isEmpty) return true;
+            String id = (data['id'] ?? '').toString().toLowerCase();
+            String end = (data['endereco'] ?? '').toString().toLowerCase();
+            return id.contains(_textoPesquisaAndamento) || end.contains(_textoPesquisaAndamento);
+          }).toList();
 
-              List<DocumentSnapshot> semaforosPendentes = semaforosDoGrupo.where((doc) {
-                var semaforo = doc.data() as Map<String, dynamic>;
-                String id = semaforo['id'].toString();
-                return !vistoriadosIds.contains(id); 
-              }).toList();
+          semaforosFiltradosPesquisa.sort((a, b) => a['id'].toString().compareTo(b['id'].toString()));
 
-              var semaforosFiltradosPesquisa = semaforosPendentes.where((doc) {
-                if (_textoPesquisaAndamento.isEmpty) return true;
-                var data = doc.data() as Map<String, dynamic>;
-                String id = (data['id'] ?? '').toString().toLowerCase();
-                String end = (data['endereco'] ?? '').toString().toLowerCase();
-                return id.contains(_textoPesquisaAndamento) || end.contains(_textoPesquisaAndamento);
-              }).toList();
-
-              semaforosFiltradosPesquisa.sort((a, b) => (a.data() as Map)['id'].toString().compareTo((b.data() as Map)['id'].toString()));
-
-              return TabBarView(
-                controller: _tabController,
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              // ==== ABA 1: EM ANDAMENTO ====
+              Column(
                 children: [
-                  // ==== ABA 1: EM ANDAMENTO ====
-                  Column(
-                    children: [
-                      Container(
-                        color: Colors.orange.shade50, padding: const EdgeInsets.all(16.0),
-                        child: Column(
+                  Container(
+                    color: Colors.orange.shade50, padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Rota $rotaNumero', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
-                                    Text('Seu Grupo de Hoje: $grupoDeHoje', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade800)),
-                                  ],
-                                ),
-                                ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade600, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))), 
-                                  icon: const Icon(Icons.stop_circle, size: 18), 
-                                  label: const Text('Encerrar', style: TextStyle(fontWeight: FontWeight.bold)), 
-                                  onPressed: () => _encerrarTurno(turnoDoc.id, turnoData['veiculo_id'] ?? '', turnoData['rota_id'] ?? '', falta, vistoriasConcluidas, rotaNumero, nomeDoVistoriadorDesteTurno)
-                                ),
+                                Text('Rota $rotaNumero', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+                                const Text('Progresso da Rota', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            Row(children: [
-                              Icon(_isAdmin ? Icons.person : Icons.motorcycle, size: 18, color: Colors.grey), 
-                              const SizedBox(width: 8), 
-                              Text(_isAdmin ? 'Vistoriador: $nomeDoVistoriadorDesteTurno' : 'Moto: ${turnoData['placa'] ?? ''}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87))
-                            ]),
-                            const SizedBox(height: 12),
-
-                            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Progresso: $concluidos de $meta', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo.shade700)), Text('Faltam: $falta', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red.shade700))]),
-                            const SizedBox(height: 6),
-                            ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: percentual, minHeight: 10, backgroundColor: Colors.grey.shade300, color: Colors.green)),
-                            const SizedBox(height: 4),
-                            Align(alignment: Alignment.centerRight, child: Text('${(percentual * 100).toStringAsFixed(1)}% Concluído', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green))),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), color: Colors.white,
-                        child: TextField(controller: _pesquisaAndamentoController, decoration: InputDecoration(hintText: 'Pesquisar nº ou endereço...', prefixIcon: const Icon(Icons.search), suffixIcon: _textoPesquisaAndamento.isNotEmpty ? IconButton(icon: const Icon(Icons.clear), onPressed: () => _pesquisaAndamentoController.clear()) : null, filled: true, fillColor: Colors.grey.shade100, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(vertical: 0))),
-                      ),
-                      Expanded(
-                        child: semaforosFiltradosPesquisa.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(falta == 0 && meta > 0 ? Icons.emoji_events : Icons.search_off, size: 80, color: Colors.grey.shade400),
-                                  const SizedBox(height: 16),
-                                  Text(falta == 0 && meta > 0 ? '🎉 Rota Finalizada!' : 'Nenhum semáforo pendente do Grupo $grupoDeHoje.', style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 16)),
-                                ],
-                              )
-                            )
-                          : GridView.builder(
-                              padding: const EdgeInsets.all(16),
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 1),
-                              itemCount: semaforosFiltradosPesquisa.length,
-                              itemBuilder: (context, index) {
-                                var semaforo = semaforosFiltradosPesquisa[index].data() as Map<String, dynamic>;
-                                String idSemaforo = semaforo['id']?.toString() ?? 'S/N';
-                                String enderecoSemaforo = semaforo['endereco'] ?? 'Sem endereço cadastrado';
-                                
-                                return Tooltip(
-                                  message: enderecoSemaforo, triggerMode: TooltipTriggerMode.longPress,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(100),
-                                    onTap: () => _abrirVistoriaSemaforo(semaforo, turnoDoc.id),
-                                    child: Container(
-                                      decoration: BoxDecoration(color: Colors.orange.shade50, shape: BoxShape.circle, border: Border.all(color: Colors.orange, width: 2), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(2, 2))]),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(idSemaforo, style: TextStyle(color: Colors.orange.shade900, fontWeight: FontWeight.bold, fontSize: 18)),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
+                            ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade600, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))), 
+                              icon: const Icon(Icons.stop_circle, size: 18), 
+                              label: const Text('Encerrar', style: TextStyle(fontWeight: FontWeight.bold)), 
+                              onPressed: () => _encerrarTurno(turnoDoc.id, turnoData['veiculo_id'] ?? '', turnoData['rota_id'] ?? '', falta, vistoriasConcluidas, rotaNumero, nomeDoVistoriadorDesteTurno)
                             ),
-                      ),
-                    ],
-                  ),
-                  
-                  // ==== ABA 2: CONCLUÍDOS ====
-                  Column(
-                    children: [
-                      Container(
-                        color: Colors.white, padding: const EdgeInsets.all(12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white), icon: const Icon(Icons.picture_as_pdf), label: const Text('Baixar PDF de Hoje'), onPressed: () => _gerarEMostrarPDF(vistoriasConcluidas, rotaNumero, nomeDoVistoriadorDesteTurno)),
-                            ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white), icon: const Icon(Icons.grid_on), label: const Text('Exportar Excel'), onPressed: () => _exportarExcelConcluidos(vistoriasConcluidas, rotaNumero, nomeDoVistoriadorDesteTurno)),
                           ],
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), color: Colors.white,
-                        child: TextField(controller: _pesquisaConcluidosController, decoration: InputDecoration(hintText: 'Pesquisar na lista...', prefixIcon: const Icon(Icons.search), suffixIcon: _textoPesquisaConcluidos.isNotEmpty ? IconButton(icon: const Icon(Icons.clear), onPressed: () => _pesquisaConcluidosController.clear()) : null, filled: true, fillColor: Colors.grey.shade100, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(vertical: 0))),
-                      ),
-                      Expanded(
-                        child: vistoriasConcluidas.isEmpty
-                          ? const Center(child: Text('Nenhuma vistoria finalizada ainda.', style: TextStyle(color: Colors.grey)))
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: vistoriasConcluidas.length,
-                              itemBuilder: (context, index) {
-                                var vistoria = vistoriasConcluidas[index].data() as Map<String, dynamic>;
-                                String idSemaforo = vistoria['semaforo_id']?.toString() ?? '';
-                                String endSemaforo = vistoria['semaforo_endereco']?.toString() ?? '';
-                                
-                                if (_textoPesquisaConcluidos.isNotEmpty && !idSemaforo.toLowerCase().contains(_textoPesquisaConcluidos) && !endSemaforo.toLowerCase().contains(_textoPesquisaConcluidos)) return const SizedBox.shrink();
+                        const SizedBox(height: 8),
+                        Row(children: [
+                          Icon(_isAdmin ? Icons.person : Icons.motorcycle, size: 18, color: Colors.grey), 
+                          const SizedBox(width: 8), 
+                          Text(_isAdmin ? 'Vistoriador: $nomeDoVistoriadorDesteTurno' : 'Moto: ${turnoData['placa'] ?? ''}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87))
+                        ]),
+                        const SizedBox(height: 12),
 
-                                bool temFalha = vistoria['teve_anormalidade'] == true;
-                                Color corFundo = temFalha ? Colors.red.shade50 : Colors.grey.shade200;
-                                Color corIcone = temFalha ? Colors.red.shade700 : Colors.grey.shade600;
-
-                                return Card(
-                                  color: corFundo,
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  child: ListTile(
-                                    leading: CircleAvatar(backgroundColor: corIcone, child: Text(idSemaforo, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
-                                    title: Text('Semáforo $idSemaforo', style: TextStyle(fontWeight: FontWeight.bold, color: corIcone)),
-                                    subtitle: Text(endSemaforo, maxLines: 1, overflow: TextOverflow.ellipsis),
-                                    trailing: Icon(temFalha ? Icons.warning_amber_rounded : Icons.check_circle, color: corIcone),
-                                    onTap: () => _mostrarDetalhesVistoria(vistoria, rotaNumero, nomeDoVistoriadorDesteTurno), 
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Progresso: $concluidos de $meta', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo.shade700)), Text('Faltam: $falta', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red.shade700))]),
+                        const SizedBox(height: 6),
+                        ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: percentual, minHeight: 10, backgroundColor: Colors.grey.shade300, color: Colors.green)),
+                        const SizedBox(height: 4),
+                        Align(alignment: Alignment.centerRight, child: Text('${(percentual * 100).toStringAsFixed(1)}% Concluído', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green))),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), color: Colors.white,
+                    child: TextField(controller: _pesquisaAndamentoController, decoration: InputDecoration(hintText: 'Pesquisar nº ou endereço...', prefixIcon: const Icon(Icons.search), suffixIcon: _textoPesquisaAndamento.isNotEmpty ? IconButton(icon: const Icon(Icons.clear), onPressed: () => _pesquisaAndamentoController.clear()) : null, filled: true, fillColor: Colors.grey.shade100, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(vertical: 0))),
+                  ),
+                  Expanded(
+                    child: semaforosFiltradosPesquisa.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(falta == 0 && meta > 0 ? Icons.emoji_events : Icons.search_off, size: 80, color: Colors.grey.shade400),
+                              const SizedBox(height: 16),
+                              Text(falta == 0 && meta > 0 ? '🎉 Rota Finalizada!' : 'Nenhum semáforo encontrado nesta rota.', style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 16)),
+                            ],
+                          )
+                        )
+                      : GridView.builder(
+                          padding: const EdgeInsets.all(16),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 1),
+                          itemCount: semaforosFiltradosPesquisa.length,
+                          itemBuilder: (context, index) {
+                            var semaforo = semaforosFiltradosPesquisa[index];
+                            String idSemaforo = semaforo['id']?.toString() ?? 'S/N';
+                            String enderecoSemaforo = semaforo['endereco'] ?? 'Sem endereço cadastrado';
+                            
+                            return Tooltip(
+                              message: enderecoSemaforo, triggerMode: TooltipTriggerMode.longPress,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(100),
+                                onTap: () => _abrirVistoriaSemaforo(semaforo, turnoDoc.id),
+                                child: Container(
+                                  decoration: BoxDecoration(color: Colors.orange.shade50, shape: BoxShape.circle, border: Border.all(color: Colors.orange, width: 2), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(2, 2))]),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(idSemaforo, style: TextStyle(color: Colors.orange.shade900, fontWeight: FontWeight.bold, fontSize: 18)),
+                                    ],
                                   ),
-                                );
-                              },
-                            )
-                      )
-                    ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                  ),
+                ],
+              ),
+              
+              // ==== ABA 2: CONCLUÍDOS ====
+              Column(
+                children: [
+                  Container(
+                    color: Colors.white, padding: const EdgeInsets.all(12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white), icon: const Icon(Icons.picture_as_pdf), label: const Text('Baixar PDF de Hoje'), onPressed: () => _gerarEMostrarPDF(vistoriasConcluidas, rotaNumero, nomeDoVistoriadorDesteTurno)),
+                        ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white), icon: const Icon(Icons.grid_on), label: const Text('Exportar Excel'), onPressed: () => _exportarExcelConcluidos(vistoriasConcluidas, rotaNumero, nomeDoVistoriadorDesteTurno)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), color: Colors.white,
+                    child: TextField(controller: _pesquisaConcluidosController, decoration: InputDecoration(hintText: 'Pesquisar na lista...', prefixIcon: const Icon(Icons.search), suffixIcon: _textoPesquisaConcluidos.isNotEmpty ? IconButton(icon: const Icon(Icons.clear), onPressed: () => _pesquisaConcluidosController.clear()) : null, filled: true, fillColor: Colors.grey.shade100, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(vertical: 0))),
+                  ),
+                  Expanded(
+                    child: vistoriasConcluidas.isEmpty
+                      ? const Center(child: Text('Nenhuma vistoria finalizada ainda.', style: TextStyle(color: Colors.grey)))
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: vistoriasConcluidas.length,
+                          itemBuilder: (context, index) {
+                            var vistoria = vistoriasConcluidas[index].data() as Map<String, dynamic>;
+                            String idSemaforo = vistoria['semaforo_id']?.toString() ?? '';
+                            String endSemaforo = vistoria['semaforo_endereco']?.toString() ?? '';
+                            
+                            if (_textoPesquisaConcluidos.isNotEmpty && !idSemaforo.toLowerCase().contains(_textoPesquisaConcluidos) && !endSemaforo.toLowerCase().contains(_textoPesquisaConcluidos)) return const SizedBox.shrink();
+
+                            bool temFalha = vistoria['teve_anormalidade'] == true;
+                            Color corFundo = temFalha ? Colors.red.shade50 : Colors.grey.shade200;
+                            Color corIcone = temFalha ? Colors.red.shade700 : Colors.grey.shade600;
+
+                            return Card(
+                              color: corFundo,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: ListTile(
+                                leading: CircleAvatar(backgroundColor: corIcone, child: Text(idSemaforo, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
+                                title: Text('Semáforo $idSemaforo', style: TextStyle(fontWeight: FontWeight.bold, color: corIcone)),
+                                subtitle: Text(endSemaforo, maxLines: 1, overflow: TextOverflow.ellipsis),
+                                trailing: Icon(temFalha ? Icons.warning_amber_rounded : Icons.check_circle, color: corIcone),
+                                onTap: () => _mostrarDetalhesVistoria(vistoria, rotaNumero, nomeDoVistoriadorDesteTurno), 
+                              ),
+                            );
+                          },
+                        )
                   )
                 ],
-              );
-            }
+              )
+            ],
           );
         }
       ),
@@ -1386,21 +1424,28 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    if (user == null) return const Scaffold(body: Center(child: Text('Erro: Usuário não logado.')));
-    if (_carregandoPerfil) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (_carregandoPerfil || _carregandoRotas) return const Scaffold(body: Center(child: CircularProgressIndicator(color: Colors.orange)));
 
+    // Se for admin e não escolheu rota, mostra a lista de rotas ativas
     if (_isAdmin && _turnoSelecionadoAdmin == null) {
       return _buildVisaoListaAdmin();
     }
 
+    // Se for admin e escolheu uma rota, mostra os detalhes dela
     if (_isAdmin && _turnoSelecionadoAdmin != null) {
       return _buildVisaoDetalheTurno(_turnoSelecionadoAdmin!);
     }
 
+    // Se for Vistoriador, puxa o turno ativo dele
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('turnos').where('vistoriador_uid', isEqualTo: user!.uid).where('status', isEqualTo: 'ativo').limit(1).snapshots(),
+      stream: FirebaseFirestore.instance.collection('turnos')
+          .where('vistoriador_uid', isEqualTo: user!.uid)
+          .where('status', isEqualTo: 'ativo')
+          .limit(1).snapshots(),
       builder: (context, snapshotTurno) {
-        if (snapshotTurno.connectionState == ConnectionState.waiting) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        if (snapshotTurno.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator(color: Colors.orange)));
+        }
         
         if (!snapshotTurno.hasData || snapshotTurno.data!.docs.isEmpty) {
           return Scaffold(
@@ -1412,6 +1457,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                   Icon(Icons.block, size: 80, color: Colors.red.shade300), 
                   const SizedBox(height: 16), 
                   const Text('Nenhum turno ativo.', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)), 
+                  const SizedBox(height: 16),
                   ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Voltar ao Início'))
                 ]
               )

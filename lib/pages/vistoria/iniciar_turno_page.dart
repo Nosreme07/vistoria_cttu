@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
@@ -20,17 +21,16 @@ class IniciarTurnoPage extends StatefulWidget {
 class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
   // Controles Iniciar Turno
   final _kmInicialController = TextEditingController();
-  final _nomeController = TextEditingController(text: 'Carregando...');
   
   // Controles Encerrar Turno
   final _kmFinalController = TextEditingController();
 
   String? _veiculoSelecionadoId;
   String? _veiculoSelecionadoPlaca;
-  String? _rotaSelecionadaId;
-  String? _rotaSelecionadaNumero;
+  String? _rotaSelecionada; 
 
   String _nomeVistoriador = '';
+  String? _fotoUrlVistoriador; // ==== NOVO: Variável para guardar a foto do vistoriador ====
   bool _confirmouIdentidade = false; 
   
   // Gerenciamento de Estado da Tela
@@ -41,6 +41,10 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
   // Dados do Turno Ativo (se o vistoriador já tiver um)
   String? _turnoAtivoId;
   Map<String, dynamic>? _turnoAtivoData;
+
+  // VARIÁVEIS PARA ROTAS DA PLANILHA
+  List<String> _todasAsRotasDaPlanilha = [];
+  bool _carregandoRotas = true;
 
   // ==== FILTROS DA ABA ADMIN (CONCLUÍDOS) ====
   DateTime? _dataInicioFiltro;
@@ -57,7 +61,6 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
   void dispose() {
     _kmInicialController.dispose();
     _kmFinalController.dispose();
-    _nomeController.dispose();
     super.dispose();
   }
 
@@ -66,18 +69,22 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
     if (user == null) return;
 
     try {
+      // 1. Busca os dados do usuário, incluindo a FOTO
       final docUser = await FirebaseFirestore.instance.collection('usuarios').doc(user.uid).get();
       if (docUser.exists) {
         final dataUser = docUser.data()!;
         _nomeVistoriador = dataUser['nome_completo'] ?? dataUser['nome'] ?? user.email!;
         
-        String perfil = (dataUser['perfil'] ?? '').toString().toLowerCase(); 
+        // ==== NOVO: Puxando a Foto ====
+        _fotoUrlVistoriador = dataUser['foto_url'] as String?;
         
+        String perfil = (dataUser['perfil'] ?? '').toString().toLowerCase(); 
         if (perfil.contains('administrador') || perfil.contains('admin')) {
           _isAdmin = true;
         }
       }
 
+      // 2. Busca se já tem turno ativo
       if (!_isAdmin) {
         final turnoAtivoQuery = await FirebaseFirestore.instance
             .collection('turnos')
@@ -92,14 +99,66 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
         }
       }
 
-      setState(() {
-        _nomeController.text = _nomeVistoriador;
-        _carregandoInicial = false;
+      // 3. Baixa as rotas da Planilha do Google Drive
+      const url = 'https://docs.google.com/spreadsheets/d/1fUpL6AOxFmk_RI66E09asktSYi4vyoRQ2P8ivcfiivI/export?format=tsv&gid=1606226965';
+      final resposta = await http.get(Uri.parse(url));
+      
+      Set<String> rotasExtraidas = {};
+      if (resposta.statusCode == 200) {
+        final tsvString = utf8.decode(resposta.bodyBytes);
+        List<String> linhas = tsvString.split('\n');
+        
+        if (linhas.length > 1) {
+          List<String> cabecalhos = linhas.first.split('\t').map((c) => c.trim().toLowerCase()).toList();
+          for (int i = 1; i < linhas.length; i++) {
+            String linhaAtual = linhas[i].trim();
+            if (linhaAtual.isEmpty) continue;
+
+            List<String> valores = linhaAtual.split('\t');
+            Map<String, dynamic> item = {};
+            for (int j = 0; j < cabecalhos.length; j++) {
+              if (j < valores.length) item[cabecalhos[j]] = valores[j].trim();
+            }
+
+            String rotaLimpa = (item['rota'] ?? '').toString().replaceFirst(RegExp(r'^0+'), '');
+            if (rotaLimpa.isNotEmpty && rotaLimpa != 'S/R') {
+              rotasExtraidas.add(rotaLimpa);
+            }
+          }
+        }
+      }
+
+      // ==== MODIFICADO: ORDENAÇÃO NUMÉRICA DAS ROTAS ====
+      List<String> listaRotas = rotasExtraidas.toList();
+      listaRotas.sort((a, b) {
+        // Extrai apenas os números para ordenar (ex: "10A" vira 10)
+        int numA = int.tryParse(a.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        int numB = int.tryParse(b.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        
+        int comparacao = numA.compareTo(numB);
+        if (comparacao == 0) {
+          return a.compareTo(b); // Desempate para rotas tipo 10A e 10B
+        }
+        return comparacao;
       });
+      // ===================================================
+
+      if (mounted) {
+        setState(() {
+          _todasAsRotasDaPlanilha = listaRotas;
+          _carregandoRotas = false;
+          _carregandoInicial = false;
+        });
+      }
       
     } catch (e) {
       debugPrint('Erro ao carregar dados iniciais: $e');
-      setState(() => _carregandoInicial = false);
+      if (mounted) {
+        setState(() {
+          _carregandoRotas = false;
+          _carregandoInicial = false;
+        });
+      }
     }
   }
 
@@ -109,7 +168,7 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
       return;
     }
 
-    if (_veiculoSelecionadoId == null || _rotaSelecionadaId == null || _kmInicialController.text.isEmpty) {
+    if (_veiculoSelecionadoId == null || _rotaSelecionada == null || _kmInicialController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Preencha todos os campos obrigatórios!'), backgroundColor: Colors.red));
       return;
     }
@@ -126,14 +185,13 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
         'placa': _veiculoSelecionadoPlaca,
         'km_inicial': _kmInicialController.text.trim(),
         'km_final': null,
-        'rota_id': _rotaSelecionadaId,
-        'rota_numero': _rotaSelecionadaNumero,
+        'rota_numero': _rotaSelecionada, 
         'status': 'ativo', 
         'data_inicio': FieldValue.serverTimestamp(),
       });
 
+      // Tranca a Moto
       await FirebaseFirestore.instance.collection('veiculos').doc(_veiculoSelecionadoId).update({'em_uso': true});
-      await FirebaseFirestore.instance.collection('rotas').doc(_rotaSelecionadaId).update({'em_uso': true});
 
       final turnoCriado = await novoTurnoRef.get();
       setState(() {
@@ -165,16 +223,15 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
       });
 
       String idVeiculo = _turnoAtivoData!['veiculo_id'];
-      String idRota = _turnoAtivoData!['rota_id'];
       
+      // Destranca a moto
       await FirebaseFirestore.instance.collection('veiculos').doc(idVeiculo).update({'em_uso': false});
-      await FirebaseFirestore.instance.collection('rotas').doc(idRota).update({'em_uso': false});
 
       setState(() {
         _turnoAtivoId = null;
         _turnoAtivoData = null;
         _veiculoSelecionadoId = null;
-        _rotaSelecionadaId = null;
+        _rotaSelecionada = null;
         _kmInicialController.clear();
         _kmFinalController.clear();
         _confirmouIdentidade = false;
@@ -306,7 +363,7 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
       }
       
       final dir = await getTemporaryDirectory();
-      final path = '${dir.path}/Turnos_Concluidos.xls';
+      final path = '${dir.path}/Turnos_Concluidos.csv'; 
       final file = File(path);
       await file.writeAsBytes(utf8.encode(csv));
       await Share.shareXFiles([XFile(path)], text: 'Planilha de Turnos Concluídos');
@@ -314,7 +371,6 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
       if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar Excel!'), backgroundColor: Colors.red));
     }
   }
-
 
   // ==========================================
   // ABA 1 DO ADMIN: EM ANDAMENTO
@@ -389,13 +445,12 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
     );
   }
 
-// ==========================================
-  // ABA 2 DO ADMIN: CONCLUÍDOS (À PROVA DE FALHAS)
+  // ==========================================
+  // ABA 2 DO ADMIN: CONCLUÍDOS
   // ==========================================
   Widget _buildAbaConcluidos() {
     return Column(
       children: [
-        // Painel de Filtros e Botões
         Container(
           color: Colors.white,
           padding: const EdgeInsets.all(16),
@@ -410,27 +465,21 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
               ),
               const SizedBox(height: 12),
               
-              // Dropdown de Rotas
-              StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('rotas').orderBy('numero').snapshots(),
-                builder: (context, snapshot) {
-                  List<String> rotasDisponiveis = ['Todas'];
-                  if (snapshot.hasData) {
-                    rotasDisponiveis.addAll(snapshot.data!.docs.map((d) => (d.data() as Map<String, dynamic>)['numero'].toString()));
-                  }
-                  return InputDecorator(
-                    decoration: InputDecoration(labelText: 'Filtrar por Rota', border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4)),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        isExpanded: true,
-                        value: rotasDisponiveis.contains(_rotaFiltro) ? _rotaFiltro : 'Todas',
-                        items: rotasDisponiveis.map((r) => DropdownMenuItem(value: r, child: Text(r == 'Todas' ? 'Todas as Rotas' : 'Rota $r'))).toList(),
-                        onChanged: (val) => setState(() => _rotaFiltro = val!),
-                      ),
-                    ),
-                  );
-                }
+              InputDecorator(
+                decoration: InputDecoration(labelText: 'Filtrar por Rota', border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4)),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: _todasAsRotasDaPlanilha.contains(_rotaFiltro) ? _rotaFiltro : 'Todas',
+                    items: [
+                      const DropdownMenuItem(value: 'Todas', child: Text('Todas as Rotas')),
+                      ..._todasAsRotasDaPlanilha.map((r) => DropdownMenuItem(value: r, child: Text('Rota $r')))
+                    ],
+                    onChanged: (val) => setState(() => _rotaFiltro = val!),
+                  ),
+                ),
               ),
+
               const SizedBox(height: 12),
               if (_dataInicioFiltro != null || _dataFimFiltro != null || _rotaFiltro != 'Todas')
                 Align(
@@ -446,29 +495,23 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
           ),
         ),
         
-        // Lista de Concluídos
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
-            // MUDANÇA AQUI: Busca tudo do Firebase (snapshots) para evitar bloqueio de query do Google
             stream: FirebaseFirestore.instance.collection('turnos').snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) return Center(child: Text('Erro: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
               if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
 
-              // Filtro 100% Local (Garante que vai achar o "finalizado")
               var turnosFiltrados = snapshot.data!.docs.where((doc) {
                 var t = doc.data() as Map<String, dynamic>;
                 
-                // 1. Filtro de Status
                 String status = (t['status'] ?? '').toString().toLowerCase().trim();
                 if (status != 'finalizado' && status != 'concluido') return false;
                 
-                // 2. Filtro Rota (Ignorando zeros à esquerda pra evitar conflito 01 vs 1)
                 String rotaDb = (t['rota_numero'] ?? '').toString().replaceFirst(RegExp(r'^0+'), '');
                 String filtroLimpo = _rotaFiltro.replaceFirst(RegExp(r'^0+'), '');
                 if (_rotaFiltro != 'Todas' && rotaDb != filtroLimpo) return false;
                 
-                // 3. Filtro Data (pela data final do turno)
                 if (_dataInicioFiltro != null || _dataFimFiltro != null) {
                   if (t['data_fim'] == null) return false;
                   DateTime dataFim = (t['data_fim'] as Timestamp).toDate();
@@ -566,18 +609,33 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
 
           const Text('Vistoriador Responsável:', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          TextField(
-            controller: _nomeController,
-            readOnly: true,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              prefixIcon: const Icon(Icons.person),
-              filled: true,
-              fillColor: Colors.grey.shade200, 
+          
+          // ==== MODIFICADO: NOVO DESIGN EXIBINDO A FOTO E O NOME JUNTOS ====
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade400)
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.teal,
+                  backgroundImage: _fotoUrlVistoriador != null && _fotoUrlVistoriador!.isNotEmpty ? NetworkImage(_fotoUrlVistoriador!) : null,
+                  child: _fotoUrlVistoriador == null || _fotoUrlVistoriador!.isEmpty ? const Icon(Icons.person, color: Colors.white) : null,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(_nomeVistoriador, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                ),
+              ],
             ),
           ),
+          // =================================================================
+
           CheckboxListTile(
-            title: const Text('Confirmo que sou o vistoriador acima e estou assumindo esta rota.'),
+            title: const Text('Confirmo que sou o vistoriador acima e estou assumindo esta rota.', style: TextStyle(fontSize: 13)),
             value: _confirmouIdentidade,
             activeColor: Colors.teal,
             contentPadding: EdgeInsets.zero,
@@ -588,7 +646,7 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
               });
             },
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           
           const Text('Selecione a Moto Disponível:', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
@@ -596,7 +654,7 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
             stream: FirebaseFirestore.instance.collection('veiculos').snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) return Text('Erro ao carregar veículos: ${snapshot.error}', style: const TextStyle(color: Colors.red));
-              if (!snapshot.hasData) return const LinearProgressIndicator();
+              if (!snapshot.hasData) return const LinearProgressIndicator(color: Colors.teal);
               
               var veiculos = snapshot.data!.docs.where((doc) {
                 var data = doc.data() as Map<String, dynamic>;
@@ -631,7 +689,7 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
               );
             }
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
           const Text('Quilometragem (KM) Inicial:', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
@@ -645,44 +703,38 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
               suffixText: 'km'
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
           const Text('Selecione a Rota Disponível:', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
+          
           StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('rotas').snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) return Text('Erro ao carregar rotas: ${snapshot.error}', style: const TextStyle(color: Colors.red));
-              if (!snapshot.hasData) return const LinearProgressIndicator();
+            stream: FirebaseFirestore.instance.collection('turnos').where('status', isEqualTo: 'ativo').snapshots(),
+            builder: (context, snapshotTurnos) {
+              if (!snapshotTurnos.hasData || _carregandoRotas) return const LinearProgressIndicator(color: Colors.teal);
               
-              var rotas = snapshot.data!.docs.where((doc) {
-                var data = doc.data() as Map<String, dynamic>;
-                return data['em_uso'] != true; 
-              }).toList();
+              Set<String> rotasEmUso = snapshotTurnos.data!.docs.map((doc) => (doc.data() as Map<String, dynamic>)['rota_numero'].toString()).toSet();
+              List<String> rotasLivres = _todasAsRotasDaPlanilha.where((r) => !rotasEmUso.contains(r)).toList();
               
-              if (rotas.isEmpty) return const Text('Todas as rotas estão em uso no momento.', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold));
+              if (rotasLivres.isEmpty) return const Text('Todas as rotas da planilha estão em uso no momento.', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold));
 
-              rotas.sort((a, b) {
-                var dataA = a.data() as Map<String, dynamic>;
-                var dataB = b.data() as Map<String, dynamic>;
-                return (dataA['numero'] ?? '').toString().compareTo((dataB['numero'] ?? '').toString());
-              });
+              if (_rotaSelecionada != null && !rotasLivres.contains(_rotaSelecionada)) {
+                _rotaSelecionada = null;
+              }
 
               return DropdownButtonFormField<String>(
                 decoration: const InputDecoration(border: OutlineInputBorder(), prefixIcon: Icon(Icons.route)),
                 hint: const Text('Escolha uma rota...'),
-                value: _rotaSelecionadaId,
-                items: rotas.map((doc) {
-                  var r = doc.data() as Map<String, dynamic>;
+                value: _rotaSelecionada,
+                items: rotasLivres.map((r) {
                   return DropdownMenuItem(
-                    value: doc.id,
-                    child: Text("Rota ${r['numero'] ?? 'S/N'}"),
+                    value: r,
+                    child: Text("Rota $r"),
                   );
                 }).toList(),
                 onChanged: (val) {
                   setState(() {
-                    _rotaSelecionadaId = val;
-                    _rotaSelecionadaNumero = (rotas.firstWhere((d) => d.id == val).data() as Map<String, dynamic>)['numero'];
+                    _rotaSelecionada = val;
                   });
                 },
               );
@@ -693,7 +745,7 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
           SizedBox(
             height: 55,
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal.shade700, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal.shade700, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
               onPressed: _processando ? null : _salvarTurno,
               child: _processando 
                 ? const CircularProgressIndicator(color: Colors.white) 
@@ -727,7 +779,13 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.person, color: Colors.teal),
+                    // ==== MODIFICADO: FOTO AQUI TAMBÉM NA TELA DE ENCERRAR ====
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.teal,
+                      backgroundImage: _fotoUrlVistoriador != null && _fotoUrlVistoriador!.isNotEmpty ? NetworkImage(_fotoUrlVistoriador!) : null,
+                      child: _fotoUrlVistoriador == null || _fotoUrlVistoriador!.isEmpty ? const Icon(Icons.person, color: Colors.white) : null,
+                    ),
+                    // ===========================================================
                     title: const Text('Vistoriador', style: TextStyle(fontSize: 12, color: Colors.grey)),
                     subtitle: Text(_turnoAtivoData!['vistoriador_nome'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
                   ),
@@ -773,7 +831,7 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
           SizedBox(
             height: 55,
             child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade600, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade600, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
               icon: _processando ? const SizedBox.shrink() : const Icon(Icons.stop_circle),
               label: _processando 
                 ? const CircularProgressIndicator(color: Colors.white) 
@@ -788,9 +846,8 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_carregandoInicial) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (_carregandoInicial || _carregandoRotas) return const Scaffold(body: Center(child: CircularProgressIndicator(color: Colors.teal)));
 
-    // SE O USUÁRIO FOR ADMINISTRADOR -> Mostra o painel com as abas (Em Andamento / Concluídos)
     if (_isAdmin) {
       return DefaultTabController(
         length: 2,
@@ -819,7 +876,6 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
       );
     } 
     
-    // SE O USUÁRIO FOR VISTORIADOR -> Mostra a tela simples (Iniciar ou Encerrar Turno)
     else {
       return Scaffold(
         appBar: AppBar(
