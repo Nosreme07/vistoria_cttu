@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:typed_data'; // ADICIONADO: Para manipular as imagens na memória (Compatível com Web/Android/iOS)
+import 'dart:convert'; // ADICIONADO: Para conversão do CSV
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -35,7 +37,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
   bool _isAdmin = false;
   bool _carregandoPerfil = true;
   
-  // Dados Mestre do Acervo (Puxados do Firebase agora!)
+  // Dados Mestre do Acervo
   List<Map<String, dynamic>> _todosSemaforosAcervo = [];
   List<String> _todasAsRotasAcervo = [];
   bool _carregandoRotas = true;
@@ -81,7 +83,34 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     super.dispose();
   }
 
-  // ==== MODIFICADO: PUXA DO FIRESTORE EM VEZ DA INTERNET ====
+  // ==== LÓGICA DE CORES DA ROTA ====
+  Color _obterCorDaRota(String rota) {
+    String r = rota.trim().toUpperCase().replaceAll('ROTA', '').replaceAll(' ', '');
+    if (r.isEmpty) return Colors.grey.shade600;
+
+    switch (r) {
+      case '1': case '01': return Colors.blue.shade700;
+      case '2': case '02': return Colors.green.shade700;
+      case '3': case '03': return Colors.red.shade700;
+      case '4': case '04': return Colors.purple.shade700;
+      case '5': case '05': return Colors.amber.shade800;
+      case '6': case '06': return Colors.teal.shade700;
+      case '7': case '07': return Colors.indigo.shade700;
+      case '8': case '08': return Colors.pink.shade700;
+      case '9': case '09': return Colors.cyan.shade800;
+      case '10': return Colors.deepOrange.shade700;
+      default:
+        final int hash = r.hashCode;
+        final List<Color> coresDisponiveis = [
+          Colors.blue.shade700, Colors.green.shade700, Colors.red.shade700,
+          Colors.purple.shade700, Colors.amber.shade800, Colors.teal.shade700,
+          Colors.indigo.shade700, Colors.pink.shade700, Colors.cyan.shade800,
+          Colors.deepOrange.shade700, Colors.brown.shade600, Colors.blueGrey.shade700
+        ];
+        return coresDisponiveis[hash.abs() % coresDisponiveis.length];
+    }
+  }
+
   Future<void> _baixarDadosIniciais() async {
     if (user == null) return;
 
@@ -94,7 +123,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
         _nomeDoVistoriadorLogado = dataUsuario['nome'] ?? dataUsuario['nome_completo'] ?? user!.email?.split('@').first.toUpperCase() ?? 'Vistoriador';
       }
 
-      // Lê a coleção de semáforos que a sua Planilha alimentou no Firebase
       var snapshotSemaforos = await FirebaseFirestore.instance.collection('semaforos').get();
       
       List<Map<String, dynamic>> semaforosTemp = [];
@@ -105,7 +133,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
         if (item['id'] != null && item['id'].toString().isNotEmpty) {
           semaforosTemp.add(item);
           
-          // CORREÇÃO: Extrai Apenas os NÚMEROS da Rota vinda do Banco/Planilha
           String rotaLimpa = (item['rota'] ?? '').toString().replaceAll(RegExp(r'[^0-9]'), '');
           
           if (rotaLimpa.isNotEmpty) {
@@ -186,7 +213,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
   }
 
   void _mostrarOpcoesGPS(String georeferencia) {
-    if (georeferencia.trim().isEmpty || !georeferencia.contains(' ')) {
+    if (georeferencia.trim().isEmpty || !georeferencia.contains(',')) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Semáforo sem coordenadas cadastradas!'), backgroundColor: Colors.orange));
       return;
     }
@@ -250,7 +277,10 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
 
   Future<void> _abrirAppNavegacao(String georeferencia, String app) async {
     try {
-      var partes = georeferencia.trim().split(RegExp(r'\s+'));
+      String geoLimpa = georeferencia.trim();
+      List<String> partes = geoLimpa.split(',');
+      if (partes.length < 2) throw 'Formato inválido';
+
       String lat = partes[0].trim();
       String lng = partes[1].trim();
 
@@ -258,7 +288,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       if (app == 'waze') {
         url = Uri.parse('https://waze.com/ul?ll=$lat,$lng&navigate=yes');
       } else {
-        url = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+        url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
       }
 
       bool abriu = await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -269,7 +299,8 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     }
   }
 
-  Future<void> _enviarOcorrencia(Map<String, dynamic> semaforo, String falha, String detalhes, List<File> fotosLocais) async {
+  // ==== MODIFICADO: FUNÇÃO RECEBE Lista de Uint8List para suportar WEB ====
+  Future<void> _enviarOcorrencia(Map<String, dynamic> semaforo, String falha, String detalhes, List<Uint8List> fotosLocais) async {
     String idSemaforo = semaforo['id']?.toString() ?? 'S/N';
     String endereco = semaforo['endereco'] ?? 'Endereço não cadastrado';
 
@@ -282,7 +313,11 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
 
     try {
       if (fotosLocais.isNotEmpty) {
-        List<XFile> xFiles = fotosLocais.map((f) => XFile(f.path)).toList();
+        // Converte os dados da memória de volta para XFile que é o formato exigido pelo plugin SharePlus
+        List<XFile> xFiles = [];
+        for (int i = 0; i < fotosLocais.length; i++) {
+          xFiles.add(XFile.fromData(fotosLocais[i], mimeType: 'image/jpeg', name: 'ocorrencia_$i.jpg'));
+        }
         await Share.shareXFiles(xFiles, text: mensagem);
       } else {
         await Share.share(mensagem);
@@ -293,12 +328,12 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     }
   }
 
-  Future<File> _carimbarFoto(File arquivoOriginal, String semaforoInfo, String dataColetada, String gpsColetado) async {
+  // ==== MODIFICADO: Função carimba a imagem usando dados em memória em vez de Arquivo ====
+  Future<Uint8List> _carimbarFoto(Uint8List bytesOriginais, String semaforoInfo, String dataColetada, String gpsColetado) async {
     try {
-      final bytes = await arquivoOriginal.readAsBytes();
-      img.Image? imagemDecodificada = img.decodeImage(bytes);
+      img.Image? imagemDecodificada = img.decodeImage(bytesOriginais);
       
-      if (imagemDecodificada == null) return arquivoOriginal; 
+      if (imagemDecodificada == null) return bytesOriginais; 
 
       List<String> linhasTexto = [
         'Semaforo: $semaforoInfo',
@@ -318,10 +353,9 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       }
 
       final novosBytes = img.encodeJpg(imagemDecodificada, quality: 85); 
-      await arquivoOriginal.writeAsBytes(novosBytes);
-      return arquivoOriginal;
+      return Uint8List.fromList(novosBytes);
     } catch (e) {
-      return arquivoOriginal; 
+      return bytesOriginais; 
     }
   }
 
@@ -388,6 +422,12 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
         }
       }
 
+      String coordOriginal = vistoria['coordenadas_cadastro']?.toString() ?? '';
+      if (coordOriginal.isEmpty) {
+        var matches = _todosSemaforosAcervo.where((s) => s['id'].toString() == vistoria['semaforo_id'].toString());
+        coordOriginal = matches.isNotEmpty ? (matches.first['georeferencia']?.toString() ?? 'Não informada') : 'Não informada';
+      }
+
       String dataHoraAtual = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
       final pdf = pw.Document();
 
@@ -410,7 +450,8 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
               pw.Text('Endereço: ${vistoria['semaforo_endereco']}', style: const pw.TextStyle(fontSize: 12)),
               pw.Text('Início: ${vistoria['data_hora_inicio']}', style: const pw.TextStyle(fontSize: 12)),
               pw.Text('Fim: ${vistoria['data_hora_fim']}', style: const pw.TextStyle(fontSize: 12)),
-              pw.Text('Coordenadas GPS: ${vistoria['gps_coordenadas']}', style: const pw.TextStyle(fontSize: 12)),
+              pw.Text('Coordenadas do Semáforo: $coordOriginal', style: const pw.TextStyle(fontSize: 12)), 
+              pw.Text('Local do Vistoriador (GPS): ${vistoria['gps_coordenadas']}', style: const pw.TextStyle(fontSize: 12)), 
               pw.SizedBox(height: 16),
               pw.Container(
                 padding: const pw.EdgeInsets.all(12), width: double.infinity, decoration: pw.BoxDecoration(color: PdfColors.blue50, borderRadius: pw.BorderRadius.circular(8)),
@@ -438,7 +479,16 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                 pw.SizedBox(height: 12),
                 pw.Wrap(
                   spacing: 12, runSpacing: 12,
-                  children: imagensPdf.map((img) => pw.Container(width: 150, height: 150, decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey), borderRadius: pw.BorderRadius.circular(8), image: pw.DecorationImage(image: img, fit: pw.BoxFit.cover)))).toList(),
+                  children: imagensPdf.map((img) => pw.Container(
+                    width: 150, 
+                    height: 150, 
+                    decoration: pw.BoxDecoration(
+                      border: pw.Border.all(color: PdfColors.grey), 
+                      borderRadius: pw.BorderRadius.circular(8), 
+                      // ==== MODIFICADO: Mudou de cover para contain para não cortar o carimbo ====
+                      image: pw.DecorationImage(image: img, fit: pw.BoxFit.contain)
+                    )
+                  )).toList(),
                 )
               ],
             ];
@@ -464,7 +514,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4.landscape, 
-          margin: const pw.EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 20),
+          margin: const pw.EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 20),
           footer: (pw.Context context) => _buildRodapePDF(context, dataHoraAtual),
           build: (pw.Context context) {
             return [
@@ -472,21 +522,64 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
               pw.SizedBox(height: 16),
               pw.TableHelper.fromTextArray(
                 context: context,
-                headers: ['Semáforo', 'Vistoriador', 'Endereço', 'Início', 'Fim', 'Status', 'Falha', 'Detalhes', 'Fotos'],
+                headers: [
+                  'Semáforo', 
+                  'Vistoriador', 
+                  'Endereço', 
+                  'Coord. Semáforo', 
+                  'Local Vistoriador', 
+                  'Início', 
+                  'Fim', 
+                  'Status', 
+                  'Falha', 
+                  'Detalhes', 
+                  'Fotos'
+                ],
                 data: vistorias.map((doc) {
                   var v = doc.data() as Map<String, dynamic>;
                   String status = v['teve_anormalidade'] == true ? 'COM FALHA' : 'OK';
                   List<dynamic> fotos = v['fotos'] ?? [];
+                  
+                  String coordOriginal = v['coordenadas_cadastro']?.toString() ?? '';
+                  if (coordOriginal.isEmpty) {
+                    var matches = _todosSemaforosAcervo.where((s) => s['id'].toString() == v['semaforo_id'].toString());
+                    coordOriginal = matches.isNotEmpty ? (matches.first['georeferencia']?.toString() ?? '-') : '-';
+                  }
+                  
+                  String gpsVistoriador = v['gps_coordenadas']?.toString() ?? '-';
+
                   return [ 
-                    v['semaforo_id']?.toString() ?? '', nomeVistoriador, v['semaforo_endereco']?.toString() ?? '', 
-                    v['data_hora_inicio']?.toString() ?? '', v['data_hora_fim']?.toString() ?? '', status, 
-                    v['falha_registrada'] ?? '-', v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ') ?? '-', fotos.join('\n\n')
+                    v['semaforo_id']?.toString() ?? '', 
+                    nomeVistoriador, 
+                    v['semaforo_endereco']?.toString() ?? '', 
+                    coordOriginal,   
+                    gpsVistoriador,  
+                    v['data_hora_inicio']?.toString() ?? '', 
+                    v['data_hora_fim']?.toString() ?? '', 
+                    status, 
+                    v['falha_registrada'] ?? '-', 
+                    v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ') ?? '-', 
+                    fotos.join('\n\n')
                   ];
                 }).toList(),
-                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8),
+                cellAlignment: pw.Alignment.center,
+                headerAlignment: pw.Alignment.center,
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 6.5),
                 headerDecoration: const pw.BoxDecoration(color: PdfColors.teal700),
-                cellAlignment: pw.Alignment.centerLeft, cellStyle: const pw.TextStyle(fontSize: 7),
-                columnWidths: { 0: const pw.FlexColumnWidth(1), 1: const pw.FlexColumnWidth(1.2), 2: const pw.FlexColumnWidth(1.5), 3: const pw.FlexColumnWidth(1), 4: const pw.FlexColumnWidth(1), 5: const pw.FlexColumnWidth(1), 6: const pw.FlexColumnWidth(1.2), 7: const pw.FlexColumnWidth(1.5), 8: const pw.FlexColumnWidth(2) }
+                cellStyle: const pw.TextStyle(fontSize: 6),
+                columnWidths: { 
+                  0: const pw.FlexColumnWidth(0.6),  
+                  1: const pw.FlexColumnWidth(0.9),  
+                  2: const pw.FlexColumnWidth(1.4),  
+                  3: const pw.FlexColumnWidth(1.0),  
+                  4: const pw.FlexColumnWidth(1.0),  
+                  5: const pw.FlexColumnWidth(0.7),  
+                  6: const pw.FlexColumnWidth(0.7),  
+                  7: const pw.FlexColumnWidth(0.5),  
+                  8: const pw.FlexColumnWidth(1.0),  
+                  9: const pw.FlexColumnWidth(1.5),  
+                  10: const pw.FlexColumnWidth(1.3), 
+                }
               ),
             ];
           }
@@ -510,7 +603,11 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     String temAnormalidade = 'Não';
     String? falhaSelecionada;
     List<Map<String, dynamic>> tiposDeFalhaLista = []; 
-    List<File> fotos = []; 
+    
+    // ==== MODIFICADO: A lista de fotos agora trabalha puramente com dados na Memória ====
+    List<Uint8List> fotosEmMemoria = []; 
+    // ====================================================================================
+
     bool processandoFoto = false; 
     final ImagePicker picker = ImagePicker();
     final TextEditingController detalhesController = TextEditingController();
@@ -604,7 +701,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                     Position pos = await _determinarPosicao();
                                     String dataFormatada = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
                                     setModalState(() {
-                                      coordenadas = '${pos.latitude}, ${pos.longitude}';
+                                      coordenadas = '${pos.latitude.toStringAsFixed(6)}, ${pos.longitude.toStringAsFixed(6)}';
                                       dataHoraInicio = dataFormatada;
                                       vistoriaIniciada = true;
                                       salvando = false;
@@ -666,7 +763,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                     setModalState(() {
                                       temAnormalidade = val!;
                                       if (val == 'Não') {
-                                        falhaSelecionada = null; fotos.clear(); detalhesController.clear();
+                                        falhaSelecionada = null; fotosEmMemoria.clear(); detalhesController.clear();
                                       } else {
                                         carregarFalhas();
                                       }
@@ -716,33 +813,39 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                               Wrap(
                                 spacing: 12, runSpacing: 12,
                                 children: [
-                                  ...List.generate(fotos.length, (index) {
+                                  ...List.generate(fotosEmMemoria.length, (index) {
                                     return Stack(
                                       clipBehavior: Clip.none,
                                       children: [
                                         GestureDetector(
-                                          onTap: () => _mostrarImagemExpandida(context, FileImage(fotos[index])),
+                                          // ==== MODIFICADO: A imagem agora é carregada a partir da memória ====
+                                          onTap: () => _mostrarImagemExpandida(context, MemoryImage(fotosEmMemoria[index])),
                                           child: Container(
                                             width: 80, height: 80, 
-                                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade300), image: DecorationImage(image: FileImage(fotos[index]), fit: BoxFit.cover)),
+                                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade300), image: DecorationImage(image: MemoryImage(fotosEmMemoria[index]), fit: BoxFit.cover)),
                                             child: const Align(alignment: Alignment.bottomLeft, child: Padding(padding: EdgeInsets.all(4.0), child: Icon(Icons.zoom_in, color: Colors.white, size: 20))),
                                           ),
                                         ),
-                                        Positioned(right: -8, top: -8, child: GestureDetector(onTap: () => setModalState(() => fotos.removeAt(index)), child: const CircleAvatar(radius: 12, backgroundColor: Colors.red, child: Icon(Icons.close, color: Colors.white, size: 16))))
+                                        Positioned(right: -8, top: -8, child: GestureDetector(onTap: () => setModalState(() => fotosEmMemoria.removeAt(index)), child: const CircleAvatar(radius: 12, backgroundColor: Colors.red, child: Icon(Icons.close, color: Colors.white, size: 16))))
                                       ]
                                     );
                                   }),
-                                  if (fotos.length < 4 && !processandoFoto)
+                                  if (fotosEmMemoria.length < 4 && !processandoFoto)
                                     InkWell(
                                       onTap: () async {
                                         final XFile? fotoTirada = await picker.pickImage(source: ImageSource.camera, maxWidth: 1000, imageQuality: 80);
                                         if (fotoTirada != null) {
                                           setModalState(() => processandoFoto = true);
-                                          File fotoCarimbada = await _carimbarFoto(File(fotoTirada.path), semaforo['id'].toString(), dataHoraInicio, coordenadas);
+                                          
+                                          // ==== MODIFICADO: Transforma e Carimba a foto direto na memória (Resolve o problema WEB) ====
+                                          Uint8List fotoEmBytes = await fotoTirada.readAsBytes();
+                                          Uint8List fotoCarimbada = await _carimbarFoto(fotoEmBytes, semaforo['id'].toString(), dataHoraInicio, coordenadas);
+                                          
                                           setModalState(() {
-                                            fotos.add(fotoCarimbada);
+                                            fotosEmMemoria.add(fotoCarimbada);
                                             processandoFoto = false;
                                           });
+                                          // ============================================================================================
                                         }
                                       },
                                       child: Container(
@@ -776,16 +879,17 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                                 onPressed: (salvando || processandoFoto) ? null : () async {
-                                  if (!checklistConfirmado) {
+if (!checklistConfirmado) {
                                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Você precisa marcar a caixa confirmando a verificação do checklist!'), backgroundColor: Colors.red));
                                     return;
                                   }
                                   
-                                  String detalhesFinais = detalhesController.text.trim();
+                                  // ==== MODIFICADO: Adicionado .toUpperCase() para forçar maiúsculas ====
+                                  String detalhesFinais = detalhesController.text.trim().toUpperCase();
 
                                   if (temAnormalidade == 'Sim') {
                                     if (falhaSelecionada == null) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecione qual foi a falha encontrada!'), backgroundColor: Colors.red)); return; }
-                                    if (fotos.isEmpty) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('É obrigatório tirar pelo menos 1 foto do defeito!'), backgroundColor: Colors.red)); return; }
+                                    if (fotosEmMemoria.isEmpty) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('É obrigatório tirar pelo menos 1 foto do defeito!'), backgroundColor: Colors.red)); return; }
                                   } else {
                                     detalhesFinais = 'O semáforo foi vistoriado por completo e não foram identificadas anormalidades.';
                                   }
@@ -795,11 +899,14 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                   try {
                                     List<String> urlsDasFotos = [];
                                     
-                                    if (fotos.isNotEmpty) {
-                                      for (int i = 0; i < fotos.length; i++) {
+                                    if (fotosEmMemoria.isNotEmpty) {
+                                      for (int i = 0; i < fotosEmMemoria.length; i++) {
                                         String nomeArquivo = 'vistoria_${semaforo['id']}_${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
                                         Reference ref = FirebaseStorage.instance.ref().child('vistorias_fotos/$nomeArquivo');
-                                        UploadTask uploadTask = ref.putFile(fotos[i]);
+                                        
+                                        // ==== MODIFICADO: Usa putData em vez de putFile para fazer o upload via Memória ====
+                                        UploadTask uploadTask = ref.putData(fotosEmMemoria[i], SettableMetadata(contentType: 'image/jpeg'));
+                                        
                                         TaskSnapshot snapshotDaFoto = await uploadTask;
                                         urlsDasFotos.add(await snapshotDaFoto.ref.getDownloadURL());
                                       }
@@ -815,6 +922,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                       'data_hora_inicio': dataHoraInicio,
                                       'data_hora_fim': dataFormatadaFim,
                                       'gps_coordenadas': coordenadas,
+                                      'coordenadas_cadastro': geoRefSemaforo, 
                                       'resumo_checklist': textoConfirmacaoChecklist, 
                                       'teve_anormalidade': temAnormalidade == 'Sim',
                                       'falha_registrada': falhaSelecionada ?? 'Nenhuma',
@@ -824,7 +932,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                                     });
 
                                     if (temAnormalidade == 'Sim') {
-                                      await _enviarOcorrencia(semaforo, falhaSelecionada!, detalhesFinais, fotos);
+                                      await _enviarOcorrencia(semaforo, falhaSelecionada!, detalhesFinais, fotosEmMemoria);
                                     }
 
                                     if (!mounted) return;
@@ -855,27 +963,65 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     );
   }
 
+// ==== MODIFICADO: Transforma a exportação em um Excel Estruturado (.xls) ====
   Future<void> _exportarExcelConcluidos(List<QueryDocumentSnapshot> vistorias, String rotaNumero, String nomeVistoriador) async {
     if (vistorias.isEmpty) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando Excel...'), backgroundColor: Colors.green));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando Planilha Excel...'), backgroundColor: Colors.green));
+    
     try {
-      String csv = '\uFEFF'; 
-      csv += 'SEMAFORO;VISTORIADOR;ENDERECO;INICIO;FIM;COORDENADAS;STATUS;FALHA;DETALHES;FOTOS\n';
+      StringBuffer excelBuffer = StringBuffer();
+      excelBuffer.write('<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body><table border="1">');
       
+      // Cabeçalho da Planilha
+      excelBuffer.write('<tr style="background-color: #E65100; color: white; font-weight: bold; text-align: center;">');
+      excelBuffer.write('<td>SEMÁFORO</td><td>VISTORIADOR</td><td>ENDEREÇO</td><td>INÍCIO</td><td>FIM</td><td>COORD. SEMÁFORO</td><td>LOCAL VISTORIADOR</td><td>STATUS</td><td>FALHA</td><td>DETALHES</td><td>FOTOS</td></tr>');
+
       for (var doc in vistorias) {
         var v = doc.data() as Map<String, dynamic>;
-        String status = v['teve_anormalidade'] == true ? 'COM FALHA' : 'OK';
+        
+        // ==== CORREÇÃO: Variável temFalha declarada aqui! ====
+        bool temFalha = v['teve_anormalidade'] == true;
+        String status = temFalha ? 'COM FALHA' : 'OK';
         List<dynamic> fotos = v['fotos'] ?? [];
-        String linksFotos = fotos.join(', ');
+        
+        // Pega as Coordenadas
+        String coordOriginal = v['coordenadas_cadastro']?.toString() ?? '';
+        if (coordOriginal.isEmpty) {
+          var matches = _todosSemaforosAcervo.where((s) => s['id'].toString() == v['semaforo_id'].toString());
+          coordOriginal = matches.isNotEmpty ? (matches.first['georeferencia']?.toString() ?? '-') : '-';
+        }
+        String gpsVistoriador = v['gps_coordenadas']?.toString() ?? '-';
 
-        csv += '${v['semaforo_id']};$nomeVistoriador;${v['semaforo_endereco']};${v['data_hora_inicio']};${v['data_hora_fim']};${v['gps_coordenadas']};$status;${v['falha_registrada']};${v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ')};$linksFotos\n';
+        excelBuffer.write('<tr>');
+        excelBuffer.write('<td style="text-align: center;">${v['semaforo_id']}</td>');
+        excelBuffer.write('<td>$nomeVistoriador</td>');
+        excelBuffer.write('<td>${v['semaforo_endereco']}</td>');
+        excelBuffer.write('<td style="text-align: center;">${v['data_hora_inicio']}</td>');
+        excelBuffer.write('<td style="text-align: center;">${v['data_hora_fim']}</td>');
+        excelBuffer.write('<td style="text-align: center;">$coordOriginal</td>');
+        excelBuffer.write('<td style="text-align: center;">$gpsVistoriador</td>');
+        excelBuffer.write('<td style="text-align: center; color: ${temFalha ? "red" : "green"};"><b>$status</b></td>');
+        excelBuffer.write('<td>${v['falha_registrada'] ?? '-'}</td>');
+        excelBuffer.write('<td>${(v['detalhes_ocorrencia'] ?? '-').toString().replaceAll('\n', ' ')}</td>');
+        
+        // Se houver fotos, cria links clicáveis na planilha do Excel
+        if (fotos.isNotEmpty) {
+           String linksHtml = fotos.map((f) => '<a href="$f">Abrir Foto</a>').join(' | ');
+           excelBuffer.write('<td style="text-align: center;">$linksHtml</td>');
+        } else {
+           excelBuffer.write('<td style="text-align: center;">-</td>');
+        }
+        excelBuffer.write('</tr>');
       }
+
+      excelBuffer.write('</table></body></html>');
+
+      // Salva como arquivo oficial do Excel
+      final String nomeArquivo = 'Vistorias_Rota$rotaNumero.xls';
+      final bytes = utf8.encode(excelBuffer.toString());
+      final xFile = XFile.fromData(Uint8List.fromList(bytes), mimeType: 'application/vnd.ms-excel', name: nomeArquivo);
       
-      final dir = await getTemporaryDirectory();
-      final path = '${dir.path}/Vistorias_Rota$rotaNumero.csv';
-      final file = File(path);
-      await file.writeAsString(csv);
-      await Share.shareXFiles([XFile(path)], text: 'Planilha de Vistorias Concluídas - Rota $rotaNumero.');
+      await Share.shareXFiles([xFile], text: 'Planilha de Vistorias Concluídas - Rota $rotaNumero');
     } catch (e) {
       if(!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar Excel!'), backgroundColor: Colors.red));
@@ -890,6 +1036,12 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
       builder: (context) {
         bool temFalha = vistoria['teve_anormalidade'] == true;
         List<dynamic> fotos = vistoria['fotos'] ?? [];
+
+        String coordOriginal = vistoria['coordenadas_cadastro']?.toString() ?? '';
+        if (coordOriginal.isEmpty) {
+          var matches = _todosSemaforosAcervo.where((s) => s['id'].toString() == vistoria['semaforo_id'].toString());
+          coordOriginal = matches.isNotEmpty ? (matches.first['georeferencia']?.toString() ?? 'Não informada') : 'Não informada';
+        }
 
         return DraggableScrollableSheet(
           initialChildSize: 0.85, minChildSize: 0.5, maxChildSize: 0.95, expand: false,
@@ -914,7 +1066,8 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                     _buildInfoRow('Endereço', vistoria['semaforo_endereco']),
                     _buildInfoRow('Início', vistoria['data_hora_inicio']),
                     _buildInfoRow('Fim', vistoria['data_hora_fim']),
-                    _buildInfoRow('Coordenadas GPS', vistoria['gps_coordenadas']),
+                    _buildInfoRow('Coordenadas do Semáforo', coordOriginal), 
+                    _buildInfoRow('Local do Vistoriador (GPS)', vistoria['gps_coordenadas']), 
                     const SizedBox(height: 16),
                     
                     Container(
@@ -1218,7 +1371,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
     var turnoData = turnoDoc.data() as Map<String, dynamic>;
     String rotaNumero = turnoData['rota_numero'] ?? 'S/N';
     
-    // CORREÇÃO MESTRE: Extraindo apenas os NÚMEROS do turno atual para matching perfeito
     String rotaTurnoNumerica = rotaNumero.replaceAll(RegExp(r'[^0-9]'), ''); 
     String nomeDoVistoriadorDesteTurno = turnoData['vistoriador_nome'] ?? 'Desconhecido';
 
@@ -1249,7 +1401,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
           List<QueryDocumentSnapshot> vistoriasConcluidas = snapshotVistoria.data!.docs;
           Set<String> vistoriadosIds = vistoriasConcluidas.map((doc) => doc['semaforo_id'].toString()).toSet();
 
-          // CORREÇÃO MESTRE: Usando .replaceAll para garantir o fit perfeito (ex: Rota 10 == 10)
           List<Map<String, dynamic>> semaforosDaRota = _todosSemaforosAcervo.where((item) {
             String rotaDoItemNumerica = (item['rota'] ?? '').toString().replaceAll(RegExp(r'[^0-9]'), '');
             return rotaDoItemNumerica == rotaTurnoNumerica && rotaTurnoNumerica.isNotEmpty;
@@ -1272,7 +1423,11 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
             return id.contains(_textoPesquisaAndamento) || end.contains(_textoPesquisaAndamento);
           }).toList();
 
-          semaforosFiltradosPesquisa.sort((a, b) => a['id'].toString().compareTo(b['id'].toString()));
+          semaforosFiltradosPesquisa.sort((a, b) {
+            int ordemA = int.tryParse((a['ordem'] ?? '').toString()) ?? 9999;
+            int ordemB = int.tryParse((b['ordem'] ?? '').toString()) ?? 9999;
+            return ordemA.compareTo(ordemB);
+          });
 
           return TabBarView(
             controller: _tabController,
@@ -1334,26 +1489,51 @@ class _FormularioRotaPageState extends State<FormularioRotaPage> with SingleTick
                             ],
                           )
                         )
-                      : GridView.builder(
-                          padding: const EdgeInsets.all(16),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 1),
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           itemCount: semaforosFiltradosPesquisa.length,
                           itemBuilder: (context, index) {
                             var semaforo = semaforosFiltradosPesquisa[index];
                             String idSemaforo = semaforo['id']?.toString() ?? 'S/N';
                             String enderecoSemaforo = semaforo['endereco'] ?? 'Sem endereço cadastrado';
+                            String rotaRaw = semaforo['rota']?.toString() ?? rotaNumero;
                             
-                            return Tooltip(
-                              message: enderecoSemaforo, triggerMode: TooltipTriggerMode.longPress,
+                            Color corDaRota = _obterCorDaRota(rotaRaw);
+                            String bairro = semaforo['bairro']?.toString() ?? '';
+                            
+                            String titulo = bairro.isNotEmpty 
+                                ? "$idSemaforo - $enderecoSemaforo ($bairro)"
+                                : "$idSemaforo - $enderecoSemaforo";
+
+                            return Card(
+                              elevation: 2,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               child: InkWell(
-                                borderRadius: BorderRadius.circular(100),
+                                borderRadius: BorderRadius.circular(12),
                                 onTap: () => _abrirVistoriaSemaforo(semaforo, turnoDoc.id),
-                                child: Container(
-                                  decoration: BoxDecoration(color: Colors.orange.shade50, shape: BoxShape.circle, border: Border.all(color: Colors.orange, width: 2), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(2, 2))]),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                  child: Row(
                                     children: [
-                                      Text(idSemaforo, style: TextStyle(color: Colors.orange.shade900, fontWeight: FontWeight.bold, fontSize: 18)),
+                                      CircleAvatar(
+                                        backgroundColor: corDaRota,
+                                        radius: 24,
+                                        child: Text(
+                                          idSemaforo,
+                                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Text(
+                                          titulo,
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5, color: Colors.black87),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade400),
                                     ],
                                   ),
                                 ),

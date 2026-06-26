@@ -10,7 +10,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw; 
 import 'package:printing/printing.dart'; 
 import 'package:share_plus/share_plus.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // ADICIONADO: Para salvar os dados no Firebase
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 
 class AcervoPage extends StatefulWidget {
   const AcervoPage({super.key});
@@ -27,10 +27,9 @@ class _AcervoPageState extends State<AcervoPage> {
   bool _sincronizandoComPlanilha = false; 
   String _textoPesquisa = '';
   String _rotaSelecionada = 'Todas'; 
-  String _rotaSelecionadaRelatorio = 'Todas'; // Nova variável de estado para a aba de relatórios
+  String _rotaSelecionadaRelatorio = 'Todas'; 
   final TextEditingController _pesquisaController = TextEditingController();
 
-  // SEQUÊNCIA EXATA DAS COLUNAS SOLICITADAS PARA EXIBIÇÃO NO POPUP
   final List<String> _ordemCamposExibicao = [
     "SEMÁFORO",
     "IP DDNS",
@@ -44,6 +43,7 @@ class _AcervoPageState extends State<AcervoPage> {
     "TIPO DE CONTROLADOR",
     "EMPRESA",
     "ROTA",
+    "ORDEM", 
     "OBSERVAÇOES",
     "SUB-ÁREA (TRAFGO)",
     "LATITUDE",
@@ -87,7 +87,6 @@ class _AcervoPageState extends State<AcervoPage> {
     super.dispose();
   }
 
-  // FUNÇÃO DE BUSCA INTELIGENTE DE CAMPOS
   String _obterValorCampo(Map<String, dynamic> semaforo, String chaveOriginal) {
     if (semaforo.containsKey(chaveOriginal)) {
       return semaforo[chaveOriginal].toString();
@@ -120,7 +119,6 @@ class _AcervoPageState extends State<AcervoPage> {
     return '';
   }
 
-  // GERADOR DE CORES DINÂMICAS PARA CADA ROTA
   Color _obterCorDaRota(String rota) {
     String r = rota.trim().toUpperCase().replaceAll('ROTA', '').replaceAll(' ', '');
     if (r.isEmpty) return Colors.grey.shade600;
@@ -170,7 +168,6 @@ class _AcervoPageState extends State<AcervoPage> {
     });
   }
 
-  // 1. CARREGA O DATASET INICIAL DO ASSET LOCAL
   Future<void> _carregarDadosIniciais() async {
     setState(() => _carregando = true);
 
@@ -190,7 +187,6 @@ class _AcervoPageState extends State<AcervoPage> {
     }
   }
 
-  // 2. BUSCA AS ATUALIZAÇÕES DIRETO DA PLANILHA E ATUALIZA O FIREBASE JUNTOS
   Future<void> _sincronizarComGoogleDrive() async {
     if (_sincronizandoComPlanilha) return;
 
@@ -209,7 +205,6 @@ class _AcervoPageState extends State<AcervoPage> {
 
         if (novosDados.isNotEmpty) {
           
-          // ==== BLOCO NOVO: GRAVAÇÃO DOS DADOS NO FIREBASE FIRESTORE ====
           int contadorLote = 0;
           WriteBatch batch = FirebaseFirestore.instance.batch();
           final colecaoSemaforos = FirebaseFirestore.instance.collection('semaforos');
@@ -218,19 +213,18 @@ class _AcervoPageState extends State<AcervoPage> {
             String idSemaforo = _obterValorCampo(mapaSemaforo, "SEMÁFORO").trim();
             if (idSemaforo.isNotEmpty) {
               
-              // Mapeia os dados em minúsculo exatamente como a tela de vistoria espera
-              Map<String, dynamic> dadosMapeadosParaFirebase = {
+Map<String, dynamic> dadosMapeadosParaFirebase = {
                 'id': idSemaforo,
                 'rota': _obterValorCampo(mapaSemaforo, "ROTA").trim(),
                 'endereco': _obterValorCampo(mapaSemaforo, "ENDEREÇO").trim(),
                 'georeferencia': _obterValorCampo(mapaSemaforo, "GEOREFERÊNCIA").trim(),
+                'ordem': _obterValorCampo(mapaSemaforo, "ORDEM").trim(), 
+                'bairro': _obterValorCampo(mapaSemaforo, "BAIRRO").trim(),
               };
-
-              // Define o documento utilizando o próprio número do semáforo como ID único
+              
               batch.set(colecaoSemaforos.doc(idSemaforo), dadosMapeadosParaFirebase);
               contadorLote++;
 
-              // O Firestore limita blocos (batch) em até 500 operações por commit.
               if (contadorLote == 400) {
                 await batch.commit();
                 batch = FirebaseFirestore.instance.batch();
@@ -238,11 +232,9 @@ class _AcervoPageState extends State<AcervoPage> {
               }
             }
           }
-          // Envia o restante dos semáforos se sobrar algum no lote final
           if (contadorLote > 0) {
             await batch.commit();
           }
-          // ==============================================================
 
           setState(() {
             _todosSemaforos = novosDados;
@@ -325,7 +317,7 @@ class _AcervoPageState extends State<AcervoPage> {
     return rows;
   }
 
-  // FILTRAGEM COMBINADA RESTRITA APENAS A NÚMERO, ENDEREÇO E BAIRRO
+  // FILTRAGEM COMBINADA E ORDENAÇÃO
   void _aplicarFiltrosCombinados() {
     setState(() {
       _semaforosFiltrados = _todosSemaforos.where((item) {
@@ -358,6 +350,20 @@ class _AcervoPageState extends State<AcervoPage> {
 
         return passaRota && passaTexto;
       }).toList();
+
+      // ==== MODIFICADO: ORDENAR PELO NÚMERO DO SEMÁFORO (MENOR PARA O MAIOR) ====
+      _semaforosFiltrados.sort((a, b) {
+        // Extrai apenas os números para ordenar perfeitamente (ex: 9 antes de 10)
+        String strA = _obterValorCampo(Map<String, dynamic>.from(a), "SEMÁFORO").replaceAll(RegExp(r'[^0-9]'), '');
+        String strB = _obterValorCampo(Map<String, dynamic>.from(b), "SEMÁFORO").replaceAll(RegExp(r'[^0-9]'), '');
+        
+        int numA = int.tryParse(strA) ?? 999999;
+        int numB = int.tryParse(strB) ?? 999999;
+        
+        return numA.compareTo(numB);
+      });
+      // =========================================================================
+
     });
   }
 
@@ -630,7 +636,7 @@ class _AcervoPageState extends State<AcervoPage> {
   }
 
   // =========================================================================
-  // MODIFICADO: NOVAS FUNÇÕES PARA EXPORTAÇÃO EXCLUSIVAS DA ABA DE RELATÓRIOS
+  // EXPORTAÇÃO EXCLUSIVAS DA ABA DE RELATÓRIOS
   // =========================================================================
   List<dynamic> _filtrarDadosParaRelatorio() {
     if (_rotaSelecionadaRelatorio == 'Todas') {
@@ -706,10 +712,8 @@ class _AcervoPageState extends State<AcervoPage> {
                         _obterValorCampo(s, "ROTA"),
                       ];
                     }).toList(),
-                    // CENTRALIZAÇÃO HORIZONTAL E VERTICAL NO MEIO DA CÉLULA
                     cellAlignment: pw.Alignment.center,
                     headerAlignment: pw.Alignment.center,
-                    // DIMINUIÇÃO DA FONTE PARA EVITAR QUEBRAS DE LINHA
                     headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8),
                     headerDecoration: const pw.BoxDecoration(color: PdfColors.orange700),
                     cellStyle: const pw.TextStyle(fontSize: 7),
@@ -734,7 +738,6 @@ class _AcervoPageState extends State<AcervoPage> {
     _mostrarSnackBar('Gerando Planilha Excel...', Colors.green);
 
     try {
-      // Monta a estrutura da planilha em formato SpreadsheetML/HTML reconhecido nativamente pelo Excel
       StringBuffer excelBuffer = StringBuffer();
       excelBuffer.write('<!DOCTYPE html>');
       excelBuffer.write('<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">');
@@ -742,7 +745,6 @@ class _AcervoPageState extends State<AcervoPage> {
       excelBuffer.write('<body>');
       excelBuffer.write('<table border="1">');
       
-      // Cabeçalho Oficial com estilização de cor
       excelBuffer.write('<tr style="background-color: #E65100; color: white; font-weight: bold; text-align: center;">');
       excelBuffer.write('<td>SEMÁFORO</td>');
       excelBuffer.write('<td>ENDEREÇO</td>');
@@ -752,7 +754,6 @@ class _AcervoPageState extends State<AcervoPage> {
       excelBuffer.write('<td>GEOREFERÊNCIA</td>');
       excelBuffer.write('</tr>');
 
-      // Alimentando as linhas da planilha célula por célula
       for (var item in dados) {
         if (item is! Map) continue;
         final s = Map<String, dynamic>.from(item);
@@ -778,18 +779,15 @@ class _AcervoPageState extends State<AcervoPage> {
       excelBuffer.write('</body>');
       excelBuffer.write('</html>');
 
-      // Define o nome correto com a extensão .xls do Excel
       final String nomeArquivo = 'Relatorio_${_rotaSelecionadaRelatorio.replaceAll(' ', '_')}.xls';
       
-      // Converte os dados em bytes diretamente na memória (Cross-platform: Web, Android, iOS)
       final bytes = utf8.encode(excelBuffer.toString());
       final xFile = XFile.fromData(
         Uint8List.fromList(bytes),
         name: nomeArquivo,
-        mimeType: 'application/vnd.ms-excel', // Tipo MIME oficial do Excel
+        mimeType: 'application/vnd.ms-excel', 
       );
 
-      // Dispara o download nativo na Web ou a folha de compartilhamento em dispositivos móveis
       await Share.shareXFiles(
         [xFile], 
         text: 'Relatório CTTU - Rota $_rotaSelecionadaRelatorio'
@@ -800,7 +798,6 @@ class _AcervoPageState extends State<AcervoPage> {
     }
   }
 
-  // WIDGET CONSTRUTOR DA NOVA INTERFACE DE RELATÓRIOS
   Widget _construirAbaRelatorios() {
     final dadosRelatorio = _filtrarDadosParaRelatorio();
 
@@ -831,7 +828,6 @@ class _AcervoPageState extends State<AcervoPage> {
           ),
           const SizedBox(height: 16),
           
-          // Seletor de Rota do Relatório
           InputDecorator(
             decoration: InputDecoration(
               labelText: 'Selecione a Rota para o Relatório',
@@ -860,7 +856,6 @@ class _AcervoPageState extends State<AcervoPage> {
           ),
           const SizedBox(height: 20),
           
-          // Badge Informativo do volume de dados
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -881,7 +876,6 @@ class _AcervoPageState extends State<AcervoPage> {
           ),
           const Spacer(),
           
-          // Botões de Ação de Download/Compartilhamento
           Row(
             children: [
               Expanded(
@@ -921,7 +915,6 @@ class _AcervoPageState extends State<AcervoPage> {
 
   @override
   Widget build(BuildContext context) {
-    // MODIFICADO: Inclusão do DefaultTabController englobando o Scaffold
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -930,7 +923,6 @@ class _AcervoPageState extends State<AcervoPage> {
           backgroundColor: Colors.orange.shade500,
           foregroundColor: Colors.white,
           elevation: 2,
-          // MODIFICADO: Barra de Abas adicionada na parte inferior da AppBar
           bottom: const TabBar(
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white70,
@@ -987,9 +979,7 @@ class _AcervoPageState extends State<AcervoPage> {
                 ),
               )
             : TabBarView(
-                // MODIFICADO: TabBarView alternando entre a Lista Geral e a Aba de Relatórios
                 children: [
-                  // ABA 1: LISTA GERAL EXISTENTE
                   Column(
                     children: [
                       Container(
@@ -1001,7 +991,7 @@ class _AcervoPageState extends State<AcervoPage> {
                               flex: 4,
                               child: TextField(
                                 controller: _pesquisaController,
-                                textInputAction: TextInputAction.search, // CORRIGIDO
+                                textInputAction: TextInputAction.search, 
                                 onChanged: (busca) {
                                   _textoPesquisa = busca.toLowerCase();
                                   _aplicarFiltrosCombinados();
@@ -1187,8 +1177,6 @@ class _AcervoPageState extends State<AcervoPage> {
                       ),
                     ],
                   ),
-                  
-                  // ABA 2: NOVA SEÇÃO DE RELATÓRIOS CONSTRUÍDA
                   _construirAbaRelatorios(),
                 ],
               ),
@@ -1197,9 +1185,6 @@ class _AcervoPageState extends State<AcervoPage> {
   }
 }
 
-// =========================================================================
-// TELA MAPA COMPLETA COM FILTROS DE ROTA E EMPRESA DINÂMICOS
-// =========================================================================
 class TelaMapa extends StatefulWidget {
   final List<dynamic> todosSemaforos;
   final List<String> listaRotasDisponiveis;
