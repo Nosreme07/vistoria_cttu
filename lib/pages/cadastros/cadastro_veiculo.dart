@@ -19,9 +19,15 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
   final _placaController = TextEditingController();
   final _empresaController = TextEditingController();
 
-  bool _estaCarregando = false; 
+  bool _estaCarregando = false;
 
-  void _abrirFormularioCadastro({String? veiculoId, String? marcaAtual, String? modeloAtual, String? placaAtual, String? empresaAtual}) {
+  void _abrirFormularioCadastro({
+    String? veiculoId,
+    String? marcaAtual,
+    String? modeloAtual,
+    String? placaAtual,
+    String? empresaAtual,
+  }) {
     _marcaController.text = marcaAtual ?? '';
     _modeloController.text = modeloAtual ?? '';
     _placaController.text = placaAtual ?? '';
@@ -34,41 +40,57 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return StatefulBuilder( 
+        return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
-                top: 24, left: 24, right: 24,
+                top: 24,
+                left: 24,
+                right: 24,
               ),
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      veiculoId == null ? 'Cadastrar Veículo' : 'Editar Veículo', 
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
+                      veiculoId == null
+                          ? 'Cadastrar Veículo'
+                          : 'Editar Veículo',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     TextField(
                       controller: _marcaController,
                       textCapitalization: TextCapitalization.characters,
-                      decoration: const InputDecoration(labelText: 'Marca (Ex: FIAT)', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Marca (Ex: HONDA)',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     TextField(
                       controller: _modeloController,
                       textCapitalization: TextCapitalization.characters,
-                      decoration: const InputDecoration(labelText: 'Modelo (Ex: UNO)', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Modelo (Ex: BROS 160)',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     TextField(
                       controller: _placaController,
                       textCapitalization: TextCapitalization.characters,
-                      decoration: const InputDecoration(labelText: 'Placa (Ex: ABC-1234)', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Placa (Ex: ABC1A34)',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -76,13 +98,13 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
                       controller: _empresaController,
                       textCapitalization: TextCapitalization.characters,
                       decoration: const InputDecoration(
-                        labelText: 'Empresa', 
+                        labelText: 'Empresa',
                         hintText: 'Ex: SERTTEL',
-                        border: OutlineInputBorder()
+                        border: OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 24),
-                    
+
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -90,12 +112,26 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.indigo,
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        onPressed: _estaCarregando ? null : () => _salvarVeiculo(setModalState, veiculoId),
+                        onPressed: _estaCarregando
+                            ? null
+                            : () => _salvarVeiculo(setModalState, veiculoId),
                         child: _estaCarregando
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : Text(veiculoId == null ? 'Salvar Veículo' : 'Atualizar Veículo', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : Text(
+                                veiculoId == null
+                                    ? 'Salvar Veículo'
+                                    : 'Atualizar Veículo',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -103,18 +139,23 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
                 ),
               ),
             );
-          }
+          },
         );
       },
     );
   }
 
-  Future<void> _salvarVeiculo(StateSetter setModalState, String? veiculoId) async {
-    if (_marcaController.text.isEmpty || 
-        _modeloController.text.isEmpty || 
-        _placaController.text.isEmpty || 
+  Future<void> _salvarVeiculo(
+    StateSetter setModalState,
+    String? veiculoId,
+  ) async {
+    if (_marcaController.text.isEmpty ||
+        _modeloController.text.isEmpty ||
+        _placaController.text.isEmpty ||
         _empresaController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Preencha todos os campos!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha todos os campos!')),
+      );
       return;
     }
 
@@ -131,14 +172,19 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
       bool isDuplicado = false;
       for (var doc in placaExistente.docs) {
         if (veiculoId == null || doc.id != veiculoId) {
-          isDuplicado = true; 
+          isDuplicado = true;
           break;
         }
       }
 
       if (isDuplicado) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Esta placa já está cadastrada!'), backgroundColor: Colors.red));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Esta placa já está cadastrada!'),
+              backgroundColor: Colors.red,
+            ),
+          );
           setModalState(() => _estaCarregando = false);
         }
         return;
@@ -153,23 +199,37 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
       };
 
       if (veiculoId != null) {
-        await FirebaseFirestore.instance.collection('veiculos').doc(veiculoId).update(dadosVeiculo);
+        await FirebaseFirestore.instance
+            .collection('veiculos')
+            .doc(veiculoId)
+            .update(dadosVeiculo);
       } else {
-        await FirebaseFirestore.instance.collection('veiculos').add(dadosVeiculo);
+        await FirebaseFirestore.instance
+            .collection('veiculos')
+            .add(dadosVeiculo);
       }
 
       if (mounted) {
-        Navigator.pop(context); 
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(veiculoId == null ? 'Veículo salvo com sucesso!' : 'Veículo atualizado!'), 
-            backgroundColor: Colors.green
-          )
+            content: Text(
+              veiculoId == null
+                  ? 'Veículo salvo com sucesso!'
+                  : 'Veículo atualizado!',
+            ),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao salvar veículo.'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro ao salvar veículo.'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -184,20 +244,30 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
 
   // ==== FUNÇÃO PARA GERAR O PDF DOS VEÍCULOS ====
   Future<void> _gerarPDF() async {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gerando PDF... Aguarde!'), backgroundColor: Colors.indigo));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Gerando PDF... Aguarde!'),
+        backgroundColor: Colors.indigo,
+      ),
+    );
 
     try {
       // 1. Busca os veículos no banco de dados
-      final snapshot = await FirebaseFirestore.instance.collection('veiculos').orderBy('marca').get();
+      final snapshot = await FirebaseFirestore.instance
+          .collection('veiculos')
+          .orderBy('marca')
+          .get();
       final veiculos = snapshot.docs;
 
       // 2. Agrupa os veículos por empresa
       Map<String, List<Map<String, dynamic>>> veiculosPorEmpresa = {};
-      
+
       for (var doc in veiculos) {
         final data = doc.data();
-        final empresa = (data['empresa'] ?? 'NÃO INFORMADA').toString().toUpperCase();
-        
+        final empresa = (data['empresa'] ?? 'NÃO INFORMADA')
+            .toString()
+            .toUpperCase();
+
         if (!veiculosPorEmpresa.containsKey(empresa)) {
           veiculosPorEmpresa[empresa] = [];
         }
@@ -220,14 +290,27 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text('Relatório de Frota CTTU', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-                    pw.Text('Total de Veículos: ${veiculos.length}', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
-                  ]
-                )
+                    pw.Text(
+                      'Relatório de Frota CTTU',
+                      style: pw.TextStyle(
+                        fontSize: 24,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      'Total de Veículos: ${veiculos.length}',
+                      style: pw.TextStyle(
+                        fontSize: 16,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               pw.SizedBox(height: 24),
 
-              if (veiculosPorEmpresa.isEmpty) pw.Text('Nenhum veículo cadastrado no sistema.'),
+              if (veiculosPorEmpresa.isEmpty)
+                pw.Text('Nenhum veículo cadastrado no sistema.'),
 
               // Laço para desenhar a lista separada por empresa
               ...veiculosPorEmpresa.entries.map((entry) {
@@ -235,22 +318,32 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.SizedBox(height: 16),
-                    pw.Text('EMPRESA: ${entry.key}', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF3949AB))), // Cor índigo no título
+                    pw.Text(
+                      'EMPRESA: ${entry.key}',
+                      style: pw.TextStyle(
+                        fontSize: 16,
+                        fontWeight: pw.FontWeight.bold,
+                        color: const PdfColor.fromInt(0xFF3949AB),
+                      ),
+                    ), // Cor índigo no título
                     pw.Divider(),
                     pw.SizedBox(height: 8),
-                    ...entry.value.map((veiculo) => pw.Padding(
-                      padding: const pw.EdgeInsets.only(bottom: 6, left: 8),
-                      child: pw.Bullet(
-                        text: '${veiculo['marca']} ${veiculo['modelo']} | Placa: ${veiculo['placa']}', 
-                        style: const pw.TextStyle(fontSize: 14)
+                    ...entry.value.map(
+                      (veiculo) => pw.Padding(
+                        padding: const pw.EdgeInsets.only(bottom: 6, left: 8),
+                        child: pw.Bullet(
+                          text:
+                              '${veiculo['marca']} ${veiculo['modelo']} | Placa: ${veiculo['placa']}',
+                          style: const pw.TextStyle(fontSize: 14),
+                        ),
                       ),
-                    )),
-                  ]
+                    ),
+                  ],
                 );
               }),
             ];
-          }
-        )
+          },
+        ),
       );
 
       // 5. Exibe a pré-visualização para imprimir/salvar
@@ -258,10 +351,14 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
         onLayout: (PdfPageFormat format) async => pdf.save(),
         name: 'Relatorio_Frota_CTTU.pdf',
       );
-
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao gerar PDF!'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro ao gerar PDF!'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -274,14 +371,20 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
         backgroundColor: Colors.indigo.shade100,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('veiculos').orderBy('marca').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('veiculos')
+            .orderBy('marca')
+            .snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.hasError) return const Center(child: Text('Erro ao carregar veículos.'));
-          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+          if (snapshot.hasError)
+            return const Center(child: Text('Erro ao carregar veículos.'));
+          if (snapshot.connectionState == ConnectionState.waiting)
+            return const Center(child: CircularProgressIndicator());
 
           final veiculos = snapshot.data!.docs;
 
-          if (veiculos.isEmpty) return const Center(child: Text('Nenhum veículo cadastrado.'));
+          if (veiculos.isEmpty)
+            return const Center(child: Text('Nenhum veículo cadastrado.'));
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -298,14 +401,22 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
                     backgroundColor: Colors.indigo,
                     child: Icon(Icons.directions_car, color: Colors.white),
                   ),
-                  title: Text('${veiculoData['marca']} ${veiculoData['modelo']}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Placa: ${veiculoData['placa']}\nEmpresa: ${veiculoData['empresa']}'),
-                  isThreeLine: true, 
+                  title: Text(
+                    '${veiculoData['marca']} ${veiculoData['modelo']}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    'Placa: ${veiculoData['placa']}\nEmpresa: ${veiculoData['empresa']}',
+                  ),
+                  isThreeLine: true,
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                        icon: const Icon(
+                          Icons.edit_outlined,
+                          color: Colors.blue,
+                        ),
                         onPressed: () => _abrirFormularioCadastro(
                           veiculoId: veiculoDoc.id,
                           marcaAtual: veiculoData['marca'],
@@ -315,7 +426,10 @@ class _CadastroVeiculoState extends State<CadastroVeiculo> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
                         onPressed: () => _deletarVeiculo(veiculoDoc.id),
                       ),
                     ],
