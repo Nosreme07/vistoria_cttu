@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
-import 'package:http/http.dart' as http; 
-import 'package:url_launcher/url_launcher.dart'; 
-import 'package:flutter_map/flutter_map.dart'; 
-import 'package:latlong2/latlong.dart'; 
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 // Novas bibliotecas de suporte para a aba de relatórios
-import 'package:pdf/pdf.dart'; 
-import 'package:pdf/widgets.dart' as pw; 
-import 'package:printing/printing.dart'; 
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AcervoPage extends StatefulWidget {
   const AcervoPage({super.key});
@@ -22,12 +22,12 @@ class AcervoPage extends StatefulWidget {
 class _AcervoPageState extends State<AcervoPage> {
   List<dynamic> _todosSemaforos = [];
   List<dynamic> _semaforosFiltrados = [];
-  List<String> _listaRotasDisponiveis = ['Todas']; 
+  List<String> _listaRotasDisponiveis = ['Todas'];
   bool _carregando = true;
-  bool _sincronizandoComPlanilha = false; 
+  bool _sincronizandoComPlanilha = false;
   String _textoPesquisa = '';
-  String _rotaSelecionada = 'Todas'; 
-  String _rotaSelecionadaRelatorio = 'Todas'; 
+  String _rotaSelecionada = 'Todas';
+  String _rotaSelecionadaRelatorio = 'Todas';
   final TextEditingController _pesquisaController = TextEditingController();
 
   final List<String> _ordemCamposExibicao = [
@@ -43,7 +43,7 @@ class _AcervoPageState extends State<AcervoPage> {
     "TIPO DE CONTROLADOR",
     "EMPRESA",
     "ROTA",
-    "ORDEM", 
+    "ORDEM",
     "OBSERVAÇOES",
     "SUB-ÁREA (TRAFGO)",
     "LATITUDE",
@@ -72,7 +72,7 @@ class _AcervoPageState extends State<AcervoPage> {
     "Luminárias",
     "Conta-Contrato",
     "NÚMERO DO Medidor",
-    "Data de implantação"
+    "Data de implantação",
   ];
 
   @override
@@ -91,12 +91,12 @@ class _AcervoPageState extends State<AcervoPage> {
     if (semaforo.containsKey(chaveOriginal)) {
       return semaforo[chaveOriginal].toString();
     }
-    
+
     String chaveMinuscula = chaveOriginal.toLowerCase();
     if (semaforo.containsKey(chaveMinuscula)) {
       return semaforo[chaveMinuscula].toString();
     }
-    
+
     for (var entry in semaforo.entries) {
       if (entry.key.trim().toLowerCase() == chaveMinuscula) {
         return entry.value.toString();
@@ -104,43 +104,87 @@ class _AcervoPageState extends State<AcervoPage> {
     }
 
     if (chaveMinuscula == 'semáforo' || chaveMinuscula == 'semaforo') {
-      return (semaforo['id'] ?? semaforo['semáforo'] ?? semaforo['semaforo'] ?? '').toString();
+      return (semaforo['id'] ??
+              semaforo['semáforo'] ??
+              semaforo['semaforo'] ??
+              '')
+          .toString();
     }
     if (chaveMinuscula == 'endereço' || chaveMinuscula == 'endereco') {
       return (semaforo['endereco'] ?? semaforo['endereço'] ?? '').toString();
     }
     if (chaveMinuscula == 'observacoes' || chaveMinuscula == 'observaçoes') {
-      return (semaforo['observacoes'] ?? semaforo['observacoes_2'] ?? semaforo['observaçoes'] ?? '').toString();
+      return (semaforo['observacoes'] ??
+              semaforo['observacoes_2'] ??
+              semaforo['observaçoes'] ??
+              '')
+          .toString();
     }
-    if (chaveMinuscula == 'sub-área (trafgo)' || chaveMinuscula == 'sub-área (tráfego)') {
-      return (semaforo['sub-área (trafgo)'] ?? semaforo['subarea'] ?? semaforo['subareas'] ?? '').toString();
+    if (chaveMinuscula == 'sub-área (trafgo)' ||
+        chaveMinuscula == 'sub-área (tráfego)') {
+      return (semaforo['sub-área (trafgo)'] ??
+              semaforo['subarea'] ??
+              semaforo['subareas'] ??
+              '')
+          .toString();
     }
 
     return '';
   }
 
   Color _obterCorDaRota(String rota) {
-    String r = rota.trim().toUpperCase().replaceAll('ROTA', '').replaceAll(' ', '');
+    String r = rota
+        .trim()
+        .toUpperCase()
+        .replaceAll('ROTA', '')
+        .replaceAll(' ', '');
     if (r.isEmpty) return Colors.grey.shade600;
 
     switch (r) {
-      case '1': case '01': return Colors.blue.shade700;
-      case '2': case '02': return Colors.green.shade700;
-      case '3': case '03': return Colors.red.shade700;
-      case '4': case '04': return Colors.purple.shade700;
-      case '5': case '05': return Colors.amber.shade800;
-      case '6': case '06': return Colors.teal.shade700;
-      case '7': case '07': return Colors.indigo.shade700;
-      case '8': case '08': return Colors.pink.shade700;
-      case '9': case '09': return Colors.cyan.shade800;
-      case '10': return Colors.deepOrange.shade700;
+      case '1':
+      case '01':
+        return Colors.blue.shade700;
+      case '2':
+      case '02':
+        return Colors.green.shade700;
+      case '3':
+      case '03':
+        return Colors.red.shade700;
+      case '4':
+      case '04':
+        return Colors.purple.shade700;
+      case '5':
+      case '05':
+        return Colors.amber.shade800;
+      case '6':
+      case '06':
+        return Colors.teal.shade700;
+      case '7':
+      case '07':
+        return Colors.indigo.shade700;
+      case '8':
+      case '08':
+        return Colors.pink.shade700;
+      case '9':
+      case '09':
+        return Colors.cyan.shade800;
+      case '10':
+        return Colors.deepOrange.shade700;
       default:
         final int hash = r.hashCode;
         final List<Color> coresDisponiveis = [
-          Colors.blue.shade700, Colors.green.shade700, Colors.red.shade700,
-          Colors.purple.shade700, Colors.amber.shade800, Colors.teal.shade700,
-          Colors.indigo.shade700, Colors.pink.shade700, Colors.cyan.shade800,
-          Colors.deepOrange.shade700, Colors.brown.shade600, Colors.blueGrey.shade700
+          Colors.blue.shade700,
+          Colors.green.shade700,
+          Colors.red.shade700,
+          Colors.purple.shade700,
+          Colors.amber.shade800,
+          Colors.teal.shade700,
+          Colors.indigo.shade700,
+          Colors.pink.shade700,
+          Colors.cyan.shade800,
+          Colors.deepOrange.shade700,
+          Colors.brown.shade600,
+          Colors.blueGrey.shade700,
         ];
         return coresDisponiveis[hash.abs() % coresDisponiveis.length];
     }
@@ -149,7 +193,10 @@ class _AcervoPageState extends State<AcervoPage> {
   void _atualizarListaDeRotas() {
     Set<String> rotasSet = {};
     for (var semaforo in _todosSemaforos) {
-      String rotaRaw = _obterValorCampo(Map<String, dynamic>.from(semaforo), "ROTA").trim();
+      String rotaRaw = _obterValorCampo(
+        Map<String, dynamic>.from(semaforo),
+        "ROTA",
+      ).trim();
       if (rotaRaw.isNotEmpty) {
         if (!rotaRaw.toLowerCase().contains('rota')) {
           rotasSet.add('Rota ${rotaRaw.padLeft(2, '0')}');
@@ -159,7 +206,7 @@ class _AcervoPageState extends State<AcervoPage> {
       }
     }
     List<String> rotasOrdenadas = rotasSet.toList()..sort();
-    
+
     setState(() {
       _listaRotasDisponiveis = ['Todas', ...rotasOrdenadas];
       if (!_listaRotasDisponiveis.contains(_rotaSelecionada)) {
@@ -172,7 +219,9 @@ class _AcervoPageState extends State<AcervoPage> {
     setState(() => _carregando = true);
 
     try {
-      final String resposta = await rootBundle.loadString('assets/informacoes_gerais.json');
+      final String resposta = await rootBundle.loadString(
+        'assets/informacoes_gerais.json',
+      );
       final List<dynamic> dados = json.decode(resposta);
 
       setState(() {
@@ -183,7 +232,10 @@ class _AcervoPageState extends State<AcervoPage> {
       _aplicarFiltrosCombinados();
     } catch (e) {
       setState(() => _carregando = false);
-      _mostrarSnackBar('Aviso: Iniciado sem dados locais pré-carregados.', Colors.orange);
+      _mostrarSnackBar(
+        'Aviso: Iniciado sem dados locais pré-carregados.',
+        Colors.orange,
+      );
     }
   }
 
@@ -191,38 +243,69 @@ class _AcervoPageState extends State<AcervoPage> {
     if (_sincronizandoComPlanilha) return;
 
     setState(() => _sincronizandoComPlanilha = true);
-    _mostrarSnackBar('Sincronizando Planilha com o Firebase...', Colors.blueGrey);
+    _mostrarSnackBar(
+      'Sincronizando Planilha com o Firebase...',
+      Colors.blueGrey,
+    );
 
     try {
       final url = Uri.parse(
-          'https://docs.google.com/spreadsheets/d/1fUpL6AOxFmk_RI66E09asktSYi4vyoRQ2P8ivcfiivI/export?format=csv&gid=1606226965');
+        'https://docs.google.com/spreadsheets/d/1fUpL6AOxFmk_RI66E09asktSYi4vyoRQ2P8ivcfiivI/export?format=csv&gid=1606226965',
+      );
 
       final resposta = await http.get(url).timeout(const Duration(seconds: 15));
 
       if (resposta.statusCode == 200) {
         String csvDados = utf8.decode(resposta.bodyBytes);
-        List<Map<String, dynamic>> novosDados = _converterCsvParaLista(csvDados);
+        List<Map<String, dynamic>> novosDados = _converterCsvParaLista(
+          csvDados,
+        );
 
         if (novosDados.isNotEmpty) {
-          
           int contadorLote = 0;
           WriteBatch batch = FirebaseFirestore.instance.batch();
-          final colecaoSemaforos = FirebaseFirestore.instance.collection('semaforos');
+          final colecaoSemaforos = FirebaseFirestore.instance.collection(
+            'semaforos',
+          );
 
           for (var mapaSemaforo in novosDados) {
-            String idSemaforo = _obterValorCampo(mapaSemaforo, "SEMÁFORO").trim();
+            String idSemaforo = _obterValorCampo(
+              mapaSemaforo,
+              "SEMÁFORO",
+            ).trim();
             if (idSemaforo.isNotEmpty) {
-              
-Map<String, dynamic> dadosMapeadosParaFirebase = {
-                'id': idSemaforo,
-                'rota': _obterValorCampo(mapaSemaforo, "ROTA").trim(),
-                'endereco': _obterValorCampo(mapaSemaforo, "ENDEREÇO").trim(),
-                'georeferencia': _obterValorCampo(mapaSemaforo, "GEOREFERÊNCIA").trim(),
-                'ordem': _obterValorCampo(mapaSemaforo, "ORDEM").trim(), 
-                'bairro': _obterValorCampo(mapaSemaforo, "BAIRRO").trim(),
-              };
-              
-              batch.set(colecaoSemaforos.doc(idSemaforo), dadosMapeadosParaFirebase);
+              // ==== MODIFICADO: Salva TODAS as colunas da planilha no Firebase ====
+              Map<String, dynamic> dadosMapeadosParaFirebase =
+                  Map<String, dynamic>.from(mapaSemaforo);
+
+              // Mantém esses 6 nomes de chaves fixos para garantir que os filtros do mapa não quebrem
+              dadosMapeadosParaFirebase['id'] = idSemaforo;
+              dadosMapeadosParaFirebase['rota'] = _obterValorCampo(
+                mapaSemaforo,
+                "ROTA",
+              ).trim();
+              dadosMapeadosParaFirebase['endereco'] = _obterValorCampo(
+                mapaSemaforo,
+                "ENDEREÇO",
+              ).trim();
+              dadosMapeadosParaFirebase['georeferencia'] = _obterValorCampo(
+                mapaSemaforo,
+                "GEOREFERÊNCIA",
+              ).trim();
+              dadosMapeadosParaFirebase['ordem'] = _obterValorCampo(
+                mapaSemaforo,
+                "ORDEM",
+              ).trim();
+              dadosMapeadosParaFirebase['bairro'] = _obterValorCampo(
+                mapaSemaforo,
+                "BAIRRO",
+              ).trim();
+              // ====================================================================
+
+              batch.set(
+                colecaoSemaforos.doc(idSemaforo),
+                dadosMapeadosParaFirebase,
+              );
               contadorLote++;
 
               if (contadorLote == 400) {
@@ -242,7 +325,10 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
           });
           _atualizarListaDeRotas();
           _aplicarFiltrosCombinados();
-          _mostrarSnackBar('Sucesso! Semáforos salvos no App e no Firebase.', Colors.green);
+          _mostrarSnackBar(
+            'Sucesso! Semáforos salvos no App e no Firebase.',
+            Colors.green,
+          );
         } else {
           throw Exception('Planilha retornou vazia ou formato inválido.');
         }
@@ -256,21 +342,27 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
   }
 
   List<Map<String, dynamic>> _converterCsvParaLista(String csvText) {
-    List<List<String>> linhas = _parseCsvRobusto(csvText, csvText.contains(';') ? ';' : ',');
+    List<List<String>> linhas = _parseCsvRobusto(
+      csvText,
+      csvText.contains(';') ? ';' : ',',
+    );
     if (linhas.length <= 1) return [];
 
     List<Map<String, dynamic>> lista = [];
-    List<String> cabecalhos = linhas.first.map((h) => h.trim()).toList(); 
+    List<String> cabecalhos = linhas.first.map((h) => h.trim()).toList();
 
     for (int i = 1; i < linhas.length; i++) {
       List<String> colunas = linhas[i];
-      if (colunas.isEmpty || (colunas.length == 1 && colunas[0].trim().isEmpty)) continue;
+      if (colunas.isEmpty || (colunas.length == 1 && colunas[0].trim().isEmpty))
+        continue;
 
       Map<String, dynamic> mapaSemaforo = {};
       for (int j = 0; j < cabecalhos.length; j++) {
-        mapaSemaforo[cabecalhos[j]] = j < colunas.length ? colunas[j].trim() : '';
+        mapaSemaforo[cabecalhos[j]] = j < colunas.length
+            ? colunas[j].trim()
+            : '';
       }
-      
+
       String idStr = _obterValorCampo(mapaSemaforo, "SEMÁFORO");
       String endStr = _obterValorCampo(mapaSemaforo, "ENDEREÇO");
       if (idStr.isNotEmpty || endStr.isNotEmpty) {
@@ -285,14 +377,14 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
     List<String> currentRow = [];
     StringBuffer currentCell = StringBuffer();
     bool inQuotes = false;
-    
+
     for (int i = 0; i < text.length; i++) {
       String char = text[i];
-      
+
       if (char == '"') {
         if (inQuotes && i + 1 < text.length && text[i + 1] == '"') {
-          currentCell.write('"'); 
-          i++; 
+          currentCell.write('"');
+          i++;
         } else {
           inQuotes = !inQuotes;
         }
@@ -322,7 +414,7 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
     setState(() {
       _semaforosFiltrados = _todosSemaforos.where((item) {
         final Map<String, dynamic> semaforo = Map<String, dynamic>.from(item);
-        
+
         bool passaRota = false;
         if (_rotaSelecionada == 'Todas') {
           passaRota = true;
@@ -332,7 +424,9 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
           if (rotaRaw.isNotEmpty && !rotaRaw.toLowerCase().contains('rota')) {
             rotaFormatadaItem = 'Rota ${rotaRaw.padLeft(2, '0')}';
           }
-          passaRota = (rotaFormatadaItem.toLowerCase() == _rotaSelecionada.toLowerCase());
+          passaRota =
+              (rotaFormatadaItem.toLowerCase() ==
+              _rotaSelecionada.toLowerCase());
         }
 
         bool passaTexto = false;
@@ -340,12 +434,16 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
           passaTexto = true;
         } else {
           String numero = _obterValorCampo(semaforo, "SEMÁFORO").toLowerCase();
-          String endereco = _obterValorCampo(semaforo, "ENDEREÇO").toLowerCase();
+          String endereco = _obterValorCampo(
+            semaforo,
+            "ENDEREÇO",
+          ).toLowerCase();
           String bairro = _obterValorCampo(semaforo, "BAIRRO").toLowerCase();
 
-          passaTexto = numero.contains(_textoPesquisa) || 
-                       endereco.contains(_textoPesquisa) || 
-                       bairro.contains(_textoPesquisa);
+          passaTexto =
+              numero.contains(_textoPesquisa) ||
+              endereco.contains(_textoPesquisa) ||
+              bairro.contains(_textoPesquisa);
         }
 
         return passaRota && passaTexto;
@@ -354,28 +452,40 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
       // ==== MODIFICADO: ORDENAR PELO NÚMERO DO SEMÁFORO (MENOR PARA O MAIOR) ====
       _semaforosFiltrados.sort((a, b) {
         // Extrai apenas os números para ordenar perfeitamente (ex: 9 antes de 10)
-        String strA = _obterValorCampo(Map<String, dynamic>.from(a), "SEMÁFORO").replaceAll(RegExp(r'[^0-9]'), '');
-        String strB = _obterValorCampo(Map<String, dynamic>.from(b), "SEMÁFORO").replaceAll(RegExp(r'[^0-9]'), '');
-        
+        String strA = _obterValorCampo(
+          Map<String, dynamic>.from(a),
+          "SEMÁFORO",
+        ).replaceAll(RegExp(r'[^0-9]'), '');
+        String strB = _obterValorCampo(
+          Map<String, dynamic>.from(b),
+          "SEMÁFORO",
+        ).replaceAll(RegExp(r'[^0-9]'), '');
+
         int numA = int.tryParse(strA) ?? 999999;
         int numB = int.tryParse(strB) ?? 999999;
-        
+
         return numA.compareTo(numB);
       });
       // =========================================================================
-
     });
   }
 
   void _mostrarOpcoesGPS(BuildContext context, String georeferencia) {
     if (georeferencia.trim().isEmpty || !georeferencia.contains(',')) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Semáforo sem coordenadas válidas!'), backgroundColor: Colors.orange));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Semáforo sem coordenadas válidas!'),
+          backgroundColor: Colors.orange,
+        ),
+      );
       return;
     }
 
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
         return SafeArea(
           child: Padding(
@@ -383,20 +493,35 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Como deseja chegar ao semáforo?', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
+                const Text(
+                  'Como deseja chegar ao semáforo?',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueGrey,
+                  ),
+                ),
                 const SizedBox(height: 24),
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue.shade400, 
-                          foregroundColor: Colors.white, 
-                          padding: const EdgeInsets.symmetric(vertical: 14), 
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                          backgroundColor: Colors.blue.shade400,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         icon: const Icon(Icons.directions_car, size: 24),
-                        label: const Text('Waze', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                        label: const Text(
+                          'Waze',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         onPressed: () {
                           Navigator.pop(context);
                           _abrirAppNavegacao(context, georeferencia, 'waze');
@@ -407,13 +532,21 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                     Expanded(
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green.shade600, 
-                          foregroundColor: Colors.white, 
-                          padding: const EdgeInsets.symmetric(vertical: 14), 
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                          backgroundColor: Colors.green.shade600,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         icon: const Icon(Icons.map, size: 24),
-                        label: const Text('Google Maps', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                        label: const Text(
+                          'Google Maps',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         onPressed: () {
                           Navigator.pop(context);
                           _abrirAppNavegacao(context, georeferencia, 'maps');
@@ -426,11 +559,15 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
             ),
           ),
         );
-      }
+      },
     );
   }
 
-  Future<void> _abrirAppNavegacao(BuildContext context, String georeferencia, String app) async {
+  Future<void> _abrirAppNavegacao(
+    BuildContext context,
+    String georeferencia,
+    String app,
+  ) async {
     try {
       String geoLimpa = georeferencia.trim();
       List<String> partes = geoLimpa.split(',');
@@ -439,16 +576,21 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
       String lat = partes[0].trim();
       String lng = partes[1].trim();
 
-      Uri url = app == 'waze' 
+      Uri url = app == 'waze'
           ? Uri.parse('https://waze.com/ul?ll=$lat,$lng&navigate=yes')
-          : Uri.parse('http://maps.google.com/maps?daddr=$lat,$lng'); 
+          : Uri.parse('http://maps.google.com/maps?daddr=$lat,$lng');
 
       if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
         throw 'Erro ao abrir';
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Não foi possível abrir o $app.'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Não foi possível abrir o $app.'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -458,7 +600,10 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(mensagem, style: const TextStyle(fontWeight: FontWeight.w500)),
+        content: Text(
+          mensagem,
+          style: const TextStyle(fontWeight: FontWeight.w500),
+        ),
         backgroundColor: corFundo,
         duration: const Duration(seconds: 3),
       ),
@@ -466,7 +611,11 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
   }
 
   // POPUP MODAL DETALHADO DO SEMÁFORO
-  void _mostrarDetalhesSemaforo(Map<String, dynamic> semaforo, String numero, Color corRota) {
+  void _mostrarDetalhesSemaforo(
+    Map<String, dynamic> semaforo,
+    String numero,
+    Color corRota,
+  ) {
     String endereco = _obterValorCampo(semaforo, "ENDEREÇO");
     String bairro = _obterValorCampo(semaforo, "BAIRRO");
     String georef = _obterValorCampo(semaforo, "GEOREFERÊNCIA").trim();
@@ -477,9 +626,9 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return DraggableScrollableSheet(
-          initialChildSize: 0.75, 
+          initialChildSize: 0.75,
           minChildSize: 0.5,
-          maxChildSize: 0.95, 
+          maxChildSize: 0.95,
           builder: (_, scrollController) {
             return Container(
               decoration: const BoxDecoration(
@@ -497,13 +646,16 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  
+
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
                     child: Row(
                       children: [
                         CircleAvatar(
-                          backgroundColor: corRota, 
+                          backgroundColor: corRota,
                           radius: 26,
                           child: Text(
                             numero,
@@ -520,7 +672,9 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                endereco.isNotEmpty ? endereco : 'Semáforo Nº $numero',
+                                endereco.isNotEmpty
+                                    ? endereco
+                                    : 'Semáforo Nº $numero',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16.5,
@@ -531,7 +685,9 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                bairro.isNotEmpty ? bairro : 'Bairro não informado',
+                                bairro.isNotEmpty
+                                    ? bairro
+                                    : 'Bairro não informado',
                                 style: TextStyle(
                                   color: Colors.grey.shade600,
                                   fontSize: 13.5,
@@ -543,7 +699,7 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                         IconButton(
                           icon: const Icon(Icons.close, color: Colors.grey),
                           onPressed: () => Navigator.pop(context),
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -551,7 +707,11 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
 
                   if (georef.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 12.0),
+                      padding: const EdgeInsets.only(
+                        left: 20.0,
+                        right: 20.0,
+                        bottom: 12.0,
+                      ),
                       child: SizedBox(
                         width: double.infinity,
                         height: 48,
@@ -559,11 +719,19 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: corRota,
                             foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             elevation: 1,
                           ),
                           icon: const Icon(Icons.directions, size: 22),
-                          label: const Text('COMO CHEGAR (GPS)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          label: const Text(
+                            'COMO CHEGAR (GPS)',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
                           onPressed: () => _mostrarOpcoesGPS(context, georef),
                         ),
                       ),
@@ -572,11 +740,18 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                   Expanded(
                     child: ListView.builder(
                       controller: scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 4,
+                      ),
                       itemCount: _ordemCamposExibicao.length,
                       itemBuilder: (context, index) {
-                        final String chaveOriginal = _ordemCamposExibicao[index];
-                        String valor = _obterValorCampo(semaforo, chaveOriginal).trim();
+                        final String chaveOriginal =
+                            _ordemCamposExibicao[index];
+                        String valor = _obterValorCampo(
+                          semaforo,
+                          chaveOriginal,
+                        ).trim();
 
                         if (valor.isEmpty) {
                           valor = "-";
@@ -593,15 +768,24 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.label_important_outline, size: 18, color: corRota),
+                              Icon(
+                                Icons.label_important_outline,
+                                size: 18,
+                                color: corRota,
+                              ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: RichText(
                                   text: TextSpan(
-                                    style: const TextStyle(color: Colors.black87, fontSize: 14, height: 1.4),
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 14,
+                                      height: 1.4,
+                                    ),
                                     children: [
                                       TextSpan(
-                                        text: '${chaveOriginal.toUpperCase()}\n',
+                                        text:
+                                            '${chaveOriginal.toUpperCase()}\n',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.blueGrey,
@@ -611,9 +795,13 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                                       TextSpan(
                                         text: valor,
                                         style: TextStyle(
-                                          fontWeight: valor == "-" ? FontWeight.w300 : FontWeight.w400, 
+                                          fontWeight: valor == "-"
+                                              ? FontWeight.w300
+                                              : FontWeight.w400,
                                           fontSize: 14.5,
-                                          color: valor == "-" ? Colors.grey : Colors.black87
+                                          color: valor == "-"
+                                              ? Colors.grey
+                                              : Colors.black87,
                                         ),
                                       ),
                                     ],
@@ -649,28 +837,33 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
       if (rotaRaw.isNotEmpty && !rotaRaw.toLowerCase().contains('rota')) {
         rotaFormatadaItem = 'Rota ${rotaRaw.padLeft(2, '0')}';
       }
-      return (rotaFormatadaItem.toLowerCase() == _rotaSelecionadaRelatorio.toLowerCase());
+      return (rotaFormatadaItem.toLowerCase() ==
+          _rotaSelecionadaRelatorio.toLowerCase());
     }).toList();
   }
 
   Future<void> _exportarRelatorioPDF(List<dynamic> dados) async {
     if (dados.isEmpty) {
-      _mostrarSnackBar('Nenhum semáforo encontrado para exportação.', Colors.orange);
+      _mostrarSnackBar(
+        'Nenhum semáforo encontrado para exportação.',
+        Colors.orange,
+      );
       return;
     }
     _mostrarSnackBar('Gerando PDF do Relatório...', Colors.teal);
 
     try {
       final now = DateTime.now();
-      final String dataHoraAtual = "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
-      
+      final String dataHoraAtual =
+          "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
+
       await Printing.layoutPdf(
         name: 'Relatorio_${_rotaSelecionadaRelatorio.replaceAll(' ', '_')}.pdf',
         onLayout: (PdfPageFormat format) async {
           final pdf = pw.Document();
           pdf.addPage(
             pw.MultiPage(
-              pageFormat: format, 
+              pageFormat: format,
               margin: const pw.EdgeInsets.all(24),
               footer: (pw.Context context) {
                 return pw.Column(
@@ -679,29 +872,50 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                     pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                       children: [
-                        pw.Text('Gerado pelo sistema de vistoria da CTTU em $dataHoraAtual', style: const pw.TextStyle(fontSize: 9)),
-                        pw.Text('Pág. ${context.pageNumber} / ${context.pagesCount}', style: const pw.TextStyle(fontSize: 9)),
-                      ]
-                    )
-                  ]
+                        pw.Text(
+                          'Gerado pelo sistema de vistoria da CTTU em $dataHoraAtual',
+                          style: const pw.TextStyle(fontSize: 9),
+                        ),
+                        pw.Text(
+                          'Pág. ${context.pageNumber} / ${context.pagesCount}',
+                          style: const pw.TextStyle(fontSize: 9),
+                        ),
+                      ],
+                    ),
+                  ],
                 );
               },
               build: (pw.Context context) {
                 return [
                   pw.Header(
-                    level: 0, 
+                    level: 0,
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('Semáforos da Rota - CTTU', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-                        pw.Text('Filtro: $_rotaSelecionadaRelatorio | Total de registros: ${dados.length}', style: const pw.TextStyle(fontSize: 12)),
-                      ]
-                    )
+                        pw.Text(
+                          'Semáforos da Rota - CTTU',
+                          style: pw.TextStyle(
+                            fontSize: 18,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
+                        pw.Text(
+                          'Filtro: $_rotaSelecionadaRelatorio | Total de registros: ${dados.length}',
+                          style: const pw.TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
                   pw.SizedBox(height: 16),
                   pw.TableHelper.fromTextArray(
                     context: context,
-                    headers: ['SEMÁFORO', 'ENDEREÇO', 'BAIRRO', 'EMPRESA', 'ROTA'],
+                    headers: [
+                      'SEMÁFORO',
+                      'ENDEREÇO',
+                      'BAIRRO',
+                      'EMPRESA',
+                      'ROTA',
+                    ],
                     data: dados.map((item) {
                       final s = Map<String, dynamic>.from(item);
                       return [
@@ -714,16 +928,22 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                     }).toList(),
                     cellAlignment: pw.Alignment.center,
                     headerAlignment: pw.Alignment.center,
-                    headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8),
-                    headerDecoration: const pw.BoxDecoration(color: PdfColors.orange700),
+                    headerStyle: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.white,
+                      fontSize: 8,
+                    ),
+                    headerDecoration: const pw.BoxDecoration(
+                      color: PdfColors.orange700,
+                    ),
                     cellStyle: const pw.TextStyle(fontSize: 7),
                   ),
                 ];
-              }
-            )
+              },
+            ),
           );
           return pdf.save();
-        }
+        },
       );
     } catch (e) {
       _mostrarSnackBar('Erro ao gerar PDF!', Colors.red);
@@ -732,7 +952,10 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
 
   Future<void> _exportarRelatorioExcel(List<dynamic> dados) async {
     if (dados.isEmpty) {
-      _mostrarSnackBar('Nenhum semáforo encontrado para exportação.', Colors.orange);
+      _mostrarSnackBar(
+        'Nenhum semáforo encontrado para exportação.',
+        Colors.orange,
+      );
       return;
     }
     _mostrarSnackBar('Gerando Planilha Excel...', Colors.green);
@@ -740,12 +963,16 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
     try {
       StringBuffer excelBuffer = StringBuffer();
       excelBuffer.write('<!DOCTYPE html>');
-      excelBuffer.write('<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">');
+      excelBuffer.write(
+        '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">',
+      );
       excelBuffer.write('<head><meta charset="utf-8"></head>');
       excelBuffer.write('<body>');
       excelBuffer.write('<table border="1">');
-      
-      excelBuffer.write('<tr style="background-color: #E65100; color: white; font-weight: bold; text-align: center;">');
+
+      excelBuffer.write(
+        '<tr style="background-color: #E65100; color: white; font-weight: bold; text-align: center;">',
+      );
       excelBuffer.write('<td>SEMÁFORO</td>');
       excelBuffer.write('<td>ENDEREÇO</td>');
       excelBuffer.write('<td>BAIRRO</td>');
@@ -757,14 +984,14 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
       for (var item in dados) {
         if (item is! Map) continue;
         final s = Map<String, dynamic>.from(item);
-        
+
         String num = _obterValorCampo(s, "SEMÁFORO");
-        String endereco = _obterValorCampo(s, "ENDEREÇO"); 
+        String endereco = _obterValorCampo(s, "ENDEREÇO");
         String bairro = _obterValorCampo(s, "BAIRRO");
         String empresa = _obterValorCampo(s, "EMPRESA");
         String rota = _obterValorCampo(s, "ROTA");
         String coords = _obterValorCampo(s, "GEOREFERÊNCIA");
-        
+
         excelBuffer.write('<tr>');
         excelBuffer.write('<td style="text-align: center;">$num</td>');
         excelBuffer.write('<td>$endereco</td>');
@@ -779,19 +1006,19 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
       excelBuffer.write('</body>');
       excelBuffer.write('</html>');
 
-      final String nomeArquivo = 'Relatorio_${_rotaSelecionadaRelatorio.replaceAll(' ', '_')}.xls';
-      
+      final String nomeArquivo =
+          'Relatorio_${_rotaSelecionadaRelatorio.replaceAll(' ', '_')}.xls';
+
       final bytes = utf8.encode(excelBuffer.toString());
       final xFile = XFile.fromData(
         Uint8List.fromList(bytes),
         name: nomeArquivo,
-        mimeType: 'application/vnd.ms-excel', 
+        mimeType: 'application/vnd.ms-excel',
       );
 
-      await Share.shareXFiles(
-        [xFile], 
-        text: 'Relatório CTTU - Rota $_rotaSelecionadaRelatorio'
-      );
+      await Share.shareXFiles([
+        xFile,
+      ], text: 'Relatório CTTU - Rota $_rotaSelecionadaRelatorio');
     } catch (e) {
       debugPrint('Erro detalhado da Planilha: $e');
       _mostrarSnackBar('Erro ao gerar Planilha: $e', Colors.red);
@@ -815,7 +1042,11 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                 children: [
                   Text(
                     'Exportação de Relatórios Gerenciais',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                   SizedBox(height: 6),
                   Text(
@@ -827,19 +1058,28 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           InputDecorator(
             decoration: InputDecoration(
               labelText: 'Selecione a Rota para o Relatório',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               filled: true,
               fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 4,
+              ),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _rotaSelecionadaRelatorio,
-                style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
                 isExpanded: true,
                 items: _listaRotasDisponiveis.map((String rota) {
                   return DropdownMenuItem(value: rota, child: Text(rota));
@@ -855,7 +1095,7 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
             ),
           ),
           const SizedBox(height: 20),
-          
+
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -865,17 +1105,25 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.info_outline, color: Colors.orange.shade800, size: 20),
+                Icon(
+                  Icons.info_outline,
+                  color: Colors.orange.shade800,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Registros encontrados para exportação: ${dadosRelatorio.length}',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900, fontSize: 13.5),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade900,
+                    fontSize: 13.5,
+                  ),
                 ),
               ],
             ),
           ),
           const Spacer(),
-          
+
           Row(
             children: [
               Expanded(
@@ -884,10 +1132,15 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                     backgroundColor: Colors.red.shade700,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text('EXPORTAR PDF', style: TextStyle(fontWeight: FontWeight.bold)),
+                  label: const Text(
+                    'EXPORTAR PDF',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   onPressed: () => _exportarRelatorioPDF(dadosRelatorio),
                 ),
               ),
@@ -898,10 +1151,15 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                     backgroundColor: Colors.green.shade700,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   icon: const Icon(Icons.grid_on),
-                  label: const Text('EXPORTAR EXCEL', style: TextStyle(fontWeight: FontWeight.bold)),
+                  label: const Text(
+                    'EXPORTAR EXCEL',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   onPressed: () => _exportarRelatorioExcel(dadosRelatorio),
                 ),
               ),
@@ -919,7 +1177,10 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Acervo de Semáforos', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: const Text(
+            'Acervo de Semáforos',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           backgroundColor: Colors.orange.shade500,
           foregroundColor: Colors.white,
           elevation: 2,
@@ -956,7 +1217,10 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                       child: SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
                       ),
                     ),
                   )
@@ -991,17 +1255,23 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                               flex: 4,
                               child: TextField(
                                 controller: _pesquisaController,
-                                textInputAction: TextInputAction.search, 
+                                textInputAction: TextInputAction.search,
                                 onChanged: (busca) {
                                   _textoPesquisa = busca.toLowerCase();
                                   _aplicarFiltrosCombinados();
                                 },
                                 decoration: InputDecoration(
                                   labelText: 'Pesquisar...',
-                                  prefixIcon: const Icon(Icons.search, color: Colors.orange),
+                                  prefixIcon: const Icon(
+                                    Icons.search,
+                                    color: Colors.orange,
+                                  ),
                                   suffixIcon: _textoPesquisa.isNotEmpty
                                       ? IconButton(
-                                          icon: const Icon(Icons.clear, size: 20),
+                                          icon: const Icon(
+                                            Icons.clear,
+                                            size: 20,
+                                          ),
                                           onPressed: () {
                                             _pesquisaController.clear();
                                             _textoPesquisa = '';
@@ -1015,7 +1285,10 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                                   ),
                                   filled: true,
                                   fillColor: Colors.white,
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
                                   isDense: true,
                                 ),
                               ),
@@ -1025,23 +1298,34 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                               flex: 3,
                               child: InputDecorator(
                                 decoration: InputDecoration(
-                                  labelText: 'Rota', 
+                                  labelText: 'Rota',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide.none,
                                   ),
                                   filled: true,
                                   fillColor: Colors.white,
-                                  contentPadding: const EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+                                  contentPadding: const EdgeInsets.only(
+                                    left: 10,
+                                    right: 10,
+                                    top: 4,
+                                    bottom: 4,
+                                  ),
                                   isDense: true,
                                 ),
                                 child: DropdownButtonHideUnderline(
                                   child: DropdownButton<String>(
                                     value: _rotaSelecionada,
-                                    style: const TextStyle(color: Colors.black87, fontSize: 13.5, fontWeight: FontWeight.w500),
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                     isExpanded: true,
                                     icon: const Icon(Icons.arrow_drop_down),
-                                    items: _listaRotasDisponiveis.map((String rotaItem) {
+                                    items: _listaRotasDisponiveis.map((
+                                      String rotaItem,
+                                    ) {
                                       return DropdownMenuItem<String>(
                                         value: rotaItem,
                                         child: Text(rotaItem),
@@ -1060,19 +1344,28 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                           ],
                         ),
                       ),
-                      
+
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               'Mostrando ${_semaforosFiltrados.length} semáforos',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade700),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade700,
+                              ),
                             ),
                             Text(
                               'Base: ${_todosSemaforos.length}',
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
@@ -1083,48 +1376,88 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                             ? const Center(
                                 child: Text(
                                   'Nenhum semáforo encontrado.',
-                                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               )
                             : ListView.builder(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 4,
+                                ),
                                 itemCount: _semaforosFiltrados.length,
                                 itemBuilder: (context, index) {
-                                  final Map<String, dynamic> semaforo = Map<String, dynamic>.from(_semaforosFiltrados[index]);
-                                  
-                                  String numero = _obterValorCampo(semaforo, "SEMÁFORO");
-                                  String endereco = _obterValorCampo(semaforo, "ENDEREÇO");
-                                  String bairro = _obterValorCampo(semaforo, "BAIRRO");
-                                  String empresa = _obterValorCampo(semaforo, "EMPRESA");
-                                  String rotaRaw = _obterValorCampo(semaforo, "ROTA");
+                                  final Map<String, dynamic> semaforo =
+                                      Map<String, dynamic>.from(
+                                        _semaforosFiltrados[index],
+                                      );
+
+                                  String numero = _obterValorCampo(
+                                    semaforo,
+                                    "SEMÁFORO",
+                                  );
+                                  String endereco = _obterValorCampo(
+                                    semaforo,
+                                    "ENDEREÇO",
+                                  );
+                                  String bairro = _obterValorCampo(
+                                    semaforo,
+                                    "BAIRRO",
+                                  );
+                                  String empresa = _obterValorCampo(
+                                    semaforo,
+                                    "EMPRESA",
+                                  );
+                                  String rotaRaw = _obterValorCampo(
+                                    semaforo,
+                                    "ROTA",
+                                  );
 
                                   if (numero.isEmpty) numero = 'N/A';
-                                  if (endereco.isEmpty) endereco = 'Sem endereço';
+                                  if (endereco.isEmpty)
+                                    endereco = 'Sem endereço';
                                   if (empresa.isEmpty) empresa = 'S/E';
 
                                   String rotaFormatada = rotaRaw;
-                                  if (rotaRaw.isNotEmpty && !rotaRaw.toLowerCase().contains('rota')) {
-                                    rotaFormatada = 'ROTA ${rotaRaw.padLeft(2, '0')}';
+                                  if (rotaRaw.isNotEmpty &&
+                                      !rotaRaw.toLowerCase().contains('rota')) {
+                                    rotaFormatada =
+                                        'ROTA ${rotaRaw.padLeft(2, '0')}';
                                   } else if (rotaRaw.isEmpty) {
                                     rotaFormatada = 'SEM ROTA';
                                   }
 
-                                  final Color corDaRota = _obterCorDaRota(rotaRaw);
+                                  final Color corDaRota = _obterCorDaRota(
+                                    rotaRaw,
+                                  );
 
-                                  String tituloCard = "$numero - $endereco${bairro.isNotEmpty ? ' ($bairro)' : ''}";
-                                  String subtituloCard = "$empresa - $rotaFormatada";
+                                  String tituloCard =
+                                      "$numero - $endereco${bairro.isNotEmpty ? ' ($bairro)' : ''}";
+                                  String subtituloCard =
+                                      "$empresa - $rotaFormatada";
 
                                   return Card(
                                     elevation: 2,
-                                    margin: const EdgeInsets.symmetric(vertical: 6),
+                                    margin: const EdgeInsets.symmetric(
+                                      vertical: 6,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: InkWell(
                                       borderRadius: BorderRadius.circular(12),
-                                      onTap: () => _mostrarDetalhesSemaforo(semaforo, numero, corDaRota),
+                                      onTap: () => _mostrarDetalhesSemaforo(
+                                        semaforo,
+                                        numero,
+                                        corDaRota,
+                                      ),
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 12,
+                                          horizontal: 16,
+                                        ),
                                         child: Row(
                                           children: [
                                             CircleAvatar(
@@ -1142,31 +1475,40 @@ Map<String, dynamic> dadosMapeadosParaFirebase = {
                                             const SizedBox(width: 16),
                                             Expanded(
                                               child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
                                                     tituloCard,
                                                     style: const TextStyle(
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       fontSize: 14.5,
                                                       color: Colors.black87,
                                                     ),
                                                     maxLines: 2,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
                                                   const SizedBox(height: 4),
                                                   Text(
                                                     subtituloCard,
                                                     style: TextStyle(
-                                                      color: Colors.grey.shade700, 
+                                                      color:
+                                                          Colors.grey.shade700,
                                                       fontSize: 12.5,
-                                                      fontWeight: FontWeight.w500
+                                                      fontWeight:
+                                                          FontWeight.w500,
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                             ),
-                                            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade400),
+                                            Icon(
+                                              Icons.arrow_forward_ios,
+                                              size: 16,
+                                              color: Colors.grey.shade400,
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -1191,10 +1533,10 @@ class TelaMapa extends StatefulWidget {
   final List<String> ordemCamposExibicao;
 
   const TelaMapa({
-    super.key, 
-    required this.todosSemaforos, 
+    super.key,
+    required this.todosSemaforos,
     required this.listaRotasDisponiveis,
-    required this.ordemCamposExibicao
+    required this.ordemCamposExibicao,
   });
 
   @override
@@ -1203,17 +1545,17 @@ class TelaMapa extends StatefulWidget {
 
 class _TelaMapaState extends State<TelaMapa> {
   List<dynamic> _semaforosFiltradosNoMapa = [];
-  List<String> _listaEmpresasDisponiveis = ['Todas']; 
+  List<String> _listaEmpresasDisponiveis = ['Todas'];
   String _textoPesquisa = '';
   String _rotaSelecionada = 'Todas';
-  String _empresaSelecionada = 'Todas'; 
+  String _empresaSelecionada = 'Todas';
   final TextEditingController _mapPesquisaController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _semaforosFiltradosNoMapa = widget.todosSemaforos;
-    _atualizarListaDeEmpresas(); 
+    _atualizarListaDeEmpresas();
   }
 
   @override
@@ -1223,14 +1565,21 @@ class _TelaMapaState extends State<TelaMapa> {
   }
 
   String _obterValorCampo(Map<String, dynamic> semaforo, String chaveOriginal) {
-    if (semaforo.containsKey(chaveOriginal)) return semaforo[chaveOriginal].toString();
+    if (semaforo.containsKey(chaveOriginal))
+      return semaforo[chaveOriginal].toString();
     String chaveMinuscula = chaveOriginal.toLowerCase();
-    if (semaforo.containsKey(chaveMinuscula)) return semaforo[chaveMinuscula].toString();
+    if (semaforo.containsKey(chaveMinuscula))
+      return semaforo[chaveMinuscula].toString();
     for (var entry in semaforo.entries) {
-      if (entry.key.trim().toLowerCase() == chaveMinuscula) return entry.value.toString();
+      if (entry.key.trim().toLowerCase() == chaveMinuscula)
+        return entry.value.toString();
     }
     if (chaveMinuscula == 'semáforo' || chaveMinuscula == 'semaforo') {
-      return (semaforo['id'] ?? semaforo['semáforo'] ?? semaforo['semaforo'] ?? '').toString();
+      return (semaforo['id'] ??
+              semaforo['semáforo'] ??
+              semaforo['semaforo'] ??
+              '')
+          .toString();
     }
     if (chaveMinuscula == 'endereço' || chaveMinuscula == 'endereco') {
       return (semaforo['endereco'] ?? semaforo['endereço'] ?? '').toString();
@@ -1242,19 +1591,42 @@ class _TelaMapaState extends State<TelaMapa> {
   }
 
   Color _obterCorDaRota(String rota) {
-    String r = rota.trim().toUpperCase().replaceAll('ROTA', '').replaceAll(' ', '');
+    String r = rota
+        .trim()
+        .toUpperCase()
+        .replaceAll('ROTA', '')
+        .replaceAll(' ', '');
     if (r.isEmpty) return Colors.grey.shade600;
     switch (r) {
-      case '1': case '01': return Colors.blue.shade700;
-      case '2': case '02': return Colors.green.shade700;
-      case '3': case '03': return Colors.red.shade700;
-      case '4': case '04': return Colors.purple.shade700;
-      case '5': case '05': return Colors.amber.shade800;
-      case '6': case '06': return Colors.teal.shade700;
-      case '7': case '07': return Colors.indigo.shade700;
-      case '8': case '08': return Colors.pink.shade700;
-      case '9': case '09': return Colors.cyan.shade800;
-      case '10': return Colors.deepOrange.shade700;
+      case '1':
+      case '01':
+        return Colors.blue.shade700;
+      case '2':
+      case '02':
+        return Colors.green.shade700;
+      case '3':
+      case '03':
+        return Colors.red.shade700;
+      case '4':
+      case '04':
+        return Colors.purple.shade700;
+      case '5':
+      case '05':
+        return Colors.amber.shade800;
+      case '6':
+      case '06':
+        return Colors.teal.shade700;
+      case '7':
+      case '07':
+        return Colors.indigo.shade700;
+      case '8':
+      case '08':
+        return Colors.pink.shade700;
+      case '9':
+      case '09':
+        return Colors.cyan.shade800;
+      case '10':
+        return Colors.deepOrange.shade700;
       default:
         return Colors.blueGrey.shade700;
     }
@@ -1279,7 +1651,7 @@ class _TelaMapaState extends State<TelaMapa> {
     setState(() {
       _semaforosFiltradosNoMapa = widget.todosSemaforos.where((item) {
         final Map<String, dynamic> semaforo = Map<String, dynamic>.from(item);
-        
+
         bool passaRota = false;
         if (_rotaSelecionada == 'Todas') {
           passaRota = true;
@@ -1289,7 +1661,9 @@ class _TelaMapaState extends State<TelaMapa> {
           if (rotaRaw.isNotEmpty && !rotaRaw.toLowerCase().contains('rota')) {
             rotaFormatadaItem = 'Rota ${rotaRaw.padLeft(2, '0')}';
           }
-          passaRota = (rotaFormatadaItem.toLowerCase() == _rotaSelecionada.toLowerCase());
+          passaRota =
+              (rotaFormatadaItem.toLowerCase() ==
+              _rotaSelecionada.toLowerCase());
         }
 
         bool passaEmpresa = false;
@@ -1297,7 +1671,8 @@ class _TelaMapaState extends State<TelaMapa> {
           passaEmpresa = true;
         } else {
           String empRaw = _obterValorCampo(semaforo, "EMPRESA").trim();
-          passaEmpresa = (empRaw.toLowerCase() == _empresaSelecionada.toLowerCase());
+          passaEmpresa =
+              (empRaw.toLowerCase() == _empresaSelecionada.toLowerCase());
         }
 
         bool passaTexto = false;
@@ -1305,12 +1680,16 @@ class _TelaMapaState extends State<TelaMapa> {
           passaTexto = true;
         } else {
           String numero = _obterValorCampo(semaforo, "SEMÁFORO").toLowerCase();
-          String endereco = _obterValorCampo(semaforo, "ENDEREÇO").toLowerCase();
+          String endereco = _obterValorCampo(
+            semaforo,
+            "ENDEREÇO",
+          ).toLowerCase();
           String bairro = _obterValorCampo(semaforo, "BAIRRO").toLowerCase();
 
-          passaTexto = numero.contains(_textoPesquisa) || 
-                       endereco.contains(_textoPesquisa) || 
-                       bairro.contains(_textoPesquisa);
+          passaTexto =
+              numero.contains(_textoPesquisa) ||
+              endereco.contains(_textoPesquisa) ||
+              bairro.contains(_textoPesquisa);
         }
 
         return passaRota && passaEmpresa && passaTexto;
@@ -1326,7 +1705,9 @@ class _TelaMapaState extends State<TelaMapa> {
 
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
         return SafeArea(
           child: Padding(
@@ -1335,16 +1716,30 @@ class _TelaMapaState extends State<TelaMapa> {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade400, foregroundColor: Colors.white),
-                    onPressed: () => launchUrl(Uri.parse('https://waze.com/ul?ll=$lat,$lng&navigate=yes'), mode: LaunchMode.externalApplication),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade400,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () => launchUrl(
+                      Uri.parse(
+                        'https://waze.com/ul?ll=$lat,$lng&navigate=yes',
+                      ),
+                      mode: LaunchMode.externalApplication,
+                    ),
                     child: const Text('Waze'),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade600, foregroundColor: Colors.white),
-                    onPressed: () => launchUrl(Uri.parse('http://maps.google.com/maps?daddr=$lat,$lng'), mode: LaunchMode.externalApplication),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green.shade600,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () => launchUrl(
+                      Uri.parse('http://maps.google.com/maps?daddr=$lat,$lng'),
+                      mode: LaunchMode.externalApplication,
+                    ),
                     child: const Text('Google Maps'),
                   ),
                 ),
@@ -1352,11 +1747,15 @@ class _TelaMapaState extends State<TelaMapa> {
             ),
           ),
         );
-      }
+      },
     );
   }
 
-  void _mostrarDetalhesSemaforoNoMapa(Map<String, dynamic> semaforo, String numero, Color corRota) {
+  void _mostrarDetalhesSemaforoNoMapa(
+    Map<String, dynamic> semaforo,
+    String numero,
+    Color corRota,
+  ) {
     String endereco = _obterValorCampo(semaforo, "ENDEREÇO");
     String bairro = _obterValorCampo(semaforo, "BAIRRO");
     String georef = _obterValorCampo(semaforo, "GEOREFERÊNCIA").trim();
@@ -1367,37 +1766,101 @@ class _TelaMapaState extends State<TelaMapa> {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return DraggableScrollableSheet(
-          initialChildSize: 0.75, 
+          initialChildSize: 0.75,
           builder: (_, scrollController) {
             return Container(
-              decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
               child: Column(
                 children: [
-                  Container(margin: const EdgeInsets.symmetric(vertical: 12), height: 5, width: 50, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10))),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    height: 5,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
                     child: Row(
                       children: [
-                        CircleAvatar(backgroundColor: corRota, radius: 26, child: Text(numero, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                        CircleAvatar(
+                          backgroundColor: corRota,
+                          radius: 26,
+                          child: Text(
+                            numero,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                         const SizedBox(width: 16),
-                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(endereco.isNotEmpty ? endereco : 'Semáforo Nº $numero', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.5), maxLines: 2, overflow: TextOverflow.ellipsis),
-                          Text(bairro.isNotEmpty ? bairro : 'Bairro não informado', style: TextStyle(color: Colors.grey.shade600, fontSize: 13.5)),
-                        ])),
-                        IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context))
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                endereco.isNotEmpty
+                                    ? endereco
+                                    : 'Semáforo Nº $numero',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.5,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                bairro.isNotEmpty
+                                    ? bairro
+                                    : 'Bairro não informado',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 13.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
                       ],
                     ),
                   ),
                   const Divider(thickness: 1, height: 20),
                   if (georef.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 12.0),
+                      padding: const EdgeInsets.only(
+                        left: 20.0,
+                        right: 20.0,
+                        bottom: 12.0,
+                      ),
                       child: SizedBox(
-                        width: double.infinity, height: 48,
+                        width: double.infinity,
+                        height: 48,
                         child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(backgroundColor: corRota, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: corRota,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                           icon: const Icon(Icons.directions),
-                          label: const Text('COMO CHEGAR (GPS)', style: TextStyle(fontWeight: FontWeight.bold)),
+                          label: const Text(
+                            'COMO CHEGAR (GPS)',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           onPressed: () => _mostrarOpcoesGPS(context, georef),
                         ),
                       ),
@@ -1408,21 +1871,59 @@ class _TelaMapaState extends State<TelaMapa> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       itemCount: widget.ordemCamposExibicao.length,
                       itemBuilder: (context, index) {
-                        final String chaveOriginal = widget.ordemCamposExibicao[index];
-                        String valor = _obterValorCampo(semaforo, chaveOriginal).trim();
+                        final String chaveOriginal =
+                            widget.ordemCamposExibicao[index];
+                        String valor = _obterValorCampo(
+                          semaforo,
+                          chaveOriginal,
+                        ).trim();
                         if (valor.isEmpty) valor = "-";
 
                         return Container(
-                          margin: const EdgeInsets.symmetric(vertical: 4), padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.grey.shade200)),
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
                           child: Row(
                             children: [
-                              Icon(Icons.label_important_outline, size: 18, color: corRota),
+                              Icon(
+                                Icons.label_important_outline,
+                                size: 18,
+                                color: corRota,
+                              ),
                               const SizedBox(width: 10),
-                              Expanded(child: RichText(text: TextSpan(style: const TextStyle(color: Colors.black87, fontSize: 14), children: [
-                                TextSpan(text: '${chaveOriginal.toUpperCase()}\n', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey, fontSize: 11.5)),
-                                TextSpan(text: valor, style: TextStyle(color: valor == "-" ? Colors.grey : Colors.black87)),
-                              ]))),
+                              Expanded(
+                                child: RichText(
+                                  text: TextSpan(
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 14,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text:
+                                            '${chaveOriginal.toUpperCase()}\n',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blueGrey,
+                                          fontSize: 11.5,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: valor,
+                                        style: TextStyle(
+                                          color: valor == "-"
+                                              ? Colors.grey
+                                              : Colors.black87,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         );
@@ -1443,7 +1944,7 @@ class _TelaMapaState extends State<TelaMapa> {
     for (var item in _semaforosFiltradosNoMapa) {
       final Map<String, dynamic> semaforo = Map<String, dynamic>.from(item);
       String georef = _obterValorCampo(semaforo, "GEOREFERÊNCIA").trim();
-      
+
       if (georef.contains(',')) {
         List<String> partes = georef.split(',');
         double? lat = double.tryParse(partes[0].trim());
@@ -1460,18 +1961,29 @@ class _TelaMapaState extends State<TelaMapa> {
               width: 38,
               height: 38,
               child: GestureDetector(
-                onTap: () => _mostrarDetalhesSemaforoNoMapa(semaforo, numero, corDaRota),
+                onTap: () =>
+                    _mostrarDetalhesSemaforoNoMapa(semaforo, numero, corDaRota),
                 child: Container(
                   decoration: BoxDecoration(
                     color: corDaRota,
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
-                    boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Center(
                     child: Text(
                       numero,
-                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -1488,7 +2000,10 @@ class _TelaMapaState extends State<TelaMapa> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Visão do Mapa', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Visão do Mapa',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.orange.shade500,
         foregroundColor: Colors.white,
       ),
@@ -1508,9 +2023,17 @@ class _TelaMapaState extends State<TelaMapa> {
                   decoration: InputDecoration(
                     labelText: 'Pesquisar semáforo, endereço ou bairro...',
                     prefixIcon: const Icon(Icons.search, color: Colors.orange),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                    filled: true, fillColor: Colors.white, isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -1519,18 +2042,39 @@ class _TelaMapaState extends State<TelaMapa> {
                     Expanded(
                       child: InputDecorator(
                         decoration: InputDecoration(
-                          labelText: 'Rota', 
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                          filled: true, fillColor: Colors.white, isDense: true,
-                          contentPadding: const EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+                          labelText: 'Rota',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.only(
+                            left: 10,
+                            right: 10,
+                            top: 4,
+                            bottom: 4,
+                          ),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _rotaSelecionada,
-                            style: const TextStyle(color: Colors.black87, fontSize: 13.5, fontWeight: FontWeight.w500),
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w500,
+                            ),
                             isExpanded: true,
                             icon: const Icon(Icons.arrow_drop_down),
-                            items: widget.listaRotasDisponiveis.map((String rota) => DropdownMenuItem(value: rota, child: Text(rota))).toList(),
+                            items: widget.listaRotasDisponiveis
+                                .map(
+                                  (String rota) => DropdownMenuItem(
+                                    value: rota,
+                                    child: Text(rota),
+                                  ),
+                                )
+                                .toList(),
                             onChanged: (val) {
                               if (val != null) {
                                 _rotaSelecionada = val;
@@ -1545,18 +2089,39 @@ class _TelaMapaState extends State<TelaMapa> {
                     Expanded(
                       child: InputDecorator(
                         decoration: InputDecoration(
-                          labelText: 'Empresa', 
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                          filled: true, fillColor: Colors.white, isDense: true,
-                          contentPadding: const EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+                          labelText: 'Empresa',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.only(
+                            left: 10,
+                            right: 10,
+                            top: 4,
+                            bottom: 4,
+                          ),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _empresaSelecionada,
-                            style: const TextStyle(color: Colors.black87, fontSize: 13.5, fontWeight: FontWeight.w500),
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w500,
+                            ),
                             isExpanded: true,
                             icon: const Icon(Icons.arrow_drop_down),
-                            items: _listaEmpresasDisponiveis.map((String empresa) => DropdownMenuItem(value: empresa, child: Text(empresa))).toList(),
+                            items: _listaEmpresasDisponiveis
+                                .map(
+                                  (String empresa) => DropdownMenuItem(
+                                    value: empresa,
+                                    child: Text(empresa),
+                                  ),
+                                )
+                                .toList(),
                             onChanged: (val) {
                               if (val != null) {
                                 _empresaSelecionada = val;
@@ -1575,7 +2140,7 @@ class _TelaMapaState extends State<TelaMapa> {
           Expanded(
             child: FlutterMap(
               options: const MapOptions(
-                initialCenter: LatLng(-8.05428, -34.8813), 
+                initialCenter: LatLng(-8.05428, -34.8813),
                 initialZoom: 13.0,
               ),
               children: [
