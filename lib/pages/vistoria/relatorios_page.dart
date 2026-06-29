@@ -32,7 +32,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
   // ==== ESTADOS DA ABA EXPORTAÇÃO ====
   DateTime? _deExport;
   DateTime? _ateExport;
-  String _rotaExport = 'Todas'; // Base inicial é Todas as Rotas
+  String _rotaExport = 'Todas';
 
   // ==== ESTADOS DA ABA PENDÊNCIAS ====
   DateTime _mesPendencia = DateTime(
@@ -49,7 +49,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
 
-    // Define o mês em curso automaticamente ao abrir a tela
     DateTime agora = DateTime.now();
     _deConsulta = DateTime(agora.year, agora.month, 1);
     _ateConsulta = DateTime(agora.year, agora.month + 1, 0, 23, 59, 59);
@@ -329,7 +328,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     );
   }
 
-  // ==== RODAPÉ FIXO DO PDF ====
   pw.Widget _buildRodapePDF(pw.Context context, String dataHora) {
     return pw.Container(
       alignment: pw.Alignment.bottomCenter,
@@ -1069,7 +1067,55 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     }
   }
 
-  // ==== NOVO: MODAL PARA ESCOLHER DATA E ROTA EXCLUSIVO PARA O RELATÓRIO DO DIA ====
+  Future<void> _realizarExportacao(
+    String tipoExportacao,
+    Map<String, String> mapaRotas,
+    List<Map<String, dynamic>> todosSemaforosData,
+  ) async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('vistorias')
+        .where('criado_em', isGreaterThanOrEqualTo: _deExport)
+        .where('criado_em', isLessThanOrEqualTo: _ateExport)
+        .orderBy('criado_em', descending: true)
+        .get();
+    List<Map<String, dynamic>> vistoriasFiltradas = [];
+    String rotaSelecionadaLimpa = _rotaExport.replaceFirst(RegExp(r'^0+'), '');
+
+    for (var doc in snapshot.docs) {
+      var data = doc.data() as Map<String, dynamic>;
+      String rotaDesteSemaforo =
+          mapaRotas[data['semaforo_id'].toString()] ?? '';
+      if (_rotaExport == 'Todas' || rotaDesteSemaforo == rotaSelecionadaLimpa) {
+        data['nome_vistoriador'] = await _getNomeVistoriador(
+          data['vistoriador_uid'] ?? '',
+        );
+        vistoriasFiltradas.add(data);
+      }
+    }
+    if (vistoriasFiltradas.isEmpty) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Nenhuma vistoria encontrada para este filtro!'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      return;
+    }
+    if (tipoExportacao == 'PDF')
+      await _exportarPDFGlobal(
+        vistoriasFiltradas,
+        _rotaExport,
+        todosSemaforosData,
+      );
+    else
+      await _exportarExcelGlobal(
+        vistoriasFiltradas,
+        _rotaExport,
+        todosSemaforosData,
+      );
+  }
+
   Future<void> _mostrarDialogExportarRotaDoDia(
     Map<String, String> mapaRotas,
     List<Map<String, dynamic>> todosSemaforosData,
@@ -1102,7 +1148,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                   ),
                   const SizedBox(height: 16),
 
-                  // Botão para selecionar a Data
                   InkWell(
                     onTap: () async {
                       DateTime? picked = await showDatePicker(
@@ -1143,7 +1188,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
 
                   const SizedBox(height: 16),
 
-                  // Dropdown para selecionar a Rota
                   InputDecorator(
                     decoration: InputDecoration(
                       labelText: 'Rota',
@@ -1198,8 +1242,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                   ),
                   onPressed: liberado
                       ? () {
-                          Navigator.pop(context); // Fecha o modal
-                          // Dispara a geração passando as escolhas
+                          Navigator.pop(context);
                           _exportarRotaDoDiaCompleta(
                             mapaRotas,
                             todosSemaforosData,
@@ -1221,7 +1264,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     );
   }
 
-  // ==== MODIFICADO: FUNÇÃO AGORA RECEBE A DATA E A ROTA DO MODAL ====
   Future<void> _exportarRotaDoDiaCompleta(
     Map<String, String> mapaRotas,
     List<Map<String, dynamic>> todosSemaforosData,
@@ -1513,64 +1555,16 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     }
   }
 
-  Future<void> _realizarExportacao(
-    String tipoExportacao,
-    Map<String, String> mapaRotas,
-    List<Map<String, dynamic>> todosSemaforosData,
-  ) async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('vistorias')
-        .where('criado_em', isGreaterThanOrEqualTo: _deExport)
-        .where('criado_em', isLessThanOrEqualTo: _ateExport)
-        .orderBy('criado_em', descending: true)
-        .get();
-    List<Map<String, dynamic>> vistoriasFiltradas = [];
-    String rotaSelecionadaLimpa = _rotaExport.replaceFirst(RegExp(r'^0+'), '');
-
-    for (var doc in snapshot.docs) {
-      var data = doc.data() as Map<String, dynamic>;
-      String rotaDesteSemaforo =
-          mapaRotas[data['semaforo_id'].toString()] ?? '';
-      if (_rotaExport == 'Todas' || rotaDesteSemaforo == rotaSelecionadaLimpa) {
-        data['nome_vistoriador'] = await _getNomeVistoriador(
-          data['vistoriador_uid'] ?? '',
-        );
-        vistoriasFiltradas.add(data);
-      }
-    }
-    if (vistoriasFiltradas.isEmpty) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Nenhuma vistoria encontrada para este filtro!'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      return;
-    }
-    if (tipoExportacao == 'PDF')
-      await _exportarPDFGlobal(
-        vistoriasFiltradas,
-        _rotaExport,
-        todosSemaforosData,
-      );
-    else
-      await _exportarExcelGlobal(
-        vistoriasFiltradas,
-        _rotaExport,
-        todosSemaforosData,
-      );
-  }
-
   Future<void> _exportarPendenciasPDF(
-    Map<String, List<Map<String, dynamic>>> pendentesPorRota,
-    Map<String, Map<String, dynamic>> statsPorRota,
+    Map<String, Map<int, Set<String>>> vistoriasDiarias,
+    Map<String, int> totaisPorRota,
     String mesFiltro,
+    int daysInMonth,
   ) async {
-    if (pendentesPorRota.isEmpty) return;
+    if (vistoriasDiarias.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Gerando PDF de Semáforos não vistoriados...'),
+        content: Text('Gerando PDF de Acompanhamento Diário...'),
         backgroundColor: Colors.red,
       ),
     );
@@ -1580,9 +1574,33 @@ class _RelatoriosPageState extends State<RelatoriosPage>
       ).format(DateTime.now());
 
       await Printing.layoutPdf(
-        name: 'Omissões_$mesFiltro.pdf',
+        name: 'Acompanhamento_Diario_$mesFiltro.pdf',
         onLayout: (PdfPageFormat format) async {
           final pdf = pw.Document();
+
+          List<List<String>> dadosTabela = [];
+          var rotasOrdenadas = vistoriasDiarias.keys.toList()
+            ..sort(
+              (a, b) => (int.tryParse(a) ?? 0).compareTo(int.tryParse(b) ?? 0),
+            );
+
+          for (String r in rotasOrdenadas) {
+            int meta = totaisPorRota[r] ?? 0;
+            for (int d = 1; d <= daysInMonth; d++) {
+              int vistoriados = vistoriasDiarias[r]![d]?.length ?? 0;
+              int pendentes = meta - vistoriados;
+              double perc = meta == 0 ? 0.0 : (vistoriados / meta) * 100;
+
+              dadosTabela.add([
+                'Rota $r',
+                '${d.toString().padLeft(2, '0')}/$mesFiltro',
+                meta.toString(),
+                vistoriados.toString(),
+                pendentes.toString(),
+                '${perc.toStringAsFixed(1)}%',
+              ]);
+            }
+          }
 
           pdf.addPage(
             pw.MultiPage(
@@ -1603,7 +1621,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text(
-                          'Relatório de Semáforos Não Vistoriados',
+                          'Relatório de Acompanhamento Diário por Rota',
                           style: pw.TextStyle(
                             fontSize: 18,
                             fontWeight: pw.FontWeight.bold,
@@ -1626,18 +1644,13 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                     context: context,
                     headers: [
                       'Rota',
-                      'Qtd. Não Vistoriados',
-                      'Semáforos (IDs)',
+                      'Data',
+                      'Meta',
+                      'Vistoriados',
+                      'Não Vistoriados',
+                      'Concluído',
                     ],
-                    data: pendentesPorRota.keys.map((rota) {
-                      return [
-                        'Rota $rota',
-                        statsPorRota[rota]!['omitidos'].toString(),
-                        pendentesPorRota[rota]!
-                            .map((e) => e['id'].toString())
-                            .join(', '),
-                      ];
-                    }).toList(),
+                    data: dadosTabela,
                     headerStyle: pw.TextStyle(
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.white,
@@ -1645,12 +1658,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                     headerDecoration: const pw.BoxDecoration(
                       color: PdfColors.red700,
                     ),
-                    cellAlignment: pw.Alignment.centerLeft,
-                    columnWidths: {
-                      0: const pw.FlexColumnWidth(1),
-                      1: const pw.FlexColumnWidth(1.5),
-                      2: const pw.FlexColumnWidth(3),
-                    },
+                    cellAlignment: pw.Alignment.center,
                   ),
                 ];
               },
@@ -1671,33 +1679,48 @@ class _RelatoriosPageState extends State<RelatoriosPage>
   }
 
   Future<void> _exportarPendenciasExcel(
-    Map<String, List<Map<String, dynamic>>> pendentesPorRota,
-    Map<String, Map<String, dynamic>> statsPorRota,
+    Map<String, Map<int, Set<String>>> vistoriasDiarias,
+    Map<String, int> totaisPorRota,
     String mesFiltro,
+    int daysInMonth,
   ) async {
-    if (pendentesPorRota.isEmpty) return;
+    if (vistoriasDiarias.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Gerando Planilha de Semáforos Não Vistoriados...'),
+        content: Text('Gerando Planilha Diária...'),
         backgroundColor: Colors.green,
       ),
     );
     try {
       String csv = '\uFEFF';
       csv += 'Mês do Filtro:;$mesFiltro\n\n';
-      csv += 'ROTA;QTD NAO VISTORIADOS;SEMAFOROS PENDENTES\n';
-      for (var rota in pendentesPorRota.keys) {
-        csv +=
-            'Rota $rota;${statsPorRota[rota]!['omitidos']};${pendentesPorRota[rota]!.map((e) => e['id'].toString()).join(', ')}\n';
+      csv += 'ROTA;DATA;META DIARIA;VISTORIADOS;NAO VISTORIADOS;PERCENTUAL\n';
+
+      var rotasOrdenadas = vistoriasDiarias.keys.toList()
+        ..sort(
+          (a, b) => (int.tryParse(a) ?? 0).compareTo(int.tryParse(b) ?? 0),
+        );
+
+      for (String r in rotasOrdenadas) {
+        int meta = totaisPorRota[r] ?? 0;
+        for (int d = 1; d <= daysInMonth; d++) {
+          int vistoriados = vistoriasDiarias[r]![d]?.length ?? 0;
+          int pendentes = meta - vistoriados;
+          double perc = meta == 0 ? 0.0 : (vistoriados / meta) * 100;
+
+          csv +=
+              'Rota $r;${d.toString().padLeft(2, '0')}/$mesFiltro;$meta;$vistoriados;$pendentes;${perc.toStringAsFixed(1)}%\n';
+        }
       }
+
       final dir = await getTemporaryDirectory();
       final file = File(
-        '${dir.path}/Omissões_${mesFiltro.replaceAll('/', '-')}.xls',
+        '${dir.path}/Acompanhamento_Diario_${mesFiltro.replaceAll('/', '-')}.xls',
       );
       await file.writeAsBytes(utf8.encode(csv));
       await Share.shareXFiles([
         XFile(file.path),
-      ], text: 'Lista de semáforos não vistoriados - $mesFiltro.');
+      ], text: 'Acompanhamento Diário de Semáforos - $mesFiltro.');
     } catch (e) {
       if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
@@ -2260,7 +2283,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                     ),
                     const SizedBox(height: 24),
 
-                    // ===================================
                     const Text(
                       'Filtros para Período',
                       style: TextStyle(
@@ -2422,7 +2444,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Semáforos não vistoriados no Mês',
+                          'Acompanhamento Diário por Rota',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -2431,7 +2453,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'Verifique os semáforos que ficaram o mês inteiro sem vistoria.',
+                          'Selecione o mês para ver a produtividade dia a dia de cada rota.',
                           style: TextStyle(fontSize: 12, color: Colors.black54),
                         ),
                         const SizedBox(height: 12),
@@ -2524,69 +2546,56 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                             child: CircularProgressIndicator(),
                           );
 
-                        Set<String> idsVistoriadosNoMes = snapshotVistoriasDoMes
-                            .data!
-                            .docs
-                            .map((doc) => doc['semaforo_id'].toString())
-                            .toSet();
+                        int daysInMonth = DateTime(
+                          _mesPendencia.year,
+                          _mesPendencia.month + 1,
+                          0,
+                        ).day;
                         String rotaFiltro = _rotaPendencia.replaceFirst(
                           RegExp(r'^0+'),
                           '',
                         );
 
-                        Map<String, List<Map<String, dynamic>>>
-                        semaforosAgrupados = {};
+                        // 1. Descobre a meta (total de semáforos) de cada rota
+                        Map<String, int> totalSemaforosPorRota = {};
                         for (var sem in todosSemaforosData) {
                           String rotaSem = (sem['rota'] ?? '')
                               .toString()
                               .replaceFirst(RegExp(r'^0+'), '');
-                          if (_rotaPendencia == 'Todas' ||
-                              rotaSem == rotaFiltro) {
-                            if (!semaforosAgrupados.containsKey(rotaSem))
-                              semaforosAgrupados[rotaSem] = [];
-                            semaforosAgrupados[rotaSem]!.add(sem);
+                          if (rotaSem.isNotEmpty) {
+                            totalSemaforosPorRota[rotaSem] =
+                                (totalSemaforosPorRota[rotaSem] ?? 0) + 1;
                           }
                         }
 
-                        Map<String, List<Map<String, dynamic>>>
-                        pendentesPorRota = {};
-                        Map<String, Map<String, dynamic>> statsPorRota = {};
-                        int totalPendentes = 0;
-
-                        for (var rota in semaforosAgrupados.keys) {
-                          var semaforosDaRota = semaforosAgrupados[rota]!;
-                          int totalRota = semaforosDaRota.length;
-
-                          List<Map<String, dynamic>> omitidos = semaforosDaRota
-                              .where(
-                                (s) => !idsVistoriadosNoMes.contains(
-                                  s['id'].toString(),
-                                ),
-                              )
-                              .toList();
-
-                          if (omitidos.isNotEmpty) {
-                            pendentesPorRota[rota] = omitidos;
-                            totalPendentes += omitidos.length;
+                        // 2. Cria o mapa tridimensional: Rota -> Dia -> Set de IDs Vistoriados
+                        Map<String, Map<int, Set<String>>> vistoriasDiarias =
+                            {};
+                        for (String r in totalSemaforosPorRota.keys) {
+                          if (_rotaPendencia == 'Todas' || r == rotaFiltro) {
+                            vistoriasDiarias[r] = {};
+                            for (int d = 1; d <= daysInMonth; d++) {
+                              vistoriasDiarias[r]![d] = {};
+                            }
                           }
-
-                          int qtdOmitidos = omitidos.length;
-                          int qtdVistoriados = totalRota - qtdOmitidos;
-
-                          statsPorRota[rota] = {
-                            'total': totalRota,
-                            'vistoriados': qtdVistoriados,
-                            'omitidos': qtdOmitidos,
-                            'perc_vistoriados': totalRota == 0
-                                ? 0.0
-                                : (qtdVistoriados / totalRota) * 100,
-                            'perc_omitidos': totalRota == 0
-                                ? 0.0
-                                : (qtdOmitidos / totalRota) * 100,
-                          };
                         }
 
-                        var rotasOrdenadas = pendentesPorRota.keys.toList()
+                        // 3. Preenche os dias que tiveram vistorias
+                        for (var doc in snapshotVistoriasDoMes.data!.docs) {
+                          var v = doc.data() as Map<String, dynamic>;
+                          Timestamp? t = v['criado_em'] as Timestamp?;
+                          if (t != null) {
+                            DateTime dt = t.toDate();
+                            String idSem = v['semaforo_id']?.toString() ?? '';
+                            String rotaDoSem = mapaRotasSemaforos[idSem] ?? '';
+                            if (rotaDoSem.isNotEmpty &&
+                                vistoriasDiarias.containsKey(rotaDoSem)) {
+                              vistoriasDiarias[rotaDoSem]![dt.day]!.add(idSem);
+                            }
+                          }
+                        }
+
+                        var rotasOrdenadas = vistoriasDiarias.keys.toList()
                           ..sort(
                             (a, b) => (int.tryParse(a) ?? 0).compareTo(
                               int.tryParse(b) ?? 0,
@@ -2598,129 +2607,243 @@ class _RelatoriosPageState extends State<RelatoriosPage>
 
                         return Column(
                           children: [
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(8),
-                              color: Colors.grey.shade200,
-                              child: Text(
-                                'Total Geral de Semáforos não vistoriados no Mês: $totalPendentes',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red.shade800,
-                                ),
-                              ),
-                            ),
                             Expanded(
                               child: rotasOrdenadas.isEmpty
                                   ? const Center(
                                       child: Text(
-                                        'Todos semáforos vistoriados no mês! Meta 100% cumprida.',
-                                        style: TextStyle(
-                                          color: Colors.green,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        'Nenhuma rota encontrada.',
+                                        style: TextStyle(color: Colors.grey),
                                       ),
                                     )
                                   : ListView.builder(
                                       padding: const EdgeInsets.all(12),
                                       itemCount: rotasOrdenadas.length,
                                       itemBuilder: (context, index) {
-                                        String rotaListada =
-                                            rotasOrdenadas[index];
-                                        var semaforosDessaRota =
-                                            pendentesPorRota[rotaListada]!;
-                                        var stats = statsPorRota[rotaListada]!;
-
-                                        String idsPendentes = semaforosDessaRota
-                                            .map((s) => s['id'])
-                                            .join(', ');
+                                        String rota = rotasOrdenadas[index];
+                                        int totalMeta =
+                                            totalSemaforosPorRota[rota] ?? 0;
+                                        var diasMap = vistoriasDiarias[rota]!;
 
                                         return Card(
                                           margin: const EdgeInsets.only(
-                                            bottom: 8,
+                                            bottom: 12,
                                           ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(16.0),
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                CircleAvatar(
-                                                  radius: 26,
-                                                  backgroundColor:
-                                                      Colors.red.shade100,
-                                                  child: Text(
-                                                    rotaListada,
-                                                    style: TextStyle(
-                                                      color:
-                                                          Colors.red.shade900,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 18,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 16),
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Text(
-                                                            'Vistoriados: ${stats['vistoriados']} (${stats['perc_vistoriados'].toStringAsFixed(1)}%)',
-                                                            style: TextStyle(
-                                                              color: Colors
-                                                                  .green
-                                                                  .shade700,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 12,
-                                                            ),
-                                                          ),
-                                                          Text(
-                                                            'Pendentes: ${stats['omitidos']} (${stats['perc_omitidos'].toStringAsFixed(1)}%)',
-                                                            style: TextStyle(
-                                                              color: Colors
-                                                                  .red
-                                                                  .shade700,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 12,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      const Divider(height: 16),
-                                                      const Text(
-                                                        'Semáforos Não Vistoriados:',
-                                                        style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.black54,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(height: 4),
-                                                      Text(
-                                                        idsPendentes,
-                                                        style: const TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.black87,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
                                             ),
+                                          ),
+                                          child: ExpansionTile(
+                                            leading: CircleAvatar(
+                                              backgroundColor:
+                                                  Colors.red.shade50,
+                                              child: Text(
+                                                rota,
+                                                style: TextStyle(
+                                                  color: Colors.red.shade900,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            title: Text(
+                                              'Rota $rota',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                            subtitle: Text(
+                                              'Meta Diária: $totalMeta semáforos',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.blueGrey,
+                                              ),
+                                            ),
+                                            children: [
+                                              Container(
+                                                color: Colors.grey.shade50,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 12,
+                                                    ),
+                                                child: Column(
+                                                  children: [
+                                                    const Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Expanded(
+                                                          flex: 2,
+                                                          child: Text(
+                                                            'Dia',
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 12,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Expanded(
+                                                          flex: 3,
+                                                          child: Text(
+                                                            'Vistoriados',
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 12,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Expanded(
+                                                          flex: 3,
+                                                          child: Text(
+                                                            'Pendentes',
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 12,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Expanded(
+                                                          flex: 2,
+                                                          child: Text(
+                                                            '%',
+                                                            textAlign:
+                                                                TextAlign.right,
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 12,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const Divider(),
+                                                    ...List.generate(daysInMonth, (
+                                                      i,
+                                                    ) {
+                                                      int dia = i + 1;
+                                                      int vistoriados =
+                                                          diasMap[dia]
+                                                              ?.length ??
+                                                          0;
+                                                      int pendentes =
+                                                          totalMeta -
+                                                          vistoriados;
+                                                      double perc =
+                                                          totalMeta == 0
+                                                          ? 0.0
+                                                          : (vistoriados /
+                                                                    totalMeta) *
+                                                                100;
+
+                                                      Color corTexto =
+                                                          perc >= 100
+                                                          ? Colors
+                                                                .green
+                                                                .shade700
+                                                          : (perc > 0
+                                                                ? Colors
+                                                                      .orange
+                                                                      .shade700
+                                                                : Colors
+                                                                      .red
+                                                                      .shade700);
+
+                                                      return Padding(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              vertical: 4.0,
+                                                            ),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Expanded(
+                                                              flex: 2,
+                                                              child: Text(
+                                                                '${dia.toString().padLeft(2, '0')}/${_mesPendencia.month.toString().padLeft(2, '0')}',
+                                                                style:
+                                                                    const TextStyle(
+                                                                      fontSize:
+                                                                          13,
+                                                                    ),
+                                                              ),
+                                                            ),
+                                                            Expanded(
+                                                              flex: 3,
+                                                              child: Text(
+                                                                '$vistoriados',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                style: TextStyle(
+                                                                  fontSize: 13,
+                                                                  color:
+                                                                      corTexto,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            Expanded(
+                                                              flex: 3,
+                                                              child: Text(
+                                                                '$pendentes',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                style: TextStyle(
+                                                                  fontSize: 13,
+                                                                  color:
+                                                                      pendentes >
+                                                                          0
+                                                                      ? Colors
+                                                                            .red
+                                                                      : Colors
+                                                                            .black87,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            Expanded(
+                                                              flex: 2,
+                                                              child: Text(
+                                                                '${perc.toStringAsFixed(0)}%',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .right,
+                                                                style: TextStyle(
+                                                                  fontSize: 13,
+                                                                  color:
+                                                                      corTexto,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    }),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         );
                                       },
@@ -2754,9 +2877,10 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                           ),
                                         ),
                                         onPressed: () => _exportarPendenciasPDF(
-                                          pendentesPorRota,
-                                          statsPorRota,
+                                          vistoriasDiarias,
+                                          totalSemaforosPorRota,
                                           mesFormatado,
+                                          daysInMonth,
                                         ),
                                       ),
                                     ),
@@ -2785,9 +2909,10 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                         ),
                                         onPressed: () =>
                                             _exportarPendenciasExcel(
-                                              pendentesPorRota,
-                                              statsPorRota,
+                                              vistoriasDiarias,
+                                              totalSemaforosPorRota,
                                               mesFormatado,
+                                              daysInMonth,
                                             ),
                                       ),
                                     ),
