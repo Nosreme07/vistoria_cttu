@@ -835,11 +835,11 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                 style: const pw.TextStyle(fontSize: 12),
               ),
               pw.Text(
-                'Início: ${vistoria['data_hora_inicio']}',
+                'Início da vistoria: ${vistoria['data_hora_inicio']}',
                 style: const pw.TextStyle(fontSize: 12),
               ),
               pw.Text(
-                'Fim: ${vistoria['data_hora_fim']}',
+                'Fim da vistoria: ${vistoria['data_hora_fim']}',
                 style: const pw.TextStyle(fontSize: 12),
               ),
               pw.Text(
@@ -847,7 +847,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                 style: const pw.TextStyle(fontSize: 12),
               ),
               pw.Text(
-                'Local do Vistoriador (GPS): ${vistoria['gps_coordenadas']}',
+                'Coordenadas da Vistoria: ${vistoria['gps_coordenadas']}',
                 style: const pw.TextStyle(fontSize: 12),
               ),
               pw.SizedBox(height: 16),
@@ -888,7 +888,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                       ),
                     ),
                     pw.Text(
-                      vistoria['falha_registrada'] ?? 'NENHUMA',
+                      vistoria['falha_registrada'] ?? 'NENHUMA FALHA',
                       style: const pw.TextStyle(fontSize: 14),
                     ),
                     pw.SizedBox(height: 8),
@@ -2082,7 +2082,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                                                     temAnormalidade == 'Sim',
                                                 'falha_registrada':
                                                     falhaSelecionada ??
-                                                    'NENHUMA',
+                                                    'NENHUMA FALHA',
                                                 'detalhes_ocorrencia':
                                                     detalhesFinais,
                                                 'fotos': urlsDasFotos,
@@ -2440,11 +2440,14 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
 
                     _buildInfoRow('Vistoriador', nomeVistoriador),
                     _buildInfoRow('Endereço', vistoria['semaforo_endereco']),
-                    _buildInfoRow('Início', vistoria['data_hora_inicio']),
-                    _buildInfoRow('Fim', vistoria['data_hora_fim']),
+                    _buildInfoRow(
+                      'Início da vistoria',
+                      vistoria['data_hora_inicio'],
+                    ),
+                    _buildInfoRow('Fim da vistoria', vistoria['data_hora_fim']),
                     _buildInfoRow('Coordenadas do Semáforo', coordOriginal),
                     _buildInfoRow(
-                      'Local do Vistoriador (GPS)',
+                      'Coordenadas da Vistoria',
                       vistoria['gps_coordenadas'],
                     ),
                     const SizedBox(height: 16),
@@ -2501,7 +2504,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                             ),
                           ),
                           Text(
-                            vistoria['falha_registrada'] ?? 'NENHUMA',
+                            vistoria['falha_registrada'] ?? 'NENHUMA FALHA',
                             style: const TextStyle(fontSize: 16),
                           ),
                           const SizedBox(height: 8),
