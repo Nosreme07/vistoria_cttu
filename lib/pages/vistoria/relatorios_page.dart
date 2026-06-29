@@ -173,25 +173,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
               59,
             );
           _filtrosAplicadosConsulta = false;
-        } else if (tipoAba == 'Exportacao') {
-          if (isDe)
-            _deExport = DateTime(
-              picked.year,
-              picked.month,
-              picked.day,
-              0,
-              0,
-              0,
-            );
-          else
-            _ateExport = DateTime(
-              picked.year,
-              picked.month,
-              picked.day,
-              23,
-              59,
-              59,
-            );
         }
       });
     }
@@ -414,339 +395,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
         ],
       ),
     );
-  }
-
-  // ==== PROCESSA E FILTRA AS VISTORIAS DA ABA CONSULTA ====
-  Future<void> _exportarConsulta(
-    String tipo,
-    Map<String, String> mapaRotas,
-    List<Map<String, dynamic>> todosSemaforosData,
-  ) async {
-    Query query = FirebaseFirestore.instance
-        .collection('vistorias')
-        .orderBy('criado_em', descending: true);
-    if (_deConsulta != null && _ateConsulta != null) {
-      query = query.where(
-        'criado_em',
-        isGreaterThanOrEqualTo: _deConsulta,
-        isLessThanOrEqualTo: _ateConsulta,
-      );
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('PREPARANDO EXPORTAÇÃO EM $tipo...'),
-        backgroundColor: Colors.blue,
-      ),
-    );
-
-    try {
-      QuerySnapshot snapshot = await query.get();
-      List<Map<String, dynamic>> vistoriasFiltradas = [];
-
-      String textoPesquisa = _semaforoController.text.trim().toLowerCase();
-      String idFiltro = textoPesquisa.split(' - ')[0].trim();
-
-      for (var doc in snapshot.docs) {
-        var data = doc.data() as Map<String, dynamic>;
-        String idSem = (data['semaforo_id'] ?? '').toString();
-
-        if (idFiltro.isNotEmpty && !idSem.toLowerCase().contains(idFiltro))
-          continue;
-
-        String rotaDesteSemaforo = mapaRotas[idSem] ?? '';
-        if (_rotaConsulta != 'Todas') {
-          String rotaLimpa = _rotaConsulta.replaceFirst(RegExp(r'^0+'), '');
-          if (rotaDesteSemaforo != rotaLimpa) continue;
-        }
-
-        data['nome_vistoriador'] = await _getNomeVistoriador(
-          data['vistoriador_uid'] ?? '',
-        );
-        vistoriasFiltradas.add(data);
-      }
-
-      if (vistoriasFiltradas.isEmpty) {
-        if (mounted)
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('NENHUMA VISTORIA ENCONTRADA PARA ESTES FILTROS!'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        return;
-      }
-
-      if (tipo == 'PDF') {
-        await _exportarPDFGlobalConsulta(
-          vistoriasFiltradas,
-          _rotaConsulta,
-          todosSemaforosData,
-        );
-      } else {
-        await _exportarExcelGlobalConsulta(
-          vistoriasFiltradas,
-          _rotaConsulta,
-          todosSemaforosData,
-        );
-      }
-    } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('ERRO AO EXPORTAR CONSULTA!'),
-            backgroundColor: Colors.red,
-          ),
-        );
-    }
-  }
-
-  // ==== GERA O PDF DA ABA CONSULTA ====
-  // ==== TRECHO EDITADO: CABEÇALHO DO PDF DA CONSULTA COM TODOS OS FILTROS DETALHEDOS ====
-  Future<void> _exportarPDFGlobalConsulta(
-    List<Map<String, dynamic>> vistorias,
-    String rotaNumero,
-    List<Map<String, dynamic>> todosSemaforosData,
-  ) async {
-    String dataHoraAtual = DateFormat(
-      'dd/MM/yyyy HH:mm:ss',
-    ).format(DateTime.now()).toUpperCase();
-
-    // Tratamento e formatação das datas do filtro
-    String deStr = _deConsulta != null
-        ? DateFormat('dd/MM/yyyy').format(_deConsulta!)
-        : '-';
-    String ateStr = _ateConsulta != null
-        ? DateFormat('dd/MM/yyyy').format(_ateConsulta!)
-        : '-';
-    String filtroPeriodo = "PERÍODO: $deStr ATÉ $ateStr";
-
-    // Captura o filtro atual de Nº / Endereço do semáforo
-    String filtroSemaforo = _semaforoController.text.trim().isEmpty
-        ? "TODOS"
-        : _semaforoController.text.trim().toUpperCase();
-
-    String filtroRota = rotaNumero == "Todas"
-        ? "TODAS AS ROTAS"
-        : "ROTA $rotaNumero";
-
-    await Printing.layoutPdf(
-      name: 'RELATORIO_CONSULTA_ROTA$rotaNumero.pdf'.toUpperCase(),
-      onLayout: (PdfPageFormat format) async {
-        final pdf = pw.Document();
-        pdf.addPage(
-          pw.MultiPage(
-            pageFormat: PdfPageFormat.a4.landscape,
-            margin: const pw.EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 24,
-              bottom: 20,
-            ),
-            footer: (pw.Context context) =>
-                _buildRodapePDF(context, dataHoraAtual),
-            build: (pw.Context context) {
-              return [
-                pw.Header(
-                  level: 0,
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text(
-                        'RELATÓRIO DE VISTORIAS GERENCIAIS (CONSULTA)',
-                        style: pw.TextStyle(
-                          fontSize: 18,
-                          fontWeight: pw.FontWeight.bold,
-                        ),
-                      ),
-                      pw.SizedBox(height: 6),
-                      // ==== FILTROS ADICIONADOS AO CABEÇALHO ====
-                      pw.Text(
-                        '$filtroRota  |  $filtroPeriodo  |  BUSCA: $filtroSemaforo',
-                        style: pw.TextStyle(
-                          fontSize: 10,
-                          color: PdfColors.grey800,
-                          fontWeight: pw.FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                pw.SizedBox(height: 16),
-                pw.TableHelper.fromTextArray(
-                  context: context,
-                  headers: [
-                    'SEMÁFORO',
-                    'ENDEREÇO',
-                    'VISTORIADOR',
-                    'INÍCIO',
-                    'FIM',
-                    'GEORREFERÊNCIA',
-                    'FALHA',
-                    'DETALHES',
-                    'FOTOS (LINKS)',
-                  ],
-                  data: vistorias.map((v) {
-                    String coordOriginal =
-                        v['coordenadas_cadastro']?.toString() ?? '-';
-                    if (coordOriginal == '-' || coordOriginal.isEmpty) {
-                      var match = todosSemaforosData.where(
-                        (s) =>
-                            s['id'].toString() == v['semaforo_id'].toString(),
-                      );
-                      coordOriginal = match.isNotEmpty
-                          ? (match.first['georeferencia']?.toString() ?? '-')
-                          : '-';
-                    }
-                    String gpsVistoriador =
-                        v['gps_coordenadas']?.toString() ?? '-';
-                    List<dynamic> fotos = v['fotos'] ?? [];
-                    return [
-                      up(v['semaforo_id']),
-                      up(v['semaforo_endereco']),
-                      up(v['nome_vistoriador']),
-                      up(v['data_hora_inicio']),
-                      up(v['data_hora_fim']),
-                      pw.Container(
-                        alignment: pw.Alignment.center,
-                        child: pw.Column(
-                          mainAxisAlignment: pw.MainAxisAlignment.center,
-                          crossAxisAlignment: pw.CrossAxisAlignment.center,
-                          children: [
-                            pw.Text(
-                              'SEMÁFORO: $coordOriginal'.toUpperCase(),
-                              style: pw.TextStyle(
-                                color: PdfColors.green,
-                                fontSize: 6,
-                                fontWeight: pw.FontWeight.bold,
-                              ),
-                            ),
-                            pw.SizedBox(height: 2),
-                            pw.Text(
-                              'VISTORIA: $gpsVistoriador'.toUpperCase(),
-                              style: pw.TextStyle(
-                                color: PdfColors.red,
-                                fontSize: 6,
-                                fontWeight: pw.FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      up(v['falha_registrada']),
-                      up(v['detalhes_ocorrencia']).replaceAll('\n', ' '),
-                      fotos.join('\n\n'),
-                    ];
-                  }).toList(),
-                  cellAlignment: pw.Alignment.center,
-                  headerAlignment: pw.Alignment.center,
-                  headerStyle: pw.TextStyle(
-                    fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.white,
-                    fontSize: 7.5,
-                  ),
-                  headerDecoration: const pw.BoxDecoration(
-                    color: PdfColors.teal700,
-                  ),
-                  cellStyle: const pw.TextStyle(fontSize: 6.5),
-                  columnWidths: {
-                    0: const pw.FixedColumnWidth(55),
-                    1: const pw.FixedColumnWidth(110),
-                    2: const pw.FixedColumnWidth(65),
-                    3: const pw.FixedColumnWidth(55),
-                    4: const pw.FixedColumnWidth(55),
-                    5: const pw.FixedColumnWidth(95),
-                    6: const pw.FixedColumnWidth(70),
-                    7: const pw.FixedColumnWidth(100),
-                    8: const pw.FixedColumnWidth(65),
-                  },
-                ),
-              ];
-            },
-          ),
-        );
-        return pdf.save();
-      },
-    );
-  }
-
-  // ==== GERA O EXCEL DA ABA CONSULTA ====
-  Future<void> _exportarExcelGlobalConsulta(
-    List<Map<String, dynamic>> vistorias,
-    String rotaNumero,
-    List<Map<String, dynamic>> todosSemaforosData,
-  ) async {
-    try {
-      StringBuffer excelBuffer = StringBuffer();
-      excelBuffer.write(
-        '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body><table border="1">',
-      );
-      excelBuffer.write(
-        '<tr style="background-color: #00796B; color: white; font-weight: bold; text-align: center;"><td>SEMÁFORO</td><td>ENDEREÇO</td><td>VISTORIADOR</td><td>INÍCIO</td><td>FIM</td><td>GEORREFERÊNCIA</td><td>FALHA</td><td>DETALHES</td><td>FOTOS</td></tr>',
-      );
-
-      for (var v in vistorias) {
-        String coordOriginal = v['coordenadas_cadastro']?.toString() ?? '';
-        if (coordOriginal.isEmpty || coordOriginal == '-') {
-          var match = todosSemaforosData.where(
-            (s) => s['id'].toString() == v['semaforo_id'].toString(),
-          );
-          coordOriginal = match.isNotEmpty
-              ? (match.first['georeferencia']?.toString() ?? '-')
-              : '-';
-        }
-        String gpsVistoriador = v['gps_coordenadas']?.toString() ?? '-';
-        List<dynamic> fotos = v['fotos'] ?? [];
-
-        excelBuffer.write('<tr>');
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${up(v['semaforo_id'])}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${up(v['semaforo_endereco'])}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${up(v['nome_vistoriador'])}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${up(v['data_hora_inicio'])}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${up(v['data_hora_fim'])}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle; white-space: nowrap;"><span style="color: green; font-weight: bold;">SEMÁFORO: ${coordOriginal.toUpperCase()}</span><br/><span style="color: red; font-weight: bold;">VISTORIA: ${gpsVistoriador.toUpperCase()}</span></td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${up(v['falha_registrada'])}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${up(v['detalhes_ocorrencia']).replaceAll('\n', ' ')}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${fotos.isNotEmpty ? fotos.map((f) => '<a href="$f">FOTO</a>').join(' | ') : '-'}</td></tr>',
-        );
-      }
-      excelBuffer.write('</table></body></html>');
-
-      final Uint8List bytes = Uint8List.fromList(
-        utf8.encode(excelBuffer.toString()),
-      );
-      final xFile = XFile.fromData(
-        bytes,
-        mimeType: 'application/vnd.ms-excel',
-        name: 'RELATORIO_CONSULTA.XLS',
-      );
-      await Share.shareXFiles([xFile], text: 'PLANILHA DE VISTORIAS.');
-    } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('ERRO AO GERAR EXCEL!'),
-            backgroundColor: Colors.red,
-          ),
-        );
-    }
   }
 
   Future<void> _exportarPDFIndividual(
@@ -1151,6 +799,352 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     );
   }
 
+  // ==== PROCESSA E FILTRA AS VISTORIAS DA ABA CONSULTA ====
+  Future<void> _exportarConsulta(
+    String tipo,
+    Map<String, String> mapaRotas,
+    List<Map<String, dynamic>> todosSemaforosData,
+  ) async {
+    Query query = FirebaseFirestore.instance
+        .collection('vistorias')
+        .orderBy('criado_em', descending: true);
+    if (_deConsulta != null && _ateConsulta != null) {
+      query = query.where(
+        'criado_em',
+        isGreaterThanOrEqualTo: _deConsulta,
+        isLessThanOrEqualTo: _ateConsulta,
+      );
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('PREPARANDO EXPORTAÇÃO EM $tipo...'),
+        backgroundColor: Colors.blue,
+      ),
+    );
+
+    try {
+      QuerySnapshot snapshot = await query.get();
+      List<Map<String, dynamic>> vistoriasFiltradas = [];
+
+      String textoPesquisa = _semaforoController.text.trim().toLowerCase();
+      String idFiltro = textoPesquisa.split(' - ')[0].trim();
+
+      for (var doc in snapshot.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        String idSem = (data['semaforo_id'] ?? '').toString();
+
+        if (idFiltro.isNotEmpty && !idSem.toLowerCase().contains(idFiltro))
+          continue;
+
+        String rotaDesteSemaforo = mapaRotas[idSem] ?? '';
+        if (_rotaConsulta != 'Todas') {
+          String rotaLimpa = _rotaConsulta.replaceFirst(RegExp(r'^0+'), '');
+          if (rotaDesteSemaforo != rotaLimpa) continue;
+        }
+
+        data['nome_vistoriador'] = await _getNomeVistoriador(
+          data['vistoriador_uid'] ?? '',
+        );
+        vistoriasFiltradas.add(data);
+      }
+
+      if (tipo == 'PDF') {
+        await _exportarPDFGlobalConsulta(
+          vistoriasFiltradas,
+          _rotaConsulta,
+          todosSemaforosData,
+        );
+      } else {
+        await _exportarExcelGlobalConsulta(
+          vistoriasFiltradas,
+          _rotaConsulta,
+          todosSemaforosData,
+        );
+      }
+    } catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('ERRO AO EXPORTAR CONSULTA!'),
+            backgroundColor: Colors.red,
+          ),
+        );
+    }
+  }
+
+  // ==== GERA O PDF DA ABA CONSULTA ====
+  Future<void> _exportarPDFGlobalConsulta(
+    List<Map<String, dynamic>> vistorias,
+    String rotaNumero,
+    List<Map<String, dynamic>> todosSemaforosData,
+  ) async {
+    String dataHoraAtual = DateFormat(
+      'dd/MM/yyyy HH:mm:ss',
+    ).format(DateTime.now()).toUpperCase();
+    String deStr = _deConsulta != null
+        ? DateFormat('dd/MM/yyyy').format(_deConsulta!)
+        : '-';
+    String ateStr = _ateConsulta != null
+        ? DateFormat('dd/MM/yyyy').format(_ateConsulta!)
+        : '-';
+    String filtroPeriodo = "PERÍODO: $deStr ATÉ $ateStr";
+
+    String filtroSemaforo = _semaforoController.text.trim().isEmpty
+        ? "TODOS"
+        : _semaforoController.text.trim().toUpperCase();
+    String filtroRota = rotaNumero == "Todas"
+        ? "TODAS AS ROTAS"
+        : "ROTA $rotaNumero";
+
+    await Printing.layoutPdf(
+      name: 'RELATORIO_CONSULTA_ROTA$rotaNumero.pdf'.toUpperCase(),
+      onLayout: (PdfPageFormat format) async {
+        final pdf = pw.Document();
+        pdf.addPage(
+          pw.MultiPage(
+            pageFormat: PdfPageFormat.a4.landscape,
+            margin: const pw.EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 24,
+              bottom: 20,
+            ),
+            footer: (pw.Context context) =>
+                _buildRodapePDF(context, dataHoraAtual),
+            build: (pw.Context context) {
+              return [
+                pw.Header(
+                  level: 0,
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'RELATÓRIO DE VISTORIAS GERENCIAIS (CONSULTA)',
+                        style: pw.TextStyle(
+                          fontSize: 18,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 6),
+                      pw.Text(
+                        '$filtroRota  |  $filtroPeriodo  |  BUSCA: $filtroSemaforo',
+                        style: pw.TextStyle(
+                          fontSize: 10,
+                          color: PdfColors.grey800,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                pw.SizedBox(height: 16),
+
+                // ==== CORREÇÃO DO BORDER AQUI ====
+                vistorias.isEmpty
+                    ? pw.Container(
+                        alignment: pw.Alignment.center,
+                        padding: const pw.EdgeInsets.all(24),
+                        decoration: pw.BoxDecoration(
+                          border: pw.Border.all(
+                            color: PdfColors.red700,
+                            width: 1,
+                          ),
+                        ),
+                        child: pw.Text(
+                          'NENHUMA VISTORIA ENCONTRADA PARA ESTES FILTROS.',
+                          style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.red700,
+                            fontSize: 13,
+                          ),
+                        ),
+                      )
+                    : pw.TableHelper.fromTextArray(
+                        context: context,
+                        headers: [
+                          'SEMÁFORO',
+                          'ENDEREÇO',
+                          'VISTORIADOR',
+                          'INÍCIO',
+                          'FIM',
+                          'GEORREFERÊNCIA',
+                          'FALHA',
+                          'DETALHES',
+                          'FOTOS (LINKS)',
+                        ],
+                        data: vistorias.map((v) {
+                          String coordOriginal =
+                              v['coordenadas_cadastro']?.toString() ?? '-';
+                          if (coordOriginal == '-' || coordOriginal.isEmpty) {
+                            var match = todosSemaforosData.where(
+                              (s) =>
+                                  s['id'].toString() ==
+                                  v['semaforo_id'].toString(),
+                            );
+                            coordOriginal = match.isNotEmpty
+                                ? (match.first['georeferencia']?.toString() ??
+                                      '-')
+                                : '-';
+                          }
+                          String gpsVistoriador =
+                              v['gps_coordenadas']?.toString() ?? '-';
+                          List<dynamic> fotos = v['fotos'] ?? [];
+                          return [
+                            up(v['semaforo_id']),
+                            up(v['semaforo_endereco']),
+                            up(v['nome_vistoriador']),
+                            up(v['data_hora_inicio']),
+                            up(v['data_hora_fim']),
+                            pw.Container(
+                              alignment: pw.Alignment.center,
+                              child: pw.Column(
+                                mainAxisAlignment: pw.MainAxisAlignment.center,
+                                crossAxisAlignment:
+                                    pw.CrossAxisAlignment.center,
+                                children: [
+                                  pw.Text(
+                                    'SEMÁFORO: $coordOriginal'.toUpperCase(),
+                                    style: pw.TextStyle(
+                                      color: PdfColors.green,
+                                      fontSize: 6,
+                                      fontWeight: pw.FontWeight.bold,
+                                    ),
+                                  ),
+                                  pw.SizedBox(height: 2),
+                                  pw.Text(
+                                    'VISTORIA: $gpsVistoriador'.toUpperCase(),
+                                    style: pw.TextStyle(
+                                      color: PdfColors.red,
+                                      fontSize: 6,
+                                      fontWeight: pw.FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            up(v['falha_registrada']),
+                            up(v['detalhes_ocorrencia']).replaceAll('\n', ' '),
+                            fotos.join('\n\n'),
+                          ];
+                        }).toList(),
+                        cellAlignment: pw.Alignment.center,
+                        headerAlignment: pw.Alignment.center,
+                        headerStyle: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.white,
+                          fontSize: 7.5,
+                        ),
+                        headerDecoration: const pw.BoxDecoration(
+                          color: PdfColors.teal700,
+                        ),
+                        cellStyle: const pw.TextStyle(fontSize: 6.5),
+                        columnWidths: {
+                          0: const pw.FixedColumnWidth(45),
+                          1: const pw.FixedColumnWidth(110),
+                          2: const pw.FixedColumnWidth(65),
+                          3: const pw.FixedColumnWidth(45),
+                          4: const pw.FixedColumnWidth(45),
+                          5: const pw.FixedColumnWidth(95),
+                          6: const pw.FixedColumnWidth(70),
+                          7: const pw.FixedColumnWidth(100),
+                          8: const pw.FixedColumnWidth(100),
+                        },
+                      ),
+              ];
+            },
+          ),
+        );
+        return pdf.save();
+      },
+    );
+  }
+
+  // ==== GERA O EXCEL DA ABA CONSULTA ====
+  Future<void> _exportarExcelGlobalConsulta(
+    List<Map<String, dynamic>> vistorias,
+    String rotaNumero,
+    List<Map<String, dynamic>> todosSemaforosData,
+  ) async {
+    try {
+      StringBuffer excelBuffer = StringBuffer();
+      excelBuffer.write(
+        '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body><table border="1">',
+      );
+      excelBuffer.write(
+        '<tr style="background-color: #00796B; color: white; font-weight: bold; text-align: center;"><td>SEMÁFORO</td><td>ENDEREÇO</td><td>VISTORIADOR</td><td>INÍCIO</td><td>FIM</td><td>GEORREFERÊNCIA</td><td>FALHA</td><td>DETALHES</td><td>FOTOS</td></tr>',
+      );
+
+      if (vistorias.isEmpty) {
+        excelBuffer.write(
+          '<tr><td colspan="9" style="text-align: center; color: #FF5722; font-weight: bold; padding: 16px;">NENHUMA VISTORIA ENCONTRADA PARA ESTES FILTROS.</td></tr>',
+        );
+      } else {
+        for (var v in vistorias) {
+          String coordOriginal = v['coordenadas_cadastro']?.toString() ?? '';
+          if (coordOriginal.isEmpty || coordOriginal == '-') {
+            var match = todosSemaforosData.where(
+              (s) => s['id'].toString() == v['semaforo_id'].toString(),
+            );
+            coordOriginal = match.isNotEmpty
+                ? (match.first['georeferencia']?.toString() ?? '-')
+                : '-';
+          }
+          String gpsVistoriador = v['gps_coordenadas']?.toString() ?? '-';
+          List<dynamic> fotos = v['fotos'] ?? [];
+
+          excelBuffer.write('<tr>');
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${up(v['semaforo_id'])}</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${up(v['semaforo_endereco'])}</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${up(v['nome_vistoriador'])}</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${up(v['data_hora_inicio'])}</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${up(v['data_hora_fim'])}</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle; white-space: nowrap;"><span style="color: green; font-weight: bold;">SEMÁFORO: ${coordOriginal.toUpperCase()}</span><br/><span style="color: red; font-weight: bold;">VISTORIA: ${gpsVistoriador.toUpperCase()}</span></td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${up(v['falha_registrada'])}</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${up(v['detalhes_ocorrencia']).replaceAll('\n', ' ')}</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${fotos.isNotEmpty ? fotos.map((f) => '<a href="$f">FOTO</a>').join(' | ') : '-'}</td></tr>',
+          );
+        }
+      }
+      excelBuffer.write('</table></body></html>');
+
+      final Uint8List bytes = Uint8List.fromList(
+        utf8.encode(excelBuffer.toString()),
+      );
+      final xFile = XFile.fromData(
+        bytes,
+        mimeType: 'application/vnd.ms-excel',
+        name: 'RELATORIO_CONSULTA.XLS',
+      );
+      await Share.shareXFiles([xFile], text: 'PLANILHA DE VISTORIAS.');
+    } catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('ERRO AO GERAR EXCEL!'),
+            backgroundColor: Colors.red,
+          ),
+        );
+    }
+  }
+
   Future<void> _exportarRotaDoDiaCompleta(
     Map<String, String> mapaRotas,
     List<Map<String, dynamic>> todosSemaforosData,
@@ -1418,7 +1412,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         color: PdfColors.teal700,
                       ),
                       cellStyle: const pw.TextStyle(fontSize: 6.5),
-                      // Correção de largura solicitada: Coluna 0 vai de 40 para 55, e Coluna 8 vai de 80 para 65.
                       columnWidths: {
                         0: const pw.FixedColumnWidth(45),
                         1: const pw.FixedColumnWidth(110),
@@ -2777,7 +2770,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                   ),
                                                 ),
                                                 title: Text(
-                                                  'ROTA $rota'.toUpperCase(),
+                                                  'ROTA $rota',
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 16,
@@ -2785,8 +2778,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                   ),
                                                 ),
                                                 subtitle: Text(
-                                                  'META DIÁRIA: $totalMeta SEMÁFOROS'
-                                                      .toUpperCase(),
+                                                  'META DIÁRIA: $totalMeta SEMÁFOROS',
                                                   style: const TextStyle(
                                                     fontSize: 13,
                                                     color: Colors.blueGrey,

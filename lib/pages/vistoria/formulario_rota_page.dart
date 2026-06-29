@@ -1316,7 +1316,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
 
   // ====================================================================
   void _abrirVistoriaSemaforo(Map<String, dynamic> semaforo, String turnoId) {
-    // ==== BLOCO ADICIONADO: Trava de preenchimento por perfil ====
     if (!_isVistoriador) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1328,7 +1327,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
       );
       return;
     }
-    // =============================================================
+
     bool vistoriaIniciada = false;
     bool salvando = false;
     String dataHoraInicio = '';
@@ -1339,10 +1338,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
     String? falhaSelecionada;
     List<Map<String, dynamic>> tiposDeFalhaLista = [];
 
-    // ==== MODIFICADO: A lista de fotos agora trabalha puramente com dados na Memória ====
     List<Uint8List> fotosEmMemoria = [];
-    // ====================================================================================
-
     bool processandoFoto = false;
     final ImagePicker picker = ImagePicker();
     final TextEditingController detalhesController = TextEditingController();
@@ -1441,7 +1437,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                               ),
                             ),
                             const SizedBox(height: 24),
-
                             SizedBox(
                               width: double.infinity,
                               height: 55,
@@ -1466,7 +1461,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                                 },
                               ),
                             ),
-
                             const SizedBox(height: 16),
                             const Row(
                               children: [
@@ -1487,7 +1481,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                               ],
                             ),
                             const SizedBox(height: 16),
-
                             SizedBox(
                               width: double.infinity,
                               height: 65,
@@ -1587,9 +1580,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                               ),
                             ),
                             const SizedBox(height: 24),
-                            const SizedBox(height: 16),
 
-                            // ==== BLOCO 2 ADICIONADO: BOTÃO DO ACERVO ====
                             SizedBox(
                               width: double.infinity,
                               height: 45,
@@ -1613,7 +1604,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                             ),
                             const SizedBox(height: 24),
 
-                            // =============================================
                             const Text(
                               'CHECKLIST DE VERIFICAÇÃO',
                               style: TextStyle(
@@ -1793,7 +1783,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                                       clipBehavior: Clip.none,
                                       children: [
                                         GestureDetector(
-                                          // ==== MODIFICADO: A imagem agora é carregada a partir da memória ====
                                           onTap: () => _mostrarImagemExpandida(
                                             context,
                                             MemoryImage(fotosEmMemoria[index]),
@@ -1864,8 +1853,6 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                                           setModalState(
                                             () => processandoFoto = true,
                                           );
-
-                                          // ==== MODIFICADO: Transforma e Carimba a foto direto na memória (Resolve o problema WEB) ====
                                           Uint8List fotoEmBytes =
                                               await fotoTirada.readAsBytes();
                                           Uint8List fotoCarimbada =
@@ -1875,12 +1862,10 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                                                 dataHoraInicio,
                                                 coordenadas,
                                               );
-
                                           setModalState(() {
                                             fotosEmMemoria.add(fotoCarimbada);
                                             processandoFoto = false;
                                           });
-                                          // ============================================================================================
                                         }
                                       },
                                       child: Container(
@@ -1953,209 +1938,211 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
 
                             const SizedBox(height: 32),
 
-                            SizedBox(
-                              width: double.infinity,
-                              height: 50,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.indigo,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                            // ==== SOLUÇÃO AQUI: SafeArea envelopando o botão final ====
+                            SafeArea(
+                              bottom: true,
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.indigo,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
-                                ),
-                                onPressed: (salvando || processandoFoto)
-                                    ? null
-                                    : () async {
-                                        if (!checklistConfirmado) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'Você precisa marcar a caixa confirmando a verificação do checklist!',
-                                              ),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
-                                          return;
-                                        }
-
-                                        // ==== MODIFICADO: Adicionado .toUpperCase() para forçar maiúsculas ====
-                                        String detalhesFinais =
-                                            detalhesController.text
-                                                .trim()
-                                                .toUpperCase();
-
-                                        if (temAnormalidade == 'Sim') {
-                                          if (falhaSelecionada == null) {
+                                  onPressed: (salvando || processandoFoto)
+                                      ? null
+                                      : () async {
+                                          if (!checklistConfirmado) {
                                             ScaffoldMessenger.of(
                                               context,
                                             ).showSnackBar(
                                               const SnackBar(
                                                 content: Text(
-                                                  'Selecione qual foi a falha encontrada!',
+                                                  'Você precisa marcar a caixa confirmando a verificação do checklist!',
                                                 ),
                                                 backgroundColor: Colors.red,
                                               ),
                                             );
                                             return;
                                           }
-                                          if (fotosEmMemoria.isEmpty) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'É obrigatório tirar pelo menos 1 foto do defeito!',
+                                          String detalhesFinais =
+                                              detalhesController.text
+                                                  .trim()
+                                                  .toUpperCase();
+                                          if (temAnormalidade == 'Sim') {
+                                            if (falhaSelecionada == null) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Selecione qual foi a falha encontrada!',
+                                                  ),
+                                                  backgroundColor: Colors.red,
                                                 ),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                            );
-                                            return;
+                                              );
+                                              return;
+                                            }
+                                            if (fotosEmMemoria.isEmpty) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'É obrigatório tirar pelo menos 1 foto do defeito!',
+                                                  ),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                              return;
+                                            }
+                                          } else {
+                                            detalhesFinais =
+                                                'O SEMÁFORO FOI VISTORIADO POR COMPLETO E NÃO FORAM IDENTIFICADAS ANORMALIDADES.';
                                           }
-                                        } else {
-                                          detalhesFinais =
-                                              'O SEMÁFORO FOI VISTORIADO POR COMPLETO E NÃO FORAM IDENTIFICADAS ANORMALIDADES.';
-                                        }
 
-                                        setModalState(() => salvando = true);
+                                          setModalState(() => salvando = true);
 
-                                        try {
-                                          List<String> urlsDasFotos = [];
+                                          try {
+                                            List<String> urlsDasFotos = [];
+                                            if (fotosEmMemoria.isNotEmpty) {
+                                              for (
+                                                int i = 0;
+                                                i < fotosEmMemoria.length;
+                                                i++
+                                              ) {
+                                                String nomeArquivo =
+                                                    'vistoria_${semaforo['id']}_${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
+                                                Reference ref = FirebaseStorage
+                                                    .instance
+                                                    .ref()
+                                                    .child(
+                                                      'vistorias_fotos/$nomeArquivo',
+                                                    );
+                                                UploadTask uploadTask = ref
+                                                    .putData(
+                                                      fotosEmMemoria[i],
+                                                      SettableMetadata(
+                                                        contentType:
+                                                            'image/jpeg',
+                                                      ),
+                                                    );
+                                                TaskSnapshot snapshotDaFoto =
+                                                    await uploadTask;
+                                                urlsDasFotos.add(
+                                                  await snapshotDaFoto.ref
+                                                      .getDownloadURL(),
+                                                );
+                                              }
+                                            }
 
-                                          if (fotosEmMemoria.isNotEmpty) {
-                                            for (
-                                              int i = 0;
-                                              i < fotosEmMemoria.length;
-                                              i++
-                                            ) {
-                                              String nomeArquivo =
-                                                  'vistoria_${semaforo['id']}_${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
-                                              Reference ref = FirebaseStorage
-                                                  .instance
-                                                  .ref()
-                                                  .child(
-                                                    'vistorias_fotos/$nomeArquivo',
-                                                  );
+                                            String dataFormatadaFim =
+                                                DateFormat(
+                                                  'dd/MM/yyyy HH:mm:ss',
+                                                ).format(DateTime.now());
 
-                                              // ==== MODIFICADO: Usa putData em vez de putFile para fazer o upload via Memória ====
-                                              UploadTask uploadTask = ref
-                                                  .putData(
-                                                    fotosEmMemoria[i],
-                                                    SettableMetadata(
-                                                      contentType: 'image/jpeg',
-                                                    ),
-                                                  );
+                                            await FirebaseFirestore.instance
+                                                .collection('vistorias')
+                                                .add({
+                                                  'turno_id': turnoId,
+                                                  'vistoriador_uid': user!.uid,
+                                                  'semaforo_id': semaforo['id'],
+                                                  'semaforo_endereco':
+                                                      semaforo['endereco'],
+                                                  'data_hora_inicio':
+                                                      dataHoraInicio,
+                                                  'data_hora_fim':
+                                                      dataFormatadaFim,
+                                                  'gps_coordenadas':
+                                                      coordenadas,
+                                                  'coordenadas_cadastro':
+                                                      geoRefSemaforo,
+                                                  'resumo_checklist':
+                                                      textoConfirmacaoChecklist,
+                                                  'teve_anormalidade':
+                                                      temAnormalidade == 'Sim',
+                                                  'falha_registrada':
+                                                      falhaSelecionada ??
+                                                      'NENHUMA FALHA',
+                                                  'detalhes_ocorrencia':
+                                                      detalhesFinais,
+                                                  'fotos': urlsDasFotos,
+                                                  'criado_em':
+                                                      FieldValue.serverTimestamp(),
+                                                });
 
-                                              TaskSnapshot snapshotDaFoto =
-                                                  await uploadTask;
-                                              urlsDasFotos.add(
-                                                await snapshotDaFoto.ref
-                                                    .getDownloadURL(),
+                                            if (temAnormalidade == 'Sim') {
+                                              await _enviarOcorrencia(
+                                                semaforo,
+                                                falhaSelecionada!,
+                                                detalhesFinais,
+                                                fotosEmMemoria,
+                                                coordenadas,
                                               );
                                             }
-                                          }
 
-                                          String dataFormatadaFim = DateFormat(
-                                            'dd/MM/yyyy HH:mm:ss',
-                                          ).format(DateTime.now());
-
-                                          await FirebaseFirestore.instance
-                                              .collection('vistorias')
-                                              .add({
-                                                'turno_id': turnoId,
-                                                'vistoriador_uid': user!.uid,
-                                                'semaforo_id': semaforo['id'],
-                                                'semaforo_endereco':
-                                                    semaforo['endereco'],
-                                                'data_hora_inicio':
-                                                    dataHoraInicio,
-                                                'data_hora_fim':
-                                                    dataFormatadaFim,
-                                                'gps_coordenadas': coordenadas,
-                                                'coordenadas_cadastro':
-                                                    geoRefSemaforo,
-                                                'resumo_checklist':
-                                                    textoConfirmacaoChecklist,
-                                                'teve_anormalidade':
-                                                    temAnormalidade == 'Sim',
-                                                'falha_registrada':
-                                                    falhaSelecionada ??
-                                                    'NENHUMA FALHA',
-                                                'detalhes_ocorrencia':
-                                                    detalhesFinais,
-                                                'fotos': urlsDasFotos,
-                                                'criado_em':
-                                                    FieldValue.serverTimestamp(),
-                                              });
-
-                                          if (temAnormalidade == 'Sim') {
-                                            await _enviarOcorrencia(
-                                              semaforo,
-                                              falhaSelecionada!,
-                                              detalhesFinais,
-                                              fotosEmMemoria,
-                                              coordenadas, // <-- COORDENADA DO VISTORIADOR ADICIONADA AQUI
+                                            if (!mounted) return;
+                                            Navigator.pop(context);
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Vistoria salva com sucesso!',
+                                                ),
+                                                backgroundColor: Colors.green,
+                                              ),
+                                            );
+                                          } catch (e) {
+                                            setModalState(
+                                              () => salvando = false,
+                                            );
+                                            if (!mounted) return;
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Erro ao salvar vistoria! Verifique a conexão.',
+                                                ),
+                                                backgroundColor: Colors.red,
+                                              ),
                                             );
                                           }
-
-                                          if (!mounted) return;
-                                          Navigator.pop(context);
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'Vistoria salva com sucesso!',
+                                        },
+                                  child: salvando
+                                      ? const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 2,
                                               ),
-                                              backgroundColor: Colors.green,
                                             ),
-                                          );
-                                        } catch (e) {
-                                          setModalState(() => salvando = false);
-                                          if (!mounted) return;
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'Erro ao salvar vistoria! Verifique a conexão.',
+                                            SizedBox(width: 12),
+                                            Text(
+                                              'Enviando dados...',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
                                               ),
-                                              backgroundColor: Colors.red,
                                             ),
-                                          );
-                                        }
-                                      },
-                                child: salvando
-                                    ? const Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              color: Colors.white,
-                                              strokeWidth: 2,
-                                            ),
+                                          ],
+                                        )
+                                      : const Text(
+                                          'SALVAR E CONCLUIR VISTORIA',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                          SizedBox(width: 12),
-                                          Text(
-                                            'Enviando dados...',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : const Text(
-                                        'SALVAR E CONCLUIR VISTORIA',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
                                         ),
-                                      ),
+                                ),
                               ),
                             ),
                           ],
