@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,19 +23,16 @@ class _RelatoriosPageState extends State<RelatoriosPage>
   final User? user = FirebaseAuth.instance.currentUser;
   late TabController _tabController;
 
-  // ==== ESTADOS DA ABA CONSULTA ====
   DateTime? _deConsulta;
   DateTime? _ateConsulta;
   String _rotaConsulta = 'Todas';
   final TextEditingController _semaforoController = TextEditingController();
   bool _filtrosAplicadosConsulta = false;
 
-  // ==== ESTADOS DA ABA EXPORTAÇÃO ====
   DateTime? _deExport;
   DateTime? _ateExport;
   String _rotaExport = 'Todas';
 
-  // ==== ESTADOS DA ABA PENDÊNCIAS ====
   DateTime _mesPendencia = DateTime(
     DateTime.now().year,
     DateTime.now().month,
@@ -44,19 +42,24 @@ class _RelatoriosPageState extends State<RelatoriosPage>
 
   final Map<String, String> _cacheNomes = {};
 
-  // ==== ADICIONADO: FUNÇÃO DE CORES DAS ROTAS ====
-  // 👇 ADICIONE ESTE BLOCO INTEIRO AQUI 👇
+  String up(dynamic val) => (val?.toString() ?? '-').toUpperCase();
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-
     DateTime agora = DateTime.now();
     _deConsulta = DateTime(agora.year, agora.month, 1);
     _ateConsulta = DateTime(agora.year, agora.month + 1, 0, 23, 59, 59);
-
     _deExport = DateTime(agora.year, agora.month, 1);
     _ateExport = DateTime(agora.year, agora.month + 1, 0, 23, 59, 59);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _semaforoController.dispose();
+    super.dispose();
   }
 
   Color _obterCorDaRota(String rota) {
@@ -66,7 +69,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
         .replaceAll('ROTA', '')
         .replaceAll(' ', '');
     if (r.isEmpty) return Colors.grey.shade600;
-
     switch (r) {
       case '1':
       case '01':
@@ -98,8 +100,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
       case '10':
         return Colors.deepOrange.shade700;
       default:
-        final int hash = r.hashCode;
-        final List<Color> coresDisponiveis = [
+        final List<Color> cores = [
           Colors.blue.shade700,
           Colors.green.shade700,
           Colors.red.shade700,
@@ -113,16 +114,8 @@ class _RelatoriosPageState extends State<RelatoriosPage>
           Colors.brown.shade600,
           Colors.blueGrey.shade700,
         ];
-        return coresDisponiveis[hash.abs() % coresDisponiveis.length];
+        return cores[r.hashCode.abs() % cores.length];
     }
-  }
-  // ===============================================
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _semaforoController.dispose();
-    super.dispose();
   }
 
   Future<String> _getNomeVistoriador(String uid) async {
@@ -141,9 +134,9 @@ class _RelatoriosPageState extends State<RelatoriosPage>
         return nome;
       }
     } catch (e) {
-      // Ignora erro
+      /* Error */
     }
-    return 'Desconhecido';
+    return 'DESCONHECIDO';
   }
 
   Future<void> _selecionarData(
@@ -151,15 +144,13 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     bool isDe = true,
     required String tipoAba,
   }) async {
-    DateTime initial = DateTime.now();
     DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: initial,
+      initialDate: DateTime.now(),
       firstDate: DateTime(2024),
       lastDate: DateTime.now(),
       helpText: isDe ? 'SELECIONE A DATA INICIAL' : 'SELECIONE A DATA FINAL',
     );
-
     if (picked != null) {
       setState(() {
         if (tipoAba == 'Consulta') {
@@ -207,9 +198,8 @@ class _RelatoriosPageState extends State<RelatoriosPage>
   }
 
   Future<void> _selecionarMesAnoDialog(BuildContext context) async {
-    int mesSelecionado = _mesPendencia.month;
-    int anoSelecionado = _mesPendencia.year;
-
+    int mesSel = _mesPendencia.month;
+    int anoSel = _mesPendencia.year;
     await showDialog(
       context: context,
       builder: (context) {
@@ -217,14 +207,14 @@ class _RelatoriosPageState extends State<RelatoriosPage>
           builder: (context, setStateDialog) {
             return AlertDialog(
               title: const Text(
-                'Selecione o Mês e Ano',
+                'SELECIONE O MÊS E ANO',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               content: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   DropdownButton<int>(
-                    value: mesSelecionado,
+                    value: mesSel,
                     items: List.generate(
                       12,
                       (index) => DropdownMenuItem(
@@ -232,12 +222,11 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         child: Text((index + 1).toString().padLeft(2, '0')),
                       ),
                     ),
-                    onChanged: (val) =>
-                        setStateDialog(() => mesSelecionado = val!),
+                    onChanged: (val) => setStateDialog(() => mesSel = val!),
                   ),
                   const Text('/', style: TextStyle(fontSize: 20)),
                   DropdownButton<int>(
-                    value: anoSelecionado,
+                    value: anoSel,
                     items: List.generate(
                       10,
                       (index) => DropdownMenuItem(
@@ -245,15 +234,14 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         child: Text((2024 + index).toString()),
                       ),
                     ),
-                    onChanged: (val) =>
-                        setStateDialog(() => anoSelecionado = val!),
+                    onChanged: (val) => setStateDialog(() => anoSel = val!),
                   ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancelar'),
+                  child: const Text('CANCELAR'),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -262,15 +250,11 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                   ),
                   onPressed: () {
                     setState(() {
-                      _mesPendencia = DateTime(
-                        anoSelecionado,
-                        mesSelecionado,
-                        1,
-                      );
+                      _mesPendencia = DateTime(anoSel, mesSel, 1);
                     });
                     Navigator.pop(context);
                   },
-                  child: const Text('Confirmar'),
+                  child: const Text('CONFIRMAR'),
                 ),
               ],
             );
@@ -315,8 +299,9 @@ class _RelatoriosPageState extends State<RelatoriosPage>
               Expanded(
                 child: Text(
                   data == null
-                      ? '$label: Selecione'
-                      : '$label: ${DateFormat(formato).format(data)}',
+                      ? '$label: SELECIONE'.toUpperCase()
+                      : '$label: ${DateFormat(formato).format(data)}'
+                            .toUpperCase(),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -338,7 +323,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
       builder: (context) {
         return Dialog(
           backgroundColor: Colors.black87,
-          insetPadding: const EdgeInsets.all(0),
+          insetPadding: EdgeInsets.zero,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -376,13 +361,13 @@ class _RelatoriosPageState extends State<RelatoriosPage>
           style: const TextStyle(color: Colors.black87, fontSize: 15),
           children: [
             TextSpan(
-              text: '$label: ',
+              text: '${label.toUpperCase()}: ',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.blueGrey,
               ),
             ),
-            TextSpan(text: value ?? '-'),
+            TextSpan(text: up(value)),
           ],
         ),
       ),
@@ -403,7 +388,8 @@ class _RelatoriosPageState extends State<RelatoriosPage>
               pw.SizedBox(width: 50),
               pw.Expanded(
                 child: pw.Text(
-                  'Relatório gerado pelo aplicativo Vistoria CTTU ($dataHora)',
+                  'RELATÓRIO GERADO PELO APLICATIVO VISTORIA CTTU ($dataHora)'
+                      .toUpperCase(),
                   textAlign: pw.TextAlign.center,
                   style: const pw.TextStyle(
                     fontSize: 9,
@@ -414,7 +400,8 @@ class _RelatoriosPageState extends State<RelatoriosPage>
               pw.SizedBox(
                 width: 50,
                 child: pw.Text(
-                  'Pág. ${context.pageNumber} / ${context.pagesCount}',
+                  'PÁG. ${context.pageNumber} / ${context.pagesCount}'
+                      .toUpperCase(),
                   textAlign: pw.TextAlign.right,
                   style: const pw.TextStyle(
                     fontSize: 9,
@@ -429,6 +416,339 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     );
   }
 
+  // ==== PROCESSA E FILTRA AS VISTORIAS DA ABA CONSULTA ====
+  Future<void> _exportarConsulta(
+    String tipo,
+    Map<String, String> mapaRotas,
+    List<Map<String, dynamic>> todosSemaforosData,
+  ) async {
+    Query query = FirebaseFirestore.instance
+        .collection('vistorias')
+        .orderBy('criado_em', descending: true);
+    if (_deConsulta != null && _ateConsulta != null) {
+      query = query.where(
+        'criado_em',
+        isGreaterThanOrEqualTo: _deConsulta,
+        isLessThanOrEqualTo: _ateConsulta,
+      );
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('PREPARANDO EXPORTAÇÃO EM $tipo...'),
+        backgroundColor: Colors.blue,
+      ),
+    );
+
+    try {
+      QuerySnapshot snapshot = await query.get();
+      List<Map<String, dynamic>> vistoriasFiltradas = [];
+
+      String textoPesquisa = _semaforoController.text.trim().toLowerCase();
+      String idFiltro = textoPesquisa.split(' - ')[0].trim();
+
+      for (var doc in snapshot.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        String idSem = (data['semaforo_id'] ?? '').toString();
+
+        if (idFiltro.isNotEmpty && !idSem.toLowerCase().contains(idFiltro))
+          continue;
+
+        String rotaDesteSemaforo = mapaRotas[idSem] ?? '';
+        if (_rotaConsulta != 'Todas') {
+          String rotaLimpa = _rotaConsulta.replaceFirst(RegExp(r'^0+'), '');
+          if (rotaDesteSemaforo != rotaLimpa) continue;
+        }
+
+        data['nome_vistoriador'] = await _getNomeVistoriador(
+          data['vistoriador_uid'] ?? '',
+        );
+        vistoriasFiltradas.add(data);
+      }
+
+      if (vistoriasFiltradas.isEmpty) {
+        if (mounted)
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('NENHUMA VISTORIA ENCONTRADA PARA ESTES FILTROS!'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        return;
+      }
+
+      if (tipo == 'PDF') {
+        await _exportarPDFGlobalConsulta(
+          vistoriasFiltradas,
+          _rotaConsulta,
+          todosSemaforosData,
+        );
+      } else {
+        await _exportarExcelGlobalConsulta(
+          vistoriasFiltradas,
+          _rotaConsulta,
+          todosSemaforosData,
+        );
+      }
+    } catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('ERRO AO EXPORTAR CONSULTA!'),
+            backgroundColor: Colors.red,
+          ),
+        );
+    }
+  }
+
+  // ==== GERA O PDF DA ABA CONSULTA ====
+  // ==== TRECHO EDITADO: CABEÇALHO DO PDF DA CONSULTA COM TODOS OS FILTROS DETALHEDOS ====
+  Future<void> _exportarPDFGlobalConsulta(
+    List<Map<String, dynamic>> vistorias,
+    String rotaNumero,
+    List<Map<String, dynamic>> todosSemaforosData,
+  ) async {
+    String dataHoraAtual = DateFormat(
+      'dd/MM/yyyy HH:mm:ss',
+    ).format(DateTime.now()).toUpperCase();
+
+    // Tratamento e formatação das datas do filtro
+    String deStr = _deConsulta != null
+        ? DateFormat('dd/MM/yyyy').format(_deConsulta!)
+        : '-';
+    String ateStr = _ateConsulta != null
+        ? DateFormat('dd/MM/yyyy').format(_ateConsulta!)
+        : '-';
+    String filtroPeriodo = "PERÍODO: $deStr ATÉ $ateStr";
+
+    // Captura o filtro atual de Nº / Endereço do semáforo
+    String filtroSemaforo = _semaforoController.text.trim().isEmpty
+        ? "TODOS"
+        : _semaforoController.text.trim().toUpperCase();
+
+    String filtroRota = rotaNumero == "Todas"
+        ? "TODAS AS ROTAS"
+        : "ROTA $rotaNumero";
+
+    await Printing.layoutPdf(
+      name: 'RELATORIO_CONSULTA_ROTA$rotaNumero.pdf'.toUpperCase(),
+      onLayout: (PdfPageFormat format) async {
+        final pdf = pw.Document();
+        pdf.addPage(
+          pw.MultiPage(
+            pageFormat: PdfPageFormat.a4.landscape,
+            margin: const pw.EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 24,
+              bottom: 20,
+            ),
+            footer: (pw.Context context) =>
+                _buildRodapePDF(context, dataHoraAtual),
+            build: (pw.Context context) {
+              return [
+                pw.Header(
+                  level: 0,
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'RELATÓRIO DE VISTORIAS GERENCIAIS (CONSULTA)',
+                        style: pw.TextStyle(
+                          fontSize: 18,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 6),
+                      // ==== FILTROS ADICIONADOS AO CABEÇALHO ====
+                      pw.Text(
+                        '$filtroRota  |  $filtroPeriodo  |  BUSCA: $filtroSemaforo',
+                        style: pw.TextStyle(
+                          fontSize: 10,
+                          color: PdfColors.grey800,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                pw.SizedBox(height: 16),
+                pw.TableHelper.fromTextArray(
+                  context: context,
+                  headers: [
+                    'SEMÁFORO',
+                    'ENDEREÇO',
+                    'VISTORIADOR',
+                    'INÍCIO',
+                    'FIM',
+                    'GEORREFERÊNCIA',
+                    'FALHA',
+                    'DETALHES',
+                    'FOTOS (LINKS)',
+                  ],
+                  data: vistorias.map((v) {
+                    String coordOriginal =
+                        v['coordenadas_cadastro']?.toString() ?? '-';
+                    if (coordOriginal == '-' || coordOriginal.isEmpty) {
+                      var match = todosSemaforosData.where(
+                        (s) =>
+                            s['id'].toString() == v['semaforo_id'].toString(),
+                      );
+                      coordOriginal = match.isNotEmpty
+                          ? (match.first['georeferencia']?.toString() ?? '-')
+                          : '-';
+                    }
+                    String gpsVistoriador =
+                        v['gps_coordenadas']?.toString() ?? '-';
+                    List<dynamic> fotos = v['fotos'] ?? [];
+                    return [
+                      up(v['semaforo_id']),
+                      up(v['semaforo_endereco']),
+                      up(v['nome_vistoriador']),
+                      up(v['data_hora_inicio']),
+                      up(v['data_hora_fim']),
+                      pw.Container(
+                        alignment: pw.Alignment.center,
+                        child: pw.Column(
+                          mainAxisAlignment: pw.MainAxisAlignment.center,
+                          crossAxisAlignment: pw.CrossAxisAlignment.center,
+                          children: [
+                            pw.Text(
+                              'SEMÁFORO: $coordOriginal'.toUpperCase(),
+                              style: pw.TextStyle(
+                                color: PdfColors.green,
+                                fontSize: 6,
+                                fontWeight: pw.FontWeight.bold,
+                              ),
+                            ),
+                            pw.SizedBox(height: 2),
+                            pw.Text(
+                              'VISTORIA: $gpsVistoriador'.toUpperCase(),
+                              style: pw.TextStyle(
+                                color: PdfColors.red,
+                                fontSize: 6,
+                                fontWeight: pw.FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      up(v['falha_registrada']),
+                      up(v['detalhes_ocorrencia']).replaceAll('\n', ' '),
+                      fotos.join('\n\n'),
+                    ];
+                  }).toList(),
+                  cellAlignment: pw.Alignment.center,
+                  headerAlignment: pw.Alignment.center,
+                  headerStyle: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.white,
+                    fontSize: 7.5,
+                  ),
+                  headerDecoration: const pw.BoxDecoration(
+                    color: PdfColors.teal700,
+                  ),
+                  cellStyle: const pw.TextStyle(fontSize: 6.5),
+                  columnWidths: {
+                    0: const pw.FixedColumnWidth(55),
+                    1: const pw.FixedColumnWidth(110),
+                    2: const pw.FixedColumnWidth(65),
+                    3: const pw.FixedColumnWidth(55),
+                    4: const pw.FixedColumnWidth(55),
+                    5: const pw.FixedColumnWidth(95),
+                    6: const pw.FixedColumnWidth(70),
+                    7: const pw.FixedColumnWidth(100),
+                    8: const pw.FixedColumnWidth(65),
+                  },
+                ),
+              ];
+            },
+          ),
+        );
+        return pdf.save();
+      },
+    );
+  }
+
+  // ==== GERA O EXCEL DA ABA CONSULTA ====
+  Future<void> _exportarExcelGlobalConsulta(
+    List<Map<String, dynamic>> vistorias,
+    String rotaNumero,
+    List<Map<String, dynamic>> todosSemaforosData,
+  ) async {
+    try {
+      StringBuffer excelBuffer = StringBuffer();
+      excelBuffer.write(
+        '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body><table border="1">',
+      );
+      excelBuffer.write(
+        '<tr style="background-color: #00796B; color: white; font-weight: bold; text-align: center;"><td>SEMÁFORO</td><td>ENDEREÇO</td><td>VISTORIADOR</td><td>INÍCIO</td><td>FIM</td><td>GEORREFERÊNCIA</td><td>FALHA</td><td>DETALHES</td><td>FOTOS</td></tr>',
+      );
+
+      for (var v in vistorias) {
+        String coordOriginal = v['coordenadas_cadastro']?.toString() ?? '';
+        if (coordOriginal.isEmpty || coordOriginal == '-') {
+          var match = todosSemaforosData.where(
+            (s) => s['id'].toString() == v['semaforo_id'].toString(),
+          );
+          coordOriginal = match.isNotEmpty
+              ? (match.first['georeferencia']?.toString() ?? '-')
+              : '-';
+        }
+        String gpsVistoriador = v['gps_coordenadas']?.toString() ?? '-';
+        List<dynamic> fotos = v['fotos'] ?? [];
+
+        excelBuffer.write('<tr>');
+        excelBuffer.write(
+          '<td style="text-align: center; vertical-align: middle;">${up(v['semaforo_id'])}</td>',
+        );
+        excelBuffer.write(
+          '<td style="text-align: center; vertical-align: middle;">${up(v['semaforo_endereco'])}</td>',
+        );
+        excelBuffer.write(
+          '<td style="text-align: center; vertical-align: middle;">${up(v['nome_vistoriador'])}</td>',
+        );
+        excelBuffer.write(
+          '<td style="text-align: center; vertical-align: middle;">${up(v['data_hora_inicio'])}</td>',
+        );
+        excelBuffer.write(
+          '<td style="text-align: center; vertical-align: middle;">${up(v['data_hora_fim'])}</td>',
+        );
+        excelBuffer.write(
+          '<td style="text-align: center; vertical-align: middle; white-space: nowrap;"><span style="color: green; font-weight: bold;">SEMÁFORO: ${coordOriginal.toUpperCase()}</span><br/><span style="color: red; font-weight: bold;">VISTORIA: ${gpsVistoriador.toUpperCase()}</span></td>',
+        );
+        excelBuffer.write(
+          '<td style="text-align: center; vertical-align: middle;">${up(v['falha_registrada'])}</td>',
+        );
+        excelBuffer.write(
+          '<td style="text-align: center; vertical-align: middle;">${up(v['detalhes_ocorrencia']).replaceAll('\n', ' ')}</td>',
+        );
+        excelBuffer.write(
+          '<td style="text-align: center; vertical-align: middle;">${fotos.isNotEmpty ? fotos.map((f) => '<a href="$f">FOTO</a>').join(' | ') : '-'}</td></tr>',
+        );
+      }
+      excelBuffer.write('</table></body></html>');
+
+      final Uint8List bytes = Uint8List.fromList(
+        utf8.encode(excelBuffer.toString()),
+      );
+      final xFile = XFile.fromData(
+        bytes,
+        mimeType: 'application/vnd.ms-excel',
+        name: 'RELATORIO_CONSULTA.XLS',
+      );
+      await Share.shareXFiles([xFile], text: 'PLANILHA DE VISTORIAS.');
+    } catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('ERRO AO GERAR EXCEL!'),
+            backgroundColor: Colors.red,
+          ),
+        );
+    }
+  }
+
   Future<void> _exportarPDFIndividual(
     Map<String, dynamic> vistoria,
     String nomeVistoriador,
@@ -436,7 +756,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
   ) async {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Baixando fotos e gerando PDF...'),
+        content: Text('BAIXANDO FOTOS E GERANDO PDF...'),
         backgroundColor: Colors.teal,
       ),
     );
@@ -444,38 +764,33 @@ class _RelatoriosPageState extends State<RelatoriosPage>
       bool temFalha = vistoria['teve_anormalidade'] == true;
       List<dynamic> urlsFotos = vistoria['fotos'] ?? [];
       List<pw.ImageProvider> imagensPdf = [];
-
       for (String url in urlsFotos) {
         try {
-          final imageBytes = await networkImage(url);
-          imagensPdf.add(imageBytes);
+          imagensPdf.add(await networkImage(url));
         } catch (e) {
-          debugPrint('Erro ao baixar imagem pro pdf: $e');
+          debugPrint('Erro foto pdf: $e');
         }
       }
 
-      String gpsVistoriador =
-          vistoria['gps_coordenadas']?.toString() ?? 'Não informada';
-      String dataHoraAtual = DateFormat(
+      String gpsVist = up(vistoria['gps_coordenadas']);
+      String dHora = DateFormat(
         'dd/MM/yyyy HH:mm:ss',
-      ).format(DateTime.now());
+      ).format(DateTime.now()).toUpperCase();
 
       await Printing.layoutPdf(
-        name: 'Ficha_Semaforo_${vistoria['semaforo_id']}.pdf',
+        name: 'FICHA_SEMAFORO_${vistoria['semaforo_id']}.pdf'.toUpperCase(),
         onLayout: (PdfPageFormat format) async {
           final pdf = pw.Document();
-
           pdf.addPage(
             pw.MultiPage(
-              pageFormat: PdfPageFormat.a4.landscape,
+              pageFormat: PdfPageFormat.a4,
               margin: const pw.EdgeInsets.only(
                 left: 32,
                 right: 32,
                 top: 32,
                 bottom: 20,
               ),
-              footer: (pw.Context context) =>
-                  _buildRodapePDF(context, dataHoraAtual),
+              footer: (pw.Context context) => _buildRodapePDF(context, dHora),
               build: (pw.Context context) {
                 return [
                   pw.Row(
@@ -490,7 +805,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                       ),
                       pw.SizedBox(width: 12),
                       pw.Text(
-                        'Semáforo Nº ${vistoria['semaforo_id']}',
+                        'SEMÁFORO Nº ${up(vistoria['semaforo_id'])}',
                         style: pw.TextStyle(
                           fontSize: 24,
                           fontWeight: pw.FontWeight.bold,
@@ -501,30 +816,26 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                   ),
                   pw.Divider(thickness: 2, height: 32),
                   pw.Text(
-                    'Vistoriador: $nomeVistoriador',
+                    'VISTORIADOR: ${up(nomeVistoriador)}',
                     style: pw.TextStyle(
                       fontSize: 12,
                       fontWeight: pw.FontWeight.bold,
                     ),
                   ),
                   pw.Text(
-                    'Endereço: ${vistoria['semaforo_endereco']}',
+                    'ENDEREÇO: ${up(vistoria['semaforo_endereco'])}',
                     style: const pw.TextStyle(fontSize: 12),
                   ),
                   pw.Text(
-                    'Início: ${vistoria['data_hora_inicio']}',
+                    'INÍCIO: ${up(vistoria['data_hora_inicio'])} | FIM: ${up(vistoria['data_hora_fim'])}',
                     style: const pw.TextStyle(fontSize: 12),
                   ),
                   pw.Text(
-                    'Fim: ${vistoria['data_hora_fim']}',
+                    'LOCAL DO SEMÁFORO (ACERVO): ${up(coordOriginal)}',
                     style: const pw.TextStyle(fontSize: 12),
                   ),
                   pw.Text(
-                    'Local do Semáforo (Acervo): $coordOriginal',
-                    style: const pw.TextStyle(fontSize: 12),
-                  ),
-                  pw.Text(
-                    'Local da Vistoria (GPS): $gpsVistoriador',
+                    'LOCAL DA VISTORIA (GPS): $gpsVist',
                     style: const pw.TextStyle(fontSize: 12),
                   ),
                   pw.SizedBox(height: 16),
@@ -536,7 +847,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                       borderRadius: pw.BorderRadius.circular(8),
                     ),
                     child: pw.Text(
-                      vistoria['resumo_checklist'] ?? 'Checklist verificado.',
+                      up(vistoria['resumo_checklist']),
                       style: pw.TextStyle(
                         color: PdfColors.blue800,
                         fontWeight: pw.FontWeight.bold,
@@ -565,19 +876,19 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                           ),
                         ),
                         pw.Text(
-                          vistoria['falha_registrada'] ?? 'Nenhuma',
+                          up(vistoria['falha_registrada']),
                           style: const pw.TextStyle(fontSize: 14),
                         ),
                         pw.SizedBox(height: 8),
                         pw.Text(
-                          'Detalhes:',
+                          'DETALHES:',
                           style: pw.TextStyle(
                             fontWeight: pw.FontWeight.bold,
                             color: temFalha ? PdfColors.red : PdfColors.green,
                           ),
                         ),
                         pw.Text(
-                          vistoria['detalhes_ocorrencia'] ?? 'Sem detalhes',
+                          up(vistoria['detalhes_ocorrencia']),
                           style: const pw.TextStyle(fontSize: 12),
                         ),
                       ],
@@ -586,7 +897,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                   if (imagensPdf.isNotEmpty) ...[
                     pw.SizedBox(height: 24),
                     pw.Text(
-                      'Fotos da Ocorrência:',
+                      'FOTOS:',
                       style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold,
                         fontSize: 14,
@@ -625,7 +936,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
       if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Erro ao gerar PDF da ficha!'),
+            content: Text('ERRO AO GERAR PDF INDIVIDUAL!'),
             backgroundColor: Colors.red,
           ),
         );
@@ -647,9 +958,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
       builder: (context) {
         bool temFalha = vistoria['teve_anormalidade'] == true;
         List<dynamic> fotos = vistoria['fotos'] ?? [];
-        String gpsVistoriador =
-            vistoria['gps_coordenadas']?.toString() ?? 'Não informada';
-
+        String gpsVistoriador = up(vistoria['gps_coordenadas']);
         return DraggableScrollableSheet(
           initialChildSize: 0.85,
           minChildSize: 0.5,
@@ -675,7 +984,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Semáforo Nº ${vistoria['semaforo_id']}',
+                            'SEMÁFORO Nº ${up(vistoria['semaforo_id'])}',
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -686,12 +995,12 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                       ],
                     ),
                     const Divider(thickness: 2, height: 32),
-                    _buildInfoRow('Vistoriador', nomeVistoriador),
-                    _buildInfoRow('Endereço', vistoria['semaforo_endereco']),
-                    _buildInfoRow('Início', vistoria['data_hora_inicio']),
-                    _buildInfoRow('Fim', vistoria['data_hora_fim']),
-                    _buildInfoRow('Local do Semáforo (Acervo)', coordOriginal),
-                    _buildInfoRow('Local da Vistoria (GPS)', gpsVistoriador),
+                    _buildInfoRow('VISTORIADOR', nomeVistoriador),
+                    _buildInfoRow('ENDEREÇO', vistoria['semaforo_endereco']),
+                    _buildInfoRow('INÍCIO', vistoria['data_hora_inicio']),
+                    _buildInfoRow('FIM', vistoria['data_hora_fim']),
+                    _buildInfoRow('LOCAL DO SEMÁFORO (ACERVO)', coordOriginal),
+                    _buildInfoRow('LOCAL DA VISTORIA (GPS)', gpsVistoriador),
                     const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -709,8 +1018,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              vistoria['resumo_checklist'] ??
-                                  'Checklist verificado.',
+                              up(vistoria['resumo_checklist']),
                               style: const TextStyle(
                                 color: Colors.blue,
                                 fontWeight: FontWeight.bold,
@@ -744,19 +1052,19 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                             ),
                           ),
                           Text(
-                            vistoria['falha_registrada'] ?? 'Nenhuma',
+                            up(vistoria['falha_registrada']),
                             style: const TextStyle(fontSize: 16),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Detalhes:',
+                            'DETALHES:',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: temFalha ? Colors.red : Colors.green,
                             ),
                           ),
                           Text(
-                            vistoria['detalhes_ocorrencia'] ?? 'Sem detalhes',
+                            up(vistoria['detalhes_ocorrencia']),
                             style: const TextStyle(fontSize: 14),
                           ),
                         ],
@@ -765,7 +1073,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                     if (fotos.isNotEmpty) ...[
                       const SizedBox(height: 24),
                       const Text(
-                        'Fotos da Ocorrência:',
+                        'FOTOS:',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -807,7 +1115,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         ),
                         icon: const Icon(Icons.picture_as_pdf),
                         label: const Text(
-                          'Exportar PDF Desta Vistoria',
+                          'EXPORTAR PDF DESTA VISTORIA',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         onPressed: () => _exportarPDFIndividual(
@@ -828,7 +1136,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         ),
                         onPressed: () => Navigator.pop(context),
                         child: const Text(
-                          'Fechar Ficha',
+                          'FECHAR FICHA',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -843,496 +1151,14 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     );
   }
 
-  Future<void> _exportarPDFGlobal(
-    List<Map<String, dynamic>> vistorias,
-    String rotaNumero,
-    List<Map<String, dynamic>> todosSemaforosData,
-  ) async {
-    if (vistorias.isEmpty) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Gerando PDF Global...'),
-        backgroundColor: Colors.teal,
-      ),
-    );
-    try {
-      double colSemaforo = 40;
-      double colEndereco = 110;
-      double colVistoriador = 65;
-      double colInicio = 55;
-      double colFim = 55;
-      double colGeoreferencia = 95;
-      double colFalha = 70;
-      double colDetalhes = 100;
-      double colFotos = 80;
-
-      String dataHoraAtual = DateFormat(
-        'dd/MM/yyyy HH:mm:ss',
-      ).format(DateTime.now());
-      String deStr = _deExport != null
-          ? DateFormat('dd/MM/yyyy').format(_deExport!)
-          : '-';
-      String ateStr = _ateExport != null
-          ? DateFormat('dd/MM/yyyy').format(_ateExport!)
-          : '-';
-      String filtroPeriodo = "Período: $deStr até $ateStr";
-
-      await Printing.layoutPdf(
-        name: 'Relatorio_Rota$rotaNumero.pdf',
-        onLayout: (PdfPageFormat format) async {
-          final pdf = pw.Document();
-
-          pdf.addPage(
-            pw.MultiPage(
-              pageFormat: PdfPageFormat.a4.landscape,
-              margin: const pw.EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 24,
-                bottom: 20,
-              ),
-              footer: (pw.Context context) =>
-                  _buildRodapePDF(context, dataHoraAtual),
-              build: (pw.Context context) {
-                return [
-                  pw.Header(
-                    level: 0,
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text(
-                          'Relatório de Vistorias Gerenciais',
-                          style: pw.TextStyle(
-                            fontSize: 18,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
-                        ),
-                        pw.SizedBox(height: 4),
-                        pw.Text(
-                          'Rota: ${rotaNumero == "Todas" ? "Todas as Rotas" : rotaNumero}  |  $filtroPeriodo',
-                          style: const pw.TextStyle(
-                            fontSize: 11,
-                            color: PdfColors.grey700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  pw.SizedBox(height: 16),
-                  pw.TableHelper.fromTextArray(
-                    context: context,
-                    headers: [
-                      'Semáforo',
-                      'Endereço',
-                      'Vistoriador',
-                      'Início',
-                      'Fim',
-                      'Georreferência',
-                      'Falha',
-                      'Detalhes',
-                      'Fotos (Links)',
-                    ],
-                    data: vistorias.map((v) {
-                      String coordOriginal =
-                          v['coordenadas_cadastro']?.toString() ?? '-';
-                      if (coordOriginal == '-' || coordOriginal.isEmpty) {
-                        var match = todosSemaforosData.where(
-                          (s) =>
-                              s['id'].toString() == v['semaforo_id'].toString(),
-                        );
-                        coordOriginal = match.isNotEmpty
-                            ? (match.first['georeferencia']?.toString() ?? '-')
-                            : '-';
-                      }
-
-                      String gpsVistoriador =
-                          v['gps_coordenadas']?.toString() ?? '-';
-                      List<dynamic> fotos = v['fotos'] ?? [];
-
-                      return [
-                        v['semaforo_id']?.toString() ?? '',
-                        v['semaforo_endereco']?.toString() ?? '',
-                        v['nome_vistoriador']?.toString() ?? '',
-                        v['data_hora_inicio']?.toString() ?? '',
-                        v['data_hora_fim']?.toString() ?? '',
-                        pw.Container(
-                          alignment: pw.Alignment.center,
-                          child: pw.Column(
-                            mainAxisAlignment: pw.MainAxisAlignment.center,
-                            crossAxisAlignment: pw.CrossAxisAlignment.center,
-                            children: [
-                              pw.Text(
-                                'Semáforo: $coordOriginal',
-                                style: pw.TextStyle(
-                                  color: PdfColors.green,
-                                  fontSize: 6,
-                                  fontWeight: pw.FontWeight.bold,
-                                ),
-                              ),
-                              pw.SizedBox(height: 2),
-                              pw.Text(
-                                'Vistoria: $gpsVistoriador',
-                                style: pw.TextStyle(
-                                  color: PdfColors.red,
-                                  fontSize: 6,
-                                  fontWeight: pw.FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        v['falha_registrada'] ?? '-',
-                        v['detalhes_ocorrencia']?.toString().replaceAll(
-                              '\n',
-                              ' ',
-                            ) ??
-                            '-',
-                        fotos.join('\n\n'),
-                      ];
-                    }).toList(),
-                    cellAlignment: pw.Alignment.center,
-                    headerAlignment: pw.Alignment.center,
-                    headerStyle: pw.TextStyle(
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.white,
-                      fontSize: 7.5,
-                    ),
-                    headerDecoration: const pw.BoxDecoration(
-                      color: PdfColors.teal700,
-                    ),
-                    cellStyle: const pw.TextStyle(fontSize: 6.5),
-                    columnWidths: {
-                      0: pw.FixedColumnWidth(colSemaforo),
-                      1: pw.FixedColumnWidth(colEndereco),
-                      2: pw.FixedColumnWidth(colVistoriador),
-                      3: pw.FixedColumnWidth(colInicio),
-                      4: pw.FixedColumnWidth(colFim),
-                      5: pw.FixedColumnWidth(colGeoreferencia),
-                      6: pw.FixedColumnWidth(colFalha),
-                      7: pw.FixedColumnWidth(colDetalhes),
-                      8: pw.FixedColumnWidth(colFotos),
-                    },
-                  ),
-                ];
-              },
-            ),
-          );
-          return pdf.save();
-        },
-      );
-    } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erro ao gerar PDF Global!'),
-            backgroundColor: Colors.red,
-          ),
-        );
-    }
-  }
-
-  Future<void> _exportarExcelGlobal(
-    List<Map<String, dynamic>> vistorias,
-    String rotaNumero,
-    List<Map<String, dynamic>> todosSemaforosData,
-  ) async {
-    if (vistorias.isEmpty) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Gerando Excel...'),
-        backgroundColor: Colors.green,
-      ),
-    );
-    try {
-      StringBuffer excelBuffer = StringBuffer();
-      excelBuffer.write(
-        '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body><table border="1">',
-      );
-
-      excelBuffer.write(
-        '<tr style="background-color: #00796B; color: white; font-weight: bold; text-align: center;">'
-        '<td>SEMÁFORO</td><td>ENDEREÇO</td><td>VISTORIADOR</td><td>INÍCIO</td><td>FIM</td><td>GEORREFERÊNCIA</td><td>FALHA</td><td>DETALHES</td><td>FOTOS</td></tr>',
-      );
-
-      for (var v in vistorias) {
-        String coordOriginal = v['coordenadas_cadastro']?.toString() ?? '';
-        if (coordOriginal.isEmpty || coordOriginal == '-') {
-          var match = todosSemaforosData.where(
-            (s) => s['id'].toString() == v['semaforo_id'].toString(),
-          );
-          coordOriginal = match.isNotEmpty
-              ? (match.first['georeferencia']?.toString() ?? '-')
-              : '-';
-        }
-        String gpsVistoriador = v['gps_coordenadas']?.toString() ?? '-';
-        List<dynamic> fotos = v['fotos'] ?? [];
-
-        excelBuffer.write('<tr>');
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${v['semaforo_id']}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${v['semaforo_endereco']}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${v['nome_vistoriador'] ?? ''}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${v['data_hora_inicio']}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${v['data_hora_fim']}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle; white-space: nowrap;">'
-          '<span style="color: green; font-weight: bold;">Semáforo: $coordOriginal</span><br/>'
-          '<span style="color: red; font-weight: bold;">Vistoria: $gpsVistoriador</span></td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${v['falha_registrada']}</td>',
-        );
-        excelBuffer.write(
-          '<td style="text-align: center; vertical-align: middle;">${v['detalhes_ocorrencia']?.toString().replaceAll('\n', ' ')}</td>',
-        );
-
-        if (fotos.isNotEmpty) {
-          String linksHtml = fotos
-              .map((f) => '<a href="$f">Abrir Foto</a>')
-              .join(' | ');
-          excelBuffer.write(
-            '<td style="text-align: center; vertical-align: middle;">$linksHtml</td>',
-          );
-        } else {
-          excelBuffer.write(
-            '<td style="text-align: center; vertical-align: middle;">-</td>',
-          );
-        }
-        excelBuffer.write('</tr>');
-      }
-
-      excelBuffer.write('</table></body></html>');
-
-      final dir = await getTemporaryDirectory();
-      final path = '${dir.path}/Relatorio_Vistorias.xls';
-      final file = File(path);
-      await file.writeAsBytes(utf8.encode(excelBuffer.toString()));
-      await Share.shareXFiles([XFile(path)], text: 'Planilha de Vistorias.');
-    } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erro ao gerar Excel!'),
-            backgroundColor: Colors.red,
-          ),
-        );
-    }
-  }
-
-  Future<void> _realizarExportacao(
-    String tipoExportacao,
-    Map<String, String> mapaRotas,
-    List<Map<String, dynamic>> todosSemaforosData,
-  ) async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('vistorias')
-        .where('criado_em', isGreaterThanOrEqualTo: _deExport)
-        .where('criado_em', isLessThanOrEqualTo: _ateExport)
-        .orderBy('criado_em', descending: true)
-        .get();
-    List<Map<String, dynamic>> vistoriasFiltradas = [];
-    String rotaSelecionadaLimpa = _rotaExport.replaceFirst(RegExp(r'^0+'), '');
-
-    for (var doc in snapshot.docs) {
-      var data = doc.data() as Map<String, dynamic>;
-      String rotaDesteSemaforo =
-          mapaRotas[data['semaforo_id'].toString()] ?? '';
-      if (_rotaExport == 'Todas' || rotaDesteSemaforo == rotaSelecionadaLimpa) {
-        data['nome_vistoriador'] = await _getNomeVistoriador(
-          data['vistoriador_uid'] ?? '',
-        );
-        vistoriasFiltradas.add(data);
-      }
-    }
-    if (vistoriasFiltradas.isEmpty) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Nenhuma vistoria encontrada para este filtro!'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      return;
-    }
-    if (tipoExportacao == 'PDF')
-      await _exportarPDFGlobal(
-        vistoriasFiltradas,
-        _rotaExport,
-        todosSemaforosData,
-      );
-    else
-      await _exportarExcelGlobal(
-        vistoriasFiltradas,
-        _rotaExport,
-        todosSemaforosData,
-      );
-  }
-
-  Future<void> _mostrarDialogExportarRotaDoDia(
-    Map<String, String> mapaRotas,
-    List<Map<String, dynamic>> todosSemaforosData,
-    List<String> listaRotasDisponiveis,
-  ) async {
-    DateTime dataSelecionada = DateTime.now();
-    String rotaSelecionada = 'Selecione';
-
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            bool liberado = rotaSelecionada != 'Selecione';
-
-            return AlertDialog(
-              title: Text(
-                'Exportar Rota do Dia',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.teal.shade800,
-                ),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Selecione o dia exato e a rota para gerar o relatório completo de vistorias.',
-                    style: TextStyle(fontSize: 13, color: Colors.black54),
-                  ),
-                  const SizedBox(height: 16),
-
-                  InkWell(
-                    onTap: () async {
-                      DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: dataSelecionada,
-                        firstDate: DateTime(2024),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null) {
-                        setStateDialog(() => dataSelecionada = picked);
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade400),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 18,
-                            color: Colors.teal.shade800,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Data: ${DateFormat('dd/MM/yyyy').format(dataSelecionada)}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: 'Rota',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        isExpanded: true,
-                        value: listaRotasDisponiveis.contains(rotaSelecionada)
-                            ? rotaSelecionada
-                            : 'Selecione',
-                        items: [
-                          const DropdownMenuItem(
-                            value: 'Selecione',
-                            child: Text('Selecione uma rota...'),
-                          ),
-                          ...listaRotasDisponiveis
-                              .where((r) => r != 'Todas')
-                              .map(
-                                (r) => DropdownMenuItem(
-                                  value: r,
-                                  child: Text('Rota $r'),
-                                ),
-                              ),
-                        ],
-                        onChanged: (val) {
-                          setStateDialog(() => rotaSelecionada = val!);
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Cancelar',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal.shade800,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: liberado
-                      ? () {
-                          Navigator.pop(context);
-                          _exportarRotaDoDiaCompleta(
-                            mapaRotas,
-                            todosSemaforosData,
-                            dataSelecionada,
-                            rotaSelecionada,
-                          );
-                        }
-                      : null,
-                  child: const Text(
-                    'Gerar Relatório',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
   Future<void> _exportarRotaDoDiaCompleta(
     Map<String, String> mapaRotas,
     List<Map<String, dynamic>> todosSemaforosData,
     DateTime dataEscolhida,
     String rotaEscolhida,
+    String formatoExportacao,
   ) async {
     if (todosSemaforosData.isEmpty) return;
-
     DateTime inicioDia = DateTime(
       dataEscolhida.year,
       dataEscolhida.month,
@@ -1349,10 +1175,9 @@ class _RelatoriosPageState extends State<RelatoriosPage>
       59,
       59,
     );
-
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Buscando dados e montando a rota do dia...'),
+      SnackBar(
+        content: Text('GERANDO RELATÓRIO EM $formatoExportacao...'),
         backgroundColor: Colors.teal,
       ),
     );
@@ -1363,22 +1188,21 @@ class _RelatoriosPageState extends State<RelatoriosPage>
           .where('criado_em', isGreaterThanOrEqualTo: inicioDia)
           .where('criado_em', isLessThanOrEqualTo: fimDia)
           .get();
-
       String rotaSelecionadaLimpa = rotaEscolhida.replaceFirst(
         RegExp(r'^0+'),
         '',
       );
 
       List<Map<String, dynamic>> semaforosDaRotaAcervo = todosSemaforosData
-          .where((item) {
-            String rotaItem = (item['rota'] ?? '')
-                .toString()
-                .trim()
-                .replaceFirst(RegExp(r'^0+'), '');
-            return rotaItem == rotaSelecionadaLimpa;
-          })
+          .where(
+            (item) =>
+                (item['rota'] ?? '').toString().trim().replaceFirst(
+                  RegExp(r'^0+'),
+                  '',
+                ) ==
+                rotaSelecionadaLimpa,
+          )
           .toList();
-
       Map<String, Map<String, dynamic>> vistoriasDoDiaMap = {};
       String nomeDoVistoriadorDoDia = '-';
 
@@ -1386,37 +1210,33 @@ class _RelatoriosPageState extends State<RelatoriosPage>
         var v = doc.data() as Map<String, dynamic>;
         String idSem = v['semaforo_id']?.toString() ?? '';
         String uidVist = v['vistoriador_uid'] ?? '';
-
-        if (nomeDoVistoriadorDoDia == '-' && uidVist.isNotEmpty) {
+        if (nomeDoVistoriadorDoDia == '-' && uidVist.isNotEmpty)
           nomeDoVistoriadorDoDia = await _getNomeVistoriador(uidVist);
-        }
-
-        String rotaDesteSemaforo = mapaRotas[idSem] ?? '';
-        if (idSem.isNotEmpty && rotaDesteSemaforo == rotaSelecionadaLimpa) {
+        if (idSem.isNotEmpty &&
+            (mapaRotas[idSem] ?? '') == rotaSelecionadaLimpa)
           vistoriasDoDiaMap[idSem] = v;
-        }
       }
 
-      List<Map<String, dynamic>> feitosNoDia = [];
+      List<Map<String, dynamic>> baseFinalRelatorio = [];
       List<Map<String, dynamic>> naoFeitosNoDia = [];
 
       for (var semMestre in semaforosDaRotaAcervo) {
         String idSem = semMestre['id']?.toString() ?? '';
         if (vistoriasDoDiaMap.containsKey(idSem)) {
-          var vistoriaCompleta = vistoriasDoDiaMap[idSem]!;
-          vistoriaCompleta['nome_vistoriador'] = nomeDoVistoriadorDoDia;
-          feitosNoDia.add(vistoriaCompleta);
+          var v = vistoriasDoDiaMap[idSem]!;
+          v['nome_vistoriador'] = nomeDoVistoriadorDoDia;
+          baseFinalRelatorio.add(v);
         } else {
           naoFeitosNoDia.add({
             'semaforo_id': idSem,
-            'semaforo_endereco': semMestre['endereco'] ?? 'Sem endereço',
+            'semaforo_endereco': semMestre['endereco'] ?? 'SEM ENDEREÇO',
             'nome_vistoriador': '-',
             'data_hora_inicio': '-',
             'data_hora_fim': '-',
             'gps_coordenadas': '-',
             'teve_anormalidade': null,
             'falha_registrada': '-',
-            'detalhes_ocorrencia': '-',
+            'detalhes_ocorrencia': 'SEMÁFORO NÃO VISTORIADO',
             'fotos': [],
             'isNaoVistoriado': true,
             'criado_em': null,
@@ -1424,7 +1244,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
         }
       }
 
-      feitosNoDia.sort((a, b) {
+      baseFinalRelatorio.sort((a, b) {
         Timestamp? tA = a['criado_em'] as Timestamp?;
         Timestamp? tB = b['criado_em'] as Timestamp?;
         if (tA == null && tB == null) return 0;
@@ -1433,190 +1253,274 @@ class _RelatoriosPageState extends State<RelatoriosPage>
         return tA.compareTo(tB);
       });
 
-      naoFeitosNoDia.sort((a, b) {
-        int numA =
-            int.tryParse(
-              a['semaforo_id'].toString().replaceAll(RegExp(r'[^0-9]'), ''),
-            ) ??
-            9999;
-        int numB =
-            int.tryParse(
-              b['semaforo_id'].toString().replaceAll(RegExp(r'[^0-9]'), ''),
-            ) ??
-            9999;
-        return numA.compareTo(numB);
-      });
-
-      List<Map<String, dynamic>> baseFinalRelatorio = [
-        ...feitosNoDia,
-        ...naoFeitosNoDia,
-      ];
-
-      String dataFiltroFormatada = DateFormat(
-        'dd/MM/yyyy',
-      ).format(dataEscolhida);
-      String dataHoraAtual = DateFormat(
-        'dd/MM/yyyy HH:mm:ss',
-      ).format(DateTime.now());
-
-      await Printing.layoutPdf(
-        name:
-            'Rota_${rotaEscolhida}_Dia_${dataFiltroFormatada.replaceAll('/', '_')}.pdf',
-        onLayout: (PdfPageFormat format) async {
-          final pdf = pw.Document();
-          pdf.addPage(
-            pw.MultiPage(
-              pageFormat: PdfPageFormat.a4.landscape,
-              margin: const pw.EdgeInsets.all(16),
-              footer: (pw.Context context) =>
-                  _buildRodapePDF(context, dataHoraAtual),
-              build: (pw.Context context) {
-                return [
-                  pw.Header(
-                    level: 0,
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text(
-                          'Relatório Base de Rota Diária Concluída',
-                          style: pw.TextStyle(
-                            fontSize: 18,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
+      naoFeitosNoDia.sort(
+        (a, b) =>
+            (int.tryParse(
+                      a['semaforo_id'].toString().replaceAll(
+                        RegExp(r'[^0-9]'),
+                        '',
+                      ),
+                    ) ??
+                    9999)
+                .compareTo(
+                  int.tryParse(
+                        b['semaforo_id'].toString().replaceAll(
+                          RegExp(r'[^0-9]'),
+                          '',
                         ),
-                        pw.SizedBox(height: 4),
-                        pw.Text(
-                          'Rota selecionada: Rota $rotaEscolhida  |  Dia: $dataFiltroFormatada',
-                          style: const pw.TextStyle(
-                            fontSize: 12,
-                            color: PdfColors.grey700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  pw.SizedBox(height: 12),
-                  pw.TableHelper.fromTextArray(
-                    context: context,
-                    headers: [
-                      'Semáforo',
-                      'Endereço',
-                      'Vistoriador',
-                      'Início',
-                      'Fim',
-                      'Georreferência',
-                      'Falha',
-                      'Detalhes',
-                      'Fotos',
-                    ],
-                    data: baseFinalRelatorio.map((v) {
-                      String status = 'OK';
-                      if (v['isNaoVistoriado'] == true)
-                        status = 'NÃO VISTORIADO';
-                      else if (v['teve_anormalidade'] == true)
-                        status = 'COM FALHA';
-
-                      String coordOriginal =
-                          v['coordenadas_cadastro']?.toString() ?? '';
-                      if (coordOriginal.isEmpty || coordOriginal == '-') {
-                        var match = todosSemaforosData.where(
-                          (s) =>
-                              s['id'].toString() == v['semaforo_id'].toString(),
-                        );
-                        coordOriginal = match.isNotEmpty
-                            ? (match.first['georeferencia']?.toString() ?? '-')
-                            : '-';
-                      }
-                      String gpsVistoriador =
-                          v['gps_coordenadas']?.toString() ?? '-';
-                      List<dynamic> fotos = v['fotos'] ?? [];
-
-                      return [
-                        v['semaforo_id']?.toString() ?? '',
-                        v['semaforo_endereco']?.toString() ?? '',
-                        v['isNaoVistoriado'] == true
-                            ? '-'
-                            : (v['nome_vistoriador'] ?? nomeDoVistoriadorDoDia),
-                        v['data_hora_inicio']?.toString() ?? '',
-                        v['data_hora_fim']?.toString() ?? '',
-                        pw.Container(
-                          alignment: pw.Alignment.center,
-                          child: pw.Column(
-                            mainAxisAlignment: pw.MainAxisAlignment.center,
-                            children: [
-                              pw.Text(
-                                'Semáforo: $coordOriginal',
-                                style: pw.TextStyle(
-                                  color: PdfColors.green,
-                                  fontSize: 6,
-                                  fontWeight: pw.FontWeight.bold,
-                                ),
-                              ),
-                              pw.SizedBox(height: 2),
-                              pw.Text(
-                                status == 'NÃO VISTORIADO'
-                                    ? 'Vistoria: -'
-                                    : 'Vistoria: $gpsVistoriador',
-                                style: pw.TextStyle(
-                                  color: PdfColors.red,
-                                  fontSize: 6,
-                                  fontWeight: pw.FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        status == 'NÃO VISTORIADO'
-                            ? '-'
-                            : (v['falha_registrada'] ?? '-'),
-                        status == 'NÃO VISTORIADO'
-                            ? 'O SEMÁFORO NÃO FOI VISTORIADO NESTE DIA.'
-                            : (v['detalhes_ocorrencia'] ?? '-'),
-                        fotos.join('\n\n'),
-                      ];
-                    }).toList(),
-                    cellAlignment: pw.Alignment.center,
-                    headerAlignment: pw.Alignment.center,
-                    headerStyle: pw.TextStyle(
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.white,
-                      fontSize: 7.5,
-                    ),
-                    headerDecoration: const pw.BoxDecoration(
-                      color: PdfColors.teal700,
-                    ),
-                    cellStyle: const pw.TextStyle(fontSize: 6.5),
-                    columnWidths: {
-                      0: const pw.FixedColumnWidth(40),
-                      1: const pw.FixedColumnWidth(110),
-                      2: const pw.FixedColumnWidth(65),
-                      3: const pw.FixedColumnWidth(55),
-                      4: const pw.FixedColumnWidth(55),
-                      5: const pw.FixedColumnWidth(95),
-                      6: const pw.FixedColumnWidth(70),
-                      7: const pw.FixedColumnWidth(100),
-                      8: const pw.FixedColumnWidth(80),
-                    },
-                  ),
-                ];
-              },
-            ),
-          );
-          return pdf.save();
-        },
+                      ) ??
+                      9999,
+                ),
       );
+      baseFinalRelatorio.addAll(naoFeitosNoDia);
+
+      String dFiltroFormatada = DateFormat(
+        'dd/MM/yyyy',
+      ).format(dataEscolhida).toUpperCase();
+      String dHoraAtual = DateFormat(
+        'dd/MM/yyyy HH:mm:ss',
+      ).format(DateTime.now()).toUpperCase();
+
+      if (formatoExportacao == 'PDF') {
+        await Printing.layoutPdf(
+          name:
+              'ROTA_${rotaEscolhida}_DIA_${dFiltroFormatada.replaceAll('/', '_')}.pdf',
+          onLayout: (PdfPageFormat format) async {
+            final pdf = pw.Document();
+            pdf.addPage(
+              pw.MultiPage(
+                pageFormat: PdfPageFormat.a4.landscape,
+                margin: const pw.EdgeInsets.all(16),
+                footer: (pw.Context context) =>
+                    _buildRodapePDF(context, dHoraAtual),
+                build: (pw.Context context) {
+                  return [
+                    pw.Header(
+                      level: 0,
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                            'RELATÓRIO BASE DE ROTA DIÁRIA CONCLUÍDA',
+                            style: pw.TextStyle(
+                              fontSize: 18,
+                              fontWeight: pw.FontWeight.bold,
+                            ),
+                          ),
+                          pw.SizedBox(height: 4),
+                          pw.Text(
+                            'ROTA SELECIONADA: ROTA $rotaEscolhida  |  DIA: $dFiltroFormatada',
+                            style: const pw.TextStyle(
+                              fontSize: 12,
+                              color: PdfColors.grey700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    pw.SizedBox(height: 12),
+                    pw.TableHelper.fromTextArray(
+                      context: context,
+                      headers: [
+                        'SEMÁFORO',
+                        'ENDEREÇO',
+                        'VISTORIADOR',
+                        'INÍCIO',
+                        'FIM',
+                        'GEORREFERÊNCIA',
+                        'FALHA',
+                        'DETALHES',
+                        'FOTOS',
+                      ],
+                      data: baseFinalRelatorio.map((v) {
+                        String status = v['isNaoVistoriado'] == true
+                            ? 'NÃO VISTORIADO'
+                            : (v['teve_anormalidade'] == true
+                                  ? 'COM FALHA'
+                                  : 'OK');
+                        String coordOriginal =
+                            v['coordenadas_cadastro']?.toString() ?? '';
+                        if (coordOriginal.isEmpty || coordOriginal == '-') {
+                          var match = todosSemaforosData.where(
+                            (s) =>
+                                s['id'].toString() ==
+                                v['semaforo_id'].toString(),
+                          );
+                          coordOriginal = match.isNotEmpty
+                              ? (match.first['georeferencia']?.toString() ??
+                                    '-')
+                              : '-';
+                        }
+                        String gpsVistoriador =
+                            v['gps_coordenadas']?.toString() ?? '-';
+                        List<dynamic> fotos = v['fotos'] ?? [];
+                        return [
+                          up(v['semaforo_id']),
+                          up(v['semaforo_endereco']),
+                          v['isNaoVistoriado'] == true
+                              ? '-'
+                              : up(
+                                  v['nome_vistoriador'] ??
+                                      nomeDoVistoriadorDoDia,
+                                ),
+                          up(v['data_hora_inicio']),
+                          up(v['data_hora_fim']),
+                          pw.Container(
+                            alignment: pw.Alignment.center,
+                            child: pw.Column(
+                              mainAxisAlignment: pw.MainAxisAlignment.center,
+                              children: [
+                                pw.Text(
+                                  'SEMÁFORO: $coordOriginal'.toUpperCase(),
+                                  style: pw.TextStyle(
+                                    color: PdfColors.green,
+                                    fontSize: 6,
+                                    fontWeight: pw.FontWeight.bold,
+                                  ),
+                                ),
+                                pw.SizedBox(height: 2),
+                                pw.Text(
+                                  status == 'NÃO VISTORIADO'
+                                      ? 'VISTORIA: -'
+                                      : 'VISTORIA: $gpsVistoriador'
+                                            .toUpperCase(),
+                                  style: pw.TextStyle(
+                                    color: PdfColors.red,
+                                    fontSize: 6,
+                                    fontWeight: pw.FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          up(v['falha_registrada']),
+                          status == 'NÃO VISTORIADO'
+                              ? pw.Text(
+                                  'SEMÁFORO NÃO VISTORIADO',
+                                  style: pw.TextStyle(
+                                    color: PdfColors.orange,
+                                    fontWeight: pw.FontWeight.bold,
+                                    fontSize: 6.5,
+                                  ),
+                                )
+                              : up(v['detalhes_ocorrencia']),
+                          fotos.join('\n\n'),
+                        ];
+                      }).toList(),
+                      cellAlignment: pw.Alignment.center,
+                      headerAlignment: pw.Alignment.center,
+                      headerStyle: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.white,
+                        fontSize: 7.5,
+                      ),
+                      headerDecoration: const pw.BoxDecoration(
+                        color: PdfColors.teal700,
+                      ),
+                      cellStyle: const pw.TextStyle(fontSize: 6.5),
+                      // Correção de largura solicitada: Coluna 0 vai de 40 para 55, e Coluna 8 vai de 80 para 65.
+                      columnWidths: {
+                        0: const pw.FixedColumnWidth(45),
+                        1: const pw.FixedColumnWidth(110),
+                        2: const pw.FixedColumnWidth(65),
+                        3: const pw.FixedColumnWidth(45),
+                        4: const pw.FixedColumnWidth(45),
+                        5: const pw.FixedColumnWidth(95),
+                        6: const pw.FixedColumnWidth(70),
+                        7: const pw.FixedColumnWidth(100),
+                        8: const pw.FixedColumnWidth(100),
+                      },
+                    ),
+                  ];
+                },
+              ),
+            );
+            return pdf.save();
+          },
+        );
+      } else {
+        StringBuffer excelBuffer = StringBuffer();
+        excelBuffer.write(
+          '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body><table border="1">',
+        );
+        excelBuffer.write(
+          '<tr style="background-color: #00796B; color: white; font-weight: bold; text-align: center;"><td>SEMÁFORO</td><td>ENDEREÇO</td><td>VISTORIADOR</td><td>INÍCIO</td><td>FIM</td><td>GEORREFERÊNCIA</td><td>FALHA</td><td>DETALHES</td><td>FOTOS</td></tr>',
+        );
+
+        for (var v in baseFinalRelatorio) {
+          bool isNaoVist = v['isNaoVistoriado'] == true;
+          String coordOriginal = v['coordenadas_cadastro']?.toString() ?? '';
+          if (coordOriginal.isEmpty || coordOriginal == '-') {
+            var match = todosSemaforosData.where(
+              (s) => s['id'].toString() == v['semaforo_id'].toString(),
+            );
+            coordOriginal = match.isNotEmpty
+                ? (match.first['georeferencia']?.toString() ?? '-')
+                : '-';
+          }
+          String gpsVistoriador = v['gps_coordenadas']?.toString() ?? '-';
+          List<dynamic> fotos = v['fotos'] ?? [];
+
+          excelBuffer.write('<tr>');
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${up(v['semaforo_id'])}</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${up(v['semaforo_endereco'])}</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${isNaoVist ? '-' : up(v['nome_vistoriador'] ?? nomeDoVistoriadorDoDia)}</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${up(v['data_hora_inicio'])}</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${up(v['data_hora_fim'])}</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle; white-space: nowrap;"><span style="color: green; font-weight: bold;">SEMÁFORO: ${coordOriginal.toUpperCase()}</span><br/><span style="color: red; font-weight: bold;">VISTORIA: ${isNaoVist ? '-' : gpsVistoriador.toUpperCase()}</span></td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${up(v['falha_registrada'])}</td>',
+          );
+
+          if (isNaoVist) {
+            excelBuffer.write(
+              '<td style="text-align: center; vertical-align: middle; color: #FF9800; font-weight: bold;">SEMÁFORO NÃO VISTORIADO</td>',
+            );
+          } else {
+            excelBuffer.write(
+              '<td style="text-align: center; vertical-align: middle;">${up(v['detalhes_ocorrencia']).replaceAll('\n', ' ')}</td>',
+            );
+          }
+          excelBuffer.write(
+            '<td style="text-align: center; vertical-align: middle;">${fotos.isNotEmpty ? fotos.map((f) => '<a href="$f">FOTO</a>').join(' | ') : '-'}</td></tr>',
+          );
+        }
+        excelBuffer.write('</table></body></html>');
+
+        final Uint8List bytes = Uint8List.fromList(
+          utf8.encode(excelBuffer.toString()),
+        );
+        final xFile = XFile.fromData(
+          bytes,
+          mimeType: 'application/vnd.ms-excel',
+          name:
+              'ROTA_${rotaEscolhida}_DIA_${dFiltroFormatada.replaceAll('/', '_')}.XLS',
+        );
+        await Share.shareXFiles([xFile], text: 'RELATÓRIO DE VISTORIAS.');
+      }
     } catch (e) {
       if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Erro ao processar rota diária.'),
+            content: Text('ERRO AO PROCESSAR ROTA DIÁRIA.'),
             backgroundColor: Colors.red,
           ),
         );
     }
   }
 
-  // ==== MODIFICADO: EXPORTAÇÃO DO PDF DE PENDÊNCIAS COM TABELAS SEPARADAS E CORES ====
   Future<void> _exportarPendenciasPDF(
     Map<String, Map<int, Set<String>>> vistoriasDiarias,
     Map<String, int> totaisPorRota,
@@ -1626,81 +1530,32 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     if (vistoriasDiarias.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Gerando PDF de Acompanhamento Diário...'),
+        content: Text('GERANDO PDF DE ACOMPANHAMENTO DIÁRIO...'),
         backgroundColor: Colors.red,
       ),
     );
     try {
       String dataHoraAtual = DateFormat(
         'dd/MM/yyyy HH:mm:ss',
-      ).format(DateTime.now());
-
+      ).format(DateTime.now()).toUpperCase();
       await Printing.layoutPdf(
-        name: 'Acompanhamento_Diario_${mesFiltro.replaceAll('/', '_')}.pdf',
+        name: 'ACOMPANHAMENTO_DIARIO_${mesFiltro.replaceAll('/', '_')}.pdf',
         onLayout: (PdfPageFormat format) async {
           final pdf = pw.Document();
-
           var rotasOrdenadas = vistoriasDiarias.keys.toList()
             ..sort(
               (a, b) => (int.tryParse(a) ?? 0).compareTo(int.tryParse(b) ?? 0),
             );
 
-          // Montando os blocos da página dinamicamente
-          List<pw.Widget> elementosPDF = [
-            pw.Header(
-              level: 0,
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    'Relatório de Acompanhamento Diário',
-                    style: pw.TextStyle(
-                      fontSize: 18,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                  pw.SizedBox(height: 4),
-                  pw.Text(
-                    'Mês de referência: $mesFiltro',
-                    style: const pw.TextStyle(
-                      fontSize: 12,
-                      color: PdfColors.grey700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            pw.SizedBox(height: 16),
-          ];
-
-          // Cria uma tabela SEPARADA para cada rota
           for (String r in rotasOrdenadas) {
             int meta = totaisPorRota[r] ?? 0;
-
-            // Puxa a cor exata da rota e converte para o padrão PdfColor
             Color corFlutter = _obterCorDaRota(r);
             PdfColor corPdfRota = PdfColor.fromInt(corFlutter.value);
-
-            // Cabeçalho da Rota (Fora da tabela)
-            elementosPDF.add(
-              pw.Text(
-                'ROTA $r (Quantidade de semáforos da rota: $meta)',
-                style: pw.TextStyle(
-                  color: corPdfRota,
-                  fontSize: 14,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-            );
-            elementosPDF.add(pw.SizedBox(height: 6));
-
             List<pw.TableRow> linhasTabela = [];
-
-            // Adiciona a linha do Cabeçalho da Tabela
             linhasTabela.add(
               pw.TableRow(
                 decoration: pw.BoxDecoration(color: corPdfRota),
-                children: ['Data', 'Vistoriados', 'Pendentes', 'Concluído']
+                children: ['DATA', 'VISTORIADOS', 'PENDENTES', 'CONCLUÍDO']
                     .map(
                       (h) => pw.Padding(
                         padding: const pw.EdgeInsets.symmetric(vertical: 6),
@@ -1719,29 +1574,16 @@ class _RelatoriosPageState extends State<RelatoriosPage>
               ),
             );
 
-            // Adiciona os dias do mês
             for (int d = 1; d <= daysInMonth; d++) {
               int vistoriados = vistoriasDiarias[r]![d]?.length ?? 0;
               int pendentes = meta - vistoriados;
               double perc = meta == 0 ? 0.0 : (vistoriados / meta) * 100;
-
-              // Lógica da regra de cores das fontes
-              PdfColor corTexto;
-              if (perc == 0) {
-                corTexto = PdfColors.grey500;
-              } else if (perc < 100) {
-                corTexto = PdfColors.red700;
-              } else {
-                corTexto = PdfColors.green700;
-              }
-
-              PdfColor corPendente = pendentes > 0
-                  ? PdfColors.red700
-                  : PdfColors.grey800;
+              PdfColor corLinha = vistoriados == 0
+                  ? PdfColors.grey500
+                  : (pendentes > 0 ? PdfColors.red700 : PdfColors.green700);
               PdfColor corZebra = d % 2 == 0
                   ? PdfColors.white
                   : PdfColors.grey100;
-
               linhasTabela.add(
                 pw.TableRow(
                   decoration: pw.BoxDecoration(color: corZebra),
@@ -1752,7 +1594,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         '${d.toString().padLeft(2, '0')}/$mesFiltro',
                         textAlign: pw.TextAlign.center,
                         style: pw.TextStyle(
-                          color: corTexto,
+                          color: corLinha,
                           fontWeight: pw.FontWeight.bold,
                           fontSize: 10,
                         ),
@@ -1764,7 +1606,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         '$vistoriados',
                         textAlign: pw.TextAlign.center,
                         style: pw.TextStyle(
-                          color: corTexto,
+                          color: corLinha,
                           fontWeight: pw.FontWeight.bold,
                           fontSize: 10,
                         ),
@@ -1776,7 +1618,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         '$pendentes',
                         textAlign: pw.TextAlign.center,
                         style: pw.TextStyle(
-                          color: corPendente,
+                          color: corLinha,
                           fontWeight: pw.FontWeight.bold,
                           fontSize: 10,
                         ),
@@ -1788,7 +1630,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         '${perc.toStringAsFixed(0)}%',
                         textAlign: pw.TextAlign.center,
                         style: pw.TextStyle(
-                          color: corTexto,
+                          color: corLinha,
                           fontWeight: pw.FontWeight.bold,
                           fontSize: 10,
                         ),
@@ -1798,43 +1640,68 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                 ),
               );
             }
-
-            // Adiciona a tabela finalizada na lista de elementos da página
-            elementosPDF.add(
-              pw.Table(
-                border: pw.TableBorder.all(
-                  color: PdfColors.grey400,
-                  width: 0.5,
+            pdf.addPage(
+              pw.MultiPage(
+                pageFormat: format,
+                margin: const pw.EdgeInsets.only(
+                  left: 32,
+                  right: 32,
+                  top: 32,
+                  bottom: 20,
                 ),
-                columnWidths: {
-                  0: const pw.FlexColumnWidth(2),
-                  1: const pw.FlexColumnWidth(2),
-                  2: const pw.FlexColumnWidth(2),
-                  3: const pw.FlexColumnWidth(2),
-                },
-                children: linhasTabela,
+                footer: (pw.Context context) =>
+                    _buildRodapePDF(context, dataHoraAtual),
+                build: (pw.Context context) => [
+                  pw.Header(
+                    level: 0,
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(
+                          'RELATÓRIO DE ACOMPANHAMENTO DIÁRIO',
+                          style: pw.TextStyle(
+                            fontSize: 18,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
+                        pw.SizedBox(height: 4),
+                        pw.Text(
+                          'MÊS DE REFERÊNCIA: $mesFiltro',
+                          style: const pw.TextStyle(
+                            fontSize: 12,
+                            color: PdfColors.grey700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  pw.SizedBox(height: 16),
+                  pw.Text(
+                    'ROTA $r (META: $meta SEMÁFOROS)',
+                    style: pw.TextStyle(
+                      color: corPdfRota,
+                      fontSize: 14,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.SizedBox(height: 6),
+                  pw.Table(
+                    border: pw.TableBorder.all(
+                      color: PdfColors.grey400,
+                      width: 0.5,
+                    ),
+                    columnWidths: {
+                      0: const pw.FlexColumnWidth(2),
+                      1: const pw.FlexColumnWidth(2),
+                      2: const pw.FlexColumnWidth(2),
+                      3: const pw.FlexColumnWidth(2),
+                    },
+                    children: linhasTabela,
+                  ),
+                ],
               ),
             );
-
-            // Quebra de espaço para a próxima rota
-            elementosPDF.add(pw.SizedBox(height: 24));
           }
-
-          pdf.addPage(
-            pw.MultiPage(
-              pageFormat: format,
-              margin: const pw.EdgeInsets.only(
-                left: 32,
-                right: 32,
-                top: 32,
-                bottom: 20,
-              ),
-              footer: (pw.Context context) =>
-                  _buildRodapePDF(context, dataHoraAtual),
-              build: (pw.Context context) => elementosPDF,
-            ),
-          );
-
           return pdf.save();
         },
       );
@@ -1842,14 +1709,13 @@ class _RelatoriosPageState extends State<RelatoriosPage>
       if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Erro ao gerar PDF de Pendências!'),
+            content: Text('ERRO AO GERAR PDF DE PENDÊNCIAS!'),
             backgroundColor: Colors.red,
           ),
         );
     }
   }
 
-  // ==== MODIFICADO: EXCEL DE PENDÊNCIAS COM CORES CORRIGIDAS ====
   Future<void> _exportarPendenciasExcel(
     Map<String, Map<int, Set<String>>> vistoriasDiarias,
     Map<String, int> totaisPorRota,
@@ -1859,7 +1725,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     if (vistoriasDiarias.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Gerando Planilha Diária...'),
+        content: Text('GERANDO PLANILHA DIÁRIA...'),
         backgroundColor: Colors.green,
       ),
     );
@@ -1868,84 +1734,58 @@ class _RelatoriosPageState extends State<RelatoriosPage>
       excelBuffer.write(
         '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body>',
       );
-
       excelBuffer.write(
-        '<h2>Acompanhamento Diário - Mês: $mesFiltro</h2><br/>',
+        '<h2>ACOMPANHAMENTO DIÁRIO - MÊS: ${mesFiltro.toUpperCase()}</h2><br/>',
       );
 
       var rotasOrdenadas = vistoriasDiarias.keys.toList()
         ..sort(
           (a, b) => (int.tryParse(a) ?? 0).compareTo(int.tryParse(b) ?? 0),
         );
-
       for (String r in rotasOrdenadas) {
         int meta = totaisPorRota[r] ?? 0;
-
         Color corDaRota = _obterCorDaRota(r);
         String hexColor =
             '#${corDaRota.value.toRadixString(16).substring(2, 8)}';
-
         excelBuffer.write(
-          '<h3 style="color: $hexColor;">ROTA $r (Meta: $meta)</h3>',
+          '<h3 style="color: $hexColor;">ROTA ${r.toUpperCase()} (META: $meta)</h3><table border="1">',
         );
-        excelBuffer.write('<table border="1">');
-
         excelBuffer.write(
-          '<tr style="background-color: $hexColor; color: white; text-align: center; font-weight: bold;">'
-          '<td>DATA</td><td>VISTORIADOS</td><td>PENDENTES</td><td>CONCLUÍDO</td></tr>',
+          '<tr style="background-color: $hexColor; color: white; text-align: center; font-weight: bold;"><td>DATA</td><td>VISTORIADOS</td><td>PENDENTES</td><td>CONCLUÍDO</td></tr>',
         );
 
         for (int d = 1; d <= daysInMonth; d++) {
           int vistoriados = vistoriasDiarias[r]![d]?.length ?? 0;
           int pendentes = meta - vistoriados;
           double perc = meta == 0 ? 0.0 : (vistoriados / meta) * 100;
-
-          // ==== NOVA LÓGICA DE CORES DA LINHA NO EXCEL ====
-          String corLinha;
-          if (vistoriados == 0) {
-            corLinha = 'grey';
-          } else if (pendentes > 0) {
-            corLinha = 'red';
-          } else {
-            corLinha = 'green';
-          }
-
+          String corLinha = vistoriados == 0
+              ? 'grey'
+              : (pendentes > 0 ? 'red' : 'green');
           String corZebra = d % 2 == 0 ? '#FFFFFF' : '#F5F5F5';
-
-          excelBuffer.write('<tr style="background-color: $corZebra;">');
           excelBuffer.write(
-            '<td style="text-align: center; color: $corLinha; font-weight: bold;">${d.toString().padLeft(2, '0')}/$mesFiltro</td>',
+            '<tr style="background-color: $corZebra;"><td style="text-align: center; color: $corLinha; font-weight: bold;">${d.toString().padLeft(2, '0')}/$mesFiltro</td><td style="text-align: center; color: $corLinha; font-weight: bold;">$vistoriados</td><td style="text-align: center; color: $corLinha; font-weight: bold;">$pendentes</td><td style="text-align: center; color: $corLinha; font-weight: bold;">${perc.toStringAsFixed(1)}%</td></tr>',
           );
-          excelBuffer.write(
-            '<td style="text-align: center; color: $corLinha; font-weight: bold;">$vistoriados</td>',
-          );
-          excelBuffer.write(
-            '<td style="text-align: center; color: $corLinha; font-weight: bold;">$pendentes</td>',
-          );
-          excelBuffer.write(
-            '<td style="text-align: center; color: $corLinha; font-weight: bold;">${perc.toStringAsFixed(1)}%</td>',
-          );
-          excelBuffer.write('</tr>');
         }
         excelBuffer.write('</table><br/><br/>');
       }
-
       excelBuffer.write('</body></html>');
 
-      final dir = await getTemporaryDirectory();
-      final file = File(
-        '${dir.path}/Acompanhamento_Diario_${mesFiltro.replaceAll('/', '_')}.xls',
+      final Uint8List bytes = Uint8List.fromList(
+        utf8.encode(excelBuffer.toString()),
       );
-      await file.writeAsBytes(utf8.encode(excelBuffer.toString()));
-
+      final xFile = XFile.fromData(
+        bytes,
+        mimeType: 'application/vnd.ms-excel',
+        name: 'ACOMPANHAMENTO_DIARIO_${mesFiltro.replaceAll('/', '_')}.XLS',
+      );
       await Share.shareXFiles([
-        XFile(file.path),
-      ], text: 'Acompanhamento Diário de Semáforos - $mesFiltro.');
+        xFile,
+      ], text: 'ACOMPANHAMENTO DIÁRIO DE SEMÁFOROS - $mesFiltro.');
     } catch (e) {
       if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Erro ao exportar Pendências!'),
+            content: Text('ERRO AO EXPORTAR PENDÊNCIAS!'),
             backgroundColor: Colors.red,
           ),
         );
@@ -1957,18 +1797,17 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     Query queryConsulta = FirebaseFirestore.instance
         .collection('vistorias')
         .orderBy('criado_em', descending: true);
-    if (_deConsulta != null && _ateConsulta != null) {
+    if (_deConsulta != null && _ateConsulta != null)
       queryConsulta = queryConsulta.where(
         'criado_em',
         isGreaterThanOrEqualTo: _deConsulta,
         isLessThanOrEqualTo: _ateConsulta,
       );
-    }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Relatórios e Exportações',
+          'RELATÓRIOS E EXPORTAÇÕES',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.blue.shade500,
@@ -1978,19 +1817,17 @@ class _RelatoriosPageState extends State<RelatoriosPage>
           unselectedLabelColor: Colors.white60,
           indicatorColor: Colors.white,
           tabs: const [
-            Tab(icon: Icon(Icons.list_alt), text: 'Consulta'),
-            Tab(icon: Icon(Icons.download), text: 'Exportação'),
-            Tab(icon: Icon(Icons.warning_amber_rounded), text: 'Pendências'),
+            Tab(icon: Icon(Icons.list_alt), text: 'CONSULTA'),
+            Tab(icon: Icon(Icons.download), text: 'EXPORTAÇÃO'),
+            Tab(icon: Icon(Icons.warning_amber_rounded), text: 'PENDÊNCIAS'),
           ],
         ),
       ),
-
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('semaforos').snapshots(),
         builder: (context, snapshotSemaforos) {
           if (!snapshotSemaforos.hasData)
             return const Center(child: CircularProgressIndicator());
-
           Map<String, String> mapaRotasSemaforos = {};
           List<Map<String, dynamic>> todosSemaforosData = [];
           Set<String> rotasSet = {};
@@ -2014,11 +1851,10 @@ class _RelatoriosPageState extends State<RelatoriosPage>
           listaRotasOptions.addAll(rotasOrdenadas);
 
           List<String> listaIdsEEnderecos = todosSemaforosData
-              .map((s) {
-                String id = s['id']?.toString() ?? '';
-                String end = s['endereco']?.toString() ?? '';
-                return "$id - $end";
-              })
+              .map(
+                (s) =>
+                    "${s['id'] ?? ''} - ${s['endereco'] ?? ''}".toUpperCase(),
+              )
               .toSet()
               .toList();
           listaIdsEEnderecos.sort(
@@ -2041,7 +1877,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         Row(
                           children: [
                             _buildBotaoData(
-                              'De',
+                              'DE',
                               _deConsulta,
                               () => _selecionarData(
                                 context,
@@ -2051,7 +1887,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                             ),
                             const SizedBox(width: 8),
                             _buildBotaoData(
-                              'Até',
+                              'ATÉ',
                               _ateConsulta,
                               () => _selecionarData(
                                 context,
@@ -2068,7 +1904,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                               flex: 1,
                               child: InputDecorator(
                                 decoration: InputDecoration(
-                                  labelText: 'Rota',
+                                  labelText: 'ROTA',
                                   filled: true,
                                   fillColor: Colors.white,
                                   border: OutlineInputBorder(
@@ -2095,8 +1931,8 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                             value: r,
                                             child: Text(
                                               r == 'Todas'
-                                                  ? 'Todas Rotas'
-                                                  : 'Rota $r',
+                                                  ? 'TODAS ROTAS'
+                                                  : 'ROTA ' + r,
                                             ),
                                           ),
                                         )
@@ -2123,7 +1959,8 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                   );
                                 },
                                 onSelected: (String selecao) {
-                                  _semaforoController.text = selecao;
+                                  _semaforoController.text = selecao
+                                      .toUpperCase();
                                   setState(
                                     () => _filtrosAplicadosConsulta = false,
                                   );
@@ -2137,15 +1974,14 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                     ) {
                                       if (controller.text !=
                                               _semaforoController.text &&
-                                          !focusNode.hasFocus) {
+                                          !focusNode.hasFocus)
                                         controller.text =
                                             _semaforoController.text;
-                                      }
                                       controller.addListener(() {
-                                        _semaforoController.text =
-                                            controller.text;
+                                        _semaforoController.text = controller
+                                            .text
+                                            .toUpperCase();
                                       });
-
                                       return TextField(
                                         controller: controller,
                                         focusNode: focusNode,
@@ -2154,7 +1990,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                               _filtrosAplicadosConsulta = false,
                                         ),
                                         decoration: InputDecoration(
-                                          labelText: 'Nº ou Endereço',
+                                          labelText: 'Nº OU ENDEREÇO',
                                           filled: true,
                                           fillColor: Colors.white,
                                           border: OutlineInputBorder(
@@ -2187,17 +2023,16 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                               padding: EdgeInsets.zero,
                                               itemCount: options.length,
                                               itemBuilder: (context, index) {
-                                                final String opcao = options
-                                                    .elementAt(index);
                                                 return ListTile(
                                                   title: Text(
-                                                    opcao,
+                                                    options.elementAt(index),
                                                     style: const TextStyle(
                                                       fontSize: 13,
                                                     ),
                                                   ),
-                                                  onTap: () =>
-                                                      onSelected(opcao),
+                                                  onTap: () => onSelected(
+                                                    options.elementAt(index),
+                                                  ),
                                                 );
                                               },
                                             ),
@@ -2222,7 +2057,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                               setState(() => _filtrosAplicadosConsulta = true);
                             },
                             child: const Text(
-                              'Aplicar Filtros',
+                              'APLICAR FILTROS',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -2230,6 +2065,73 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                             ),
                           ),
                         ),
+
+                        if (_filtrosAplicadosConsulta) ...[
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: 45,
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange.shade700,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    icon: const Icon(
+                                      Icons.picture_as_pdf,
+                                      size: 20,
+                                    ),
+                                    label: const Text(
+                                      'PDF',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    onPressed: () => _exportarConsulta(
+                                      'PDF',
+                                      mapaRotasSemaforos,
+                                      todosSemaforosData,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: SizedBox(
+                                  height: 45,
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green.shade700,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    icon: const Icon(Icons.grid_on, size: 20),
+                                    label: const Text(
+                                      'EXCEL',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    onPressed: () => _exportarConsulta(
+                                      'EXCEL',
+                                      mapaRotasSemaforos,
+                                      todosSemaforosData,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+
                         if (_deConsulta != null ||
                             _ateConsulta != null ||
                             _rotaConsulta != 'Todas' ||
@@ -2240,7 +2142,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                             ),
                             icon: const Icon(Icons.clear),
                             label: const Text(
-                              'Limpar Filtros',
+                              'LIMPAR FILTROS',
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             onPressed: _limparFiltrosConsulta,
@@ -2249,7 +2151,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                       ],
                     ),
                   ),
-
                   Expanded(
                     child: !_filtrosAplicadosConsulta
                         ? Center(
@@ -2263,7 +2164,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                 ),
                                 const SizedBox(height: 16),
                                 const Text(
-                                  'Preencha os filtros acima e clique em Aplicar.',
+                                  'PREENCHA OS FILTROS ACIMA E CLIQUE EM APLICAR.',
                                   style: TextStyle(
                                     color: Colors.grey,
                                     fontSize: 16,
@@ -2281,25 +2182,17 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                   child: CircularProgressIndicator(),
                                 );
                               var vistorias = snapshotVistorias.data!.docs;
-
-                              String textoPesquisa = _semaforoController.text
-                                  .trim()
-                                  .toLowerCase();
-                              String idFiltro = textoPesquisa
+                              String idFiltro = _semaforoController.text
                                   .split(' - ')[0]
                                   .trim();
-
-                              if (idFiltro.isNotEmpty) {
+                              if (idFiltro.isNotEmpty)
                                 vistorias = vistorias
                                     .where(
-                                      (doc) => (doc['semaforo_id'] ?? '')
+                                      (doc) => doc['semaforo_id']
                                           .toString()
-                                          .toLowerCase()
                                           .contains(idFiltro),
                                     )
                                     .toList();
-                              }
-
                               if (_rotaConsulta != 'Todas') {
                                 String rotaLimpa = _rotaConsulta.replaceFirst(
                                   RegExp(r'^0+'),
@@ -2318,38 +2211,31 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                               if (vistorias.isEmpty)
                                 return const Center(
                                   child: Text(
-                                    'Nenhuma vistoria encontrada para estes filtros.',
+                                    'NENHUMA VISTORIA ENCONTRADA PARA ESTES FILTROS.',
                                     style: TextStyle(
                                       color: Colors.grey,
                                       fontSize: 16,
                                     ),
                                   ),
                                 );
-
                               return ListView.builder(
                                 padding: const EdgeInsets.all(12),
                                 itemCount: vistorias.length,
                                 itemBuilder: (context, index) {
-                                  var vistoria =
+                                  var vist =
                                       vistorias[index].data()
                                           as Map<String, dynamic>;
-                                  String idSemaforo =
-                                      vistoria['semaforo_id']?.toString() ??
-                                      'S/N';
-                                  String endSemaforo =
-                                      vistoria['semaforo_endereco']
-                                          ?.toString() ??
-                                      '';
-                                  String uidVistoriador =
-                                      vistoria['vistoriador_uid'] ?? '';
+                                  String idSemaforo = up(vist['semaforo_id']);
+                                  String endSemaforo = up(
+                                    vist['semaforo_endereco'],
+                                  );
                                   bool temFalha =
-                                      vistoria['teve_anormalidade'] == true;
+                                      vist['teve_anormalidade'] == true;
                                   String rotaExibicao =
                                       mapaRotasSemaforos[idSemaforo] ??
-                                      'Sem Rota';
-
+                                      'SEM ROTA';
                                   String coordOriginal =
-                                      vistoria['coordenadas_cadastro']
+                                      vist['coordenadas_cadastro']
                                           ?.toString() ??
                                       '';
                                   if (coordOriginal.isEmpty) {
@@ -2359,31 +2245,29 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                     coordOriginal = match.isNotEmpty
                                         ? (match.first['georeferencia']
                                                   ?.toString() ??
-                                              'Não informada')
-                                        : 'Não informada';
+                                              '-')
+                                        : '-';
                                   }
-
-                                  Color corFundo = temFalha
-                                      ? Colors.red.shade50
-                                      : Colors.grey.shade200;
-                                  Color corIcone = temFalha
-                                      ? Colors.red.shade700
-                                      : Colors.grey.shade600;
-
                                   return FutureBuilder<String>(
-                                    future: _getNomeVistoriador(uidVistoriador),
+                                    future: _getNomeVistoriador(
+                                      vist['vistoriador_uid'] ?? '',
+                                    ),
                                     builder: (context, snapshotNome) {
                                       String nome =
-                                          snapshotNome.data ?? 'Carregando...';
+                                          snapshotNome.data ?? 'CARREGANDO...';
                                       return Card(
-                                        color: corFundo,
+                                        color: temFalha
+                                            ? Colors.red.shade50
+                                            : Colors.grey.shade200,
                                         elevation: 1,
                                         margin: const EdgeInsets.only(
                                           bottom: 8,
                                         ),
                                         child: ListTile(
                                           leading: CircleAvatar(
-                                            backgroundColor: corIcone,
+                                            backgroundColor: temFalha
+                                                ? Colors.red.shade700
+                                                : Colors.grey.shade600,
                                             child: Text(
                                               idSemaforo,
                                               style: const TextStyle(
@@ -2397,7 +2281,9 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                             '$idSemaforo - $endSemaforo',
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              color: corIcone,
+                                              color: temFalha
+                                                  ? Colors.red.shade700
+                                                  : Colors.grey.shade600,
                                               fontSize: 14,
                                             ),
                                           ),
@@ -2410,7 +2296,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  'INÍCIO: ${vistoria['data_hora_inicio'] ?? '-'} - FIM: ${vistoria['data_hora_fim'] ?? '-'}',
+                                                  'INÍCIO: ${up(vist['data_hora_inicio'])} - FIM: ${up(vist['data_hora_fim'])}',
                                                   style: const TextStyle(
                                                     color: Colors.black87,
                                                     fontSize: 12,
@@ -2418,7 +2304,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                 ),
                                                 const SizedBox(height: 2),
                                                 Text(
-                                                  'VISTORIADOR: $nome',
+                                                  'VISTORIADOR: ${nome.toUpperCase()}',
                                                   style: const TextStyle(
                                                     color: Colors.black54,
                                                     fontSize: 11,
@@ -2432,11 +2318,13 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                             temFalha
                                                 ? Icons.warning_amber_rounded
                                                 : Icons.check_circle,
-                                            color: corIcone,
+                                            color: temFalha
+                                                ? Colors.red.shade700
+                                                : Colors.grey.shade600,
                                           ),
                                           onTap: () =>
                                               _mostrarDetalhesVistoriaAnterior(
-                                                vistoria,
+                                                vist,
                                                 rotaExibicao,
                                                 nome,
                                                 coordOriginal,
@@ -2456,201 +2344,194 @@ class _RelatoriosPageState extends State<RelatoriosPage>
               // ================= ABA 2: EXPORTAÇÃO =================
               Padding(
                 padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // ==== BOTÃO NOVO: ABRE O POPUP ====
-                    SizedBox(
-                      width: double.infinity,
-                      height: 60,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal.shade800,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Icon(
+                          Icons.route,
+                          size: 64,
+                          color: Colors.teal.shade800,
                         ),
-                        icon: const Icon(Icons.calendar_month, size: 28),
-                        label: const Text(
-                          'Exportar Rota Específica do Dia',
+                        const SizedBox(height: 16),
+                        Text(
+                          'EXPORTAR ROTA DO DIA',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
+                            color: Colors.teal.shade800,
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                        onPressed: () => _mostrarDialogExportarRotaDoDia(
-                          mapaRotasSemaforos,
-                          todosSemaforosData,
-                          listaRotasOptions,
+                        const SizedBox(height: 8),
+                        const Text(
+                          'SELECIONE O DIA EXATO E A ROTA PARA GERAR O RELATÓRIO (INCLUINDO OS NÃO VISTORIADOS).',
+                          style: TextStyle(fontSize: 13, color: Colors.black54),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    const Row(
-                      children: [
-                        Expanded(child: Divider()),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(
-                            'OU EXPORTAR UM PERÍODO ESPECÍFICO',
-                            style: TextStyle(color: Colors.grey, fontSize: 11),
-                          ),
-                        ),
-                        Expanded(child: Divider()),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 32),
 
-                    const Text(
-                      'Filtros para Período',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blueGrey,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        _buildBotaoData(
-                          'De',
-                          _deExport,
-                          () => _selecionarData(
-                            context,
-                            isDe: true,
-                            tipoAba: 'Exportacao',
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        _buildBotaoData(
-                          'Até',
-                          _ateExport,
-                          () => _selecionarData(
-                            context,
-                            isDe: false,
-                            tipoAba: 'Exportacao',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    InputDecorator(
-                      decoration: InputDecoration(
-                        labelText: 'Escolha a Rota',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: listaRotasOptions.contains(_rotaExport)
-                              ? _rotaExport
-                              : 'Todas',
-                          items: listaRotasOptions
-                              .map(
-                                (r) => DropdownMenuItem(
-                                  value: r,
-                                  child: Text(
-                                    r == 'Todas' ? 'Todas as Rotas' : 'Rota $r',
+                        InkWell(
+                          onTap: () async {
+                            DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: _deExport ?? DateTime.now(),
+                              firstDate: DateTime(2024),
+                              lastDate: DateTime.now(),
+                            );
+                            if (picked != null)
+                              setState(() => _deExport = picked);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade400),
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.white,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.calendar_today,
+                                  size: 24,
+                                  color: Colors.teal.shade800,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'DATA: ${DateFormat('dd/MM/yyyy').format(_deExport ?? DateTime.now())}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
                                 ),
-                              )
-                              .toList(),
-                          onChanged: (val) =>
-                              setState(() => _rotaExport = val!),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    Builder(
-                      builder: (context) {
-                        bool liberadoBases =
-                            _deExport != null && _ateExport != null;
+                        const SizedBox(height: 16),
 
-                        return Column(
+                        InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: 'ROTA',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              value:
+                                  listaRotasOptions.contains(_rotaExport) &&
+                                      _rotaExport != 'Todas'
+                                  ? _rotaExport
+                                  : 'Selecione',
+                              items: [
+                                const DropdownMenuItem(
+                                  value: 'Selecione',
+                                  child: Text('SELECIONE UMA ROTA...'),
+                                ),
+                                ...listaRotasOptions
+                                    .where((r) => r != 'Todas')
+                                    .map(
+                                      (r) => DropdownMenuItem(
+                                        value: r,
+                                        child: Text('ROTA ' + r),
+                                      ),
+                                    ),
+                              ],
+                              onChanged: (val) =>
+                                  setState(() => _rotaExport = val!),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 48),
+
+                        Row(
                           children: [
-                            SizedBox(
-                              width: double.infinity,
-                              height: 60,
-                              child: ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange.shade600,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                            Expanded(
+                              child: SizedBox(
+                                height: 60,
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orange.shade700,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
-                                ),
-                                icon: const Icon(
-                                  Icons.picture_as_pdf,
-                                  size: 28,
-                                ),
-                                label: const Text(
-                                  'Exportar PDF (Geral)',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                                  icon: const Icon(
+                                    Icons.picture_as_pdf,
+                                    size: 28,
                                   ),
+                                  label: const Text(
+                                    'PDF',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  onPressed:
+                                      _rotaExport != 'Selecione' &&
+                                          _rotaExport != 'Todas'
+                                      ? () => _exportarRotaDoDiaCompleta(
+                                          mapaRotasSemaforos,
+                                          todosSemaforosData,
+                                          _deExport ?? DateTime.now(),
+                                          _rotaExport,
+                                          'PDF',
+                                        )
+                                      : null,
                                 ),
-                                onPressed: liberadoBases
-                                    ? () => _realizarExportacao(
-                                        'PDF',
-                                        mapaRotasSemaforos,
-                                        todosSemaforosData,
-                                      )
-                                    : null,
                               ),
                             ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 60,
-                              child: ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green.shade600,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: SizedBox(
+                                height: 60,
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green.shade700,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
-                                ),
-                                icon: const Icon(Icons.grid_on, size: 28),
-                                label: const Text(
-                                  'Exportar Excel (Geral)',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                                  icon: const Icon(Icons.grid_on, size: 28),
+                                  label: const Text(
+                                    'EXCEL',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
                                   ),
+                                  onPressed:
+                                      _rotaExport != 'Selecione' &&
+                                          _rotaExport != 'Todas'
+                                      ? () => _exportarRotaDoDiaCompleta(
+                                          mapaRotasSemaforos,
+                                          todosSemaforosData,
+                                          _deExport ?? DateTime.now(),
+                                          _rotaExport,
+                                          'EXCEL',
+                                        )
+                                      : null,
                                 ),
-                                onPressed: liberadoBases
-                                    ? () => _realizarExportacao(
-                                        'EXCEL',
-                                        mapaRotasSemaforos,
-                                        todosSemaforosData,
-                                      )
-                                    : null,
                               ),
                             ),
-                            if (!liberadoBases) ...[
-                              const SizedBox(height: 16),
-                              const Text(
-                                'Preencha as datas para liberar as exportações gerais.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ],
                           ],
-                        );
-                      },
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
 
@@ -2661,16 +2542,13 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                     color: Colors.red.shade50,
                     padding: const EdgeInsets.all(16),
                     child: Center(
-                      // Centraliza no PC
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxWidth: 1000,
-                        ), // Limita a largura no PC
+                        constraints: const BoxConstraints(maxWidth: 1000),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Acompanhamento Diário por Rota',
+                              'ACOMPANHAMENTO DIÁRIO POR ROTA',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -2679,7 +2557,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                             ),
                             const SizedBox(height: 4),
                             const Text(
-                              'Selecione o mês para ver a produtividade dia a dia de cada rota.',
+                              'SELECIONE O MÊS PARA VER A PRODUTIVIDADE DIA A DIA DE CADA ROTA.',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.black54,
@@ -2689,7 +2567,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                             Row(
                               children: [
                                 _buildBotaoData(
-                                  'Mês',
+                                  'MÊS',
                                   _mesPendencia,
                                   () => _selecionarMesAnoDialog(context),
                                   formato: 'MM/yyyy',
@@ -2698,7 +2576,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                 Expanded(
                                   child: InputDecorator(
                                     decoration: InputDecoration(
-                                      labelText: 'Rota',
+                                      labelText: 'ROTA',
                                       filled: true,
                                       fillColor: Colors.white,
                                       border: OutlineInputBorder(
@@ -2726,8 +2604,8 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                 value: r,
                                                 child: Text(
                                                   r == 'Todas'
-                                                      ? 'Todas Rotas'
-                                                      : 'Rota $r',
+                                                      ? 'TODAS ROTAS'
+                                                      : 'ROTA ' + r,
                                                 ),
                                               ),
                                             )
@@ -2746,7 +2624,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                       ),
                     ),
                   ),
-
                   Expanded(
                     child: StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance
@@ -2777,7 +2654,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
-
                         int daysInMonth = DateTime(
                           _mesPendencia.year,
                           _mesPendencia.month + 1,
@@ -2793,10 +2669,9 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                           String rotaSem = (sem['rota'] ?? '')
                               .toString()
                               .replaceFirst(RegExp(r'^0+'), '');
-                          if (rotaSem.isNotEmpty) {
+                          if (rotaSem.isNotEmpty)
                             totalSemaforosPorRota[rotaSem] =
                                 (totalSemaforosPorRota[rotaSem] ?? 0) + 1;
-                          }
                         }
 
                         Map<String, Map<int, Set<String>>> vistoriasDiarias =
@@ -2804,9 +2679,8 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                         for (String r in totalSemaforosPorRota.keys) {
                           if (_rotaPendencia == 'Todas' || r == rotaFiltro) {
                             vistoriasDiarias[r] = {};
-                            for (int d = 1; d <= daysInMonth; d++) {
+                            for (int d = 1; d <= daysInMonth; d++)
                               vistoriasDiarias[r]![d] = {};
-                            }
                           }
                         }
 
@@ -2818,13 +2692,12 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                             String idSem = v['semaforo_id']?.toString() ?? '';
                             String rotaDoSem = mapaRotasSemaforos[idSem] ?? '';
                             if (rotaDoSem.isNotEmpty &&
-                                vistoriasDiarias.containsKey(rotaDoSem)) {
+                                vistoriasDiarias.containsKey(rotaDoSem))
                               vistoriasDiarias[rotaDoSem]![dt.day]!.add(idSem);
-                            }
                           }
                         }
 
-                        var rotasOrdenadas = vistoriasDiarias.keys.toList()
+                        var rotasOrd = vistoriasDiarias.keys.toList()
                           ..sort(
                             (a, b) => (int.tryParse(a) ?? 0).compareTo(
                               int.tryParse(b) ?? 0,
@@ -2832,21 +2705,18 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                           );
                         String mesFormatado = DateFormat(
                           'MM/yyyy',
-                        ).format(_mesPendencia);
+                        ).format(_mesPendencia).toUpperCase();
 
                         return Center(
-                          // Centraliza a lista inteira no PC
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                              maxWidth: 1000,
-                            ), // MaxWidth para não estourar na horizontal no PC
+                            constraints: const BoxConstraints(maxWidth: 1000),
                             child: Column(
                               children: [
                                 Expanded(
-                                  child: rotasOrdenadas.isEmpty
+                                  child: rotasOrd.isEmpty
                                       ? const Center(
                                           child: Text(
-                                            'Nenhuma rota encontrada.',
+                                            'NENHUMA ROTA ENCONTRADA.',
                                             style: TextStyle(
                                               color: Colors.grey,
                                             ),
@@ -2854,20 +2724,17 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                         )
                                       : ListView.builder(
                                           padding: const EdgeInsets.all(16),
-                                          itemCount: rotasOrdenadas.length,
+                                          itemCount: rotasOrd.length,
                                           itemBuilder: (context, index) {
-                                            String rota = rotasOrdenadas[index];
+                                            String rota = rotasOrd[index];
                                             int totalMeta =
                                                 totalSemaforosPorRota[rota] ??
                                                 0;
                                             var diasMap =
                                                 vistoriasDiarias[rota]!;
-
-                                            // Coleta a cor baseada na função
                                             Color corDaRota = _obterCorDaRota(
                                               rota,
                                             );
-
                                             return Card(
                                               margin: const EdgeInsets.only(
                                                 bottom: 16,
@@ -2901,7 +2768,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                   backgroundColor: corDaRota
                                                       .withOpacity(0.15),
                                                   child: Text(
-                                                    rota,
+                                                    rota.toUpperCase(),
                                                     style: TextStyle(
                                                       color: corDaRota,
                                                       fontWeight:
@@ -2910,7 +2777,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                   ),
                                                 ),
                                                 title: Text(
-                                                  'Rota $rota',
+                                                  'ROTA $rota'.toUpperCase(),
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 16,
@@ -2918,7 +2785,8 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                   ),
                                                 ),
                                                 subtitle: Text(
-                                                  'Quantidade de semáforos da rota $rota: $totalMeta semáforos',
+                                                  'META DIÁRIA: $totalMeta SEMÁFOROS'
+                                                      .toUpperCase(),
                                                   style: const TextStyle(
                                                     fontSize: 13,
                                                     color: Colors.blueGrey,
@@ -2926,10 +2794,10 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                 ),
                                                 children: [
                                                   Container(
-                                                    decoration: BoxDecoration(
+                                                    decoration: const BoxDecoration(
                                                       color: Colors.white,
                                                       borderRadius:
-                                                          const BorderRadius.vertical(
+                                                          BorderRadius.vertical(
                                                             bottom:
                                                                 Radius.circular(
                                                                   12,
@@ -2959,7 +2827,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                               Expanded(
                                                                 flex: 2,
                                                                 child: Text(
-                                                                  'Data',
+                                                                  'DATA',
                                                                   style: TextStyle(
                                                                     fontWeight:
                                                                         FontWeight
@@ -2974,7 +2842,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                               Expanded(
                                                                 flex: 3,
                                                                 child: Text(
-                                                                  'Vistoriados',
+                                                                  'VISTORIADOS',
                                                                   textAlign:
                                                                       TextAlign
                                                                           .center,
@@ -2992,7 +2860,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                               Expanded(
                                                                 flex: 3,
                                                                 child: Text(
-                                                                  'Pendentes',
+                                                                  'PENDENTES',
                                                                   textAlign:
                                                                       TextAlign
                                                                           .center,
@@ -3028,7 +2896,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                             ],
                                                           ),
                                                         ),
-                                                        // Lista os dias do mês
                                                         ...List.generate(daysInMonth, (
                                                           i,
                                                         ) {
@@ -3046,35 +2913,24 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                               : (vistoriados /
                                                                         totalMeta) *
                                                                     100;
-
-                                                          // ==== LÓGICA DE CORES DA FONTE ====
-                                                          Color corTexto;
-                                                          if (perc == 0) {
-                                                            corTexto = Colors
-                                                                .grey
-                                                                .shade500; // Cinza (Nenhuma vistoria)
-                                                          } else if (perc <
-                                                              100) {
-                                                            corTexto = Colors
-                                                                .red
-                                                                .shade600; // Vermelho (Incompleto)
-                                                          } else {
-                                                            corTexto = Colors
-                                                                .green
-                                                                .shade700; // Verde (100% Completo)
-                                                          }
-
-                                                          // ==== FUNDO ZEBRA ====
-                                                          Color corFundoLinha =
-                                                              i % 2 == 0
-                                                              ? Colors.white
-                                                              : Colors
+                                                          Color corLinha =
+                                                              vistoriados == 0
+                                                              ? Colors
                                                                     .grey
-                                                                    .shade100;
-
+                                                                    .shade500
+                                                              : (pendentes > 0
+                                                                    ? Colors
+                                                                          .red
+                                                                          .shade600
+                                                                    : Colors
+                                                                          .green
+                                                                          .shade700);
                                                           return Container(
-                                                            color:
-                                                                corFundoLinha,
+                                                            color: i % 2 == 0
+                                                                ? Colors.white
+                                                                : Colors
+                                                                      .grey
+                                                                      .shade100,
                                                             padding:
                                                                 const EdgeInsets.symmetric(
                                                                   vertical:
@@ -3095,7 +2951,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                                       fontSize:
                                                                           14,
                                                                       color:
-                                                                          corTexto,
+                                                                          corLinha,
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .bold,
@@ -3113,7 +2969,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                                       fontSize:
                                                                           14,
                                                                       color:
-                                                                          corTexto,
+                                                                          corLinha,
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .bold,
@@ -3131,7 +2987,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                                       fontSize:
                                                                           14,
                                                                       color:
-                                                                          corTexto,
+                                                                          corLinha,
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .bold,
@@ -3149,7 +3005,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                                                       fontSize:
                                                                           14,
                                                                       color:
-                                                                          corTexto,
+                                                                          corLinha,
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .bold,
@@ -3169,7 +3025,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                           },
                                         ),
                                 ),
-                                if (rotasOrdenadas.isNotEmpty)
+                                if (rotasOrd.isNotEmpty)
                                   Container(
                                     padding: const EdgeInsets.all(16),
                                     child: Row(
@@ -3193,7 +3049,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                               Icons.picture_as_pdf,
                                             ),
                                             label: const Text(
-                                              'Exportar PDF Geral',
+                                              'EXPORTAR PDF GERAL',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -3225,7 +3081,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                                             ),
                                             icon: const Icon(Icons.grid_on),
                                             label: const Text(
-                                              'Exportar Excel Geral',
+                                              'EXPORTAR EXCEL GERAL',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                               ),
