@@ -44,6 +44,8 @@ class _RelatoriosPageState extends State<RelatoriosPage>
 
   final Map<String, String> _cacheNomes = {};
 
+  // ==== ADICIONADO: FUNÇÃO DE CORES DAS ROTAS ====
+  // 👇 ADICIONE ESTE BLOCO INTEIRO AQUI 👇
   @override
   void initState() {
     super.initState();
@@ -56,6 +58,65 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     _deExport = DateTime(agora.year, agora.month, 1);
     _ateExport = DateTime(agora.year, agora.month + 1, 0, 23, 59, 59);
   }
+
+  Color _obterCorDaRota(String rota) {
+    String r = rota
+        .trim()
+        .toUpperCase()
+        .replaceAll('ROTA', '')
+        .replaceAll(' ', '');
+    if (r.isEmpty) return Colors.grey.shade600;
+
+    switch (r) {
+      case '1':
+      case '01':
+        return Colors.blue.shade700;
+      case '2':
+      case '02':
+        return Colors.green.shade700;
+      case '3':
+      case '03':
+        return Colors.red.shade700;
+      case '4':
+      case '04':
+        return Colors.purple.shade700;
+      case '5':
+      case '05':
+        return Colors.amber.shade800;
+      case '6':
+      case '06':
+        return Colors.teal.shade700;
+      case '7':
+      case '07':
+        return Colors.indigo.shade700;
+      case '8':
+      case '08':
+        return Colors.pink.shade700;
+      case '9':
+      case '09':
+        return Colors.cyan.shade800;
+      case '10':
+        return Colors.deepOrange.shade700;
+      default:
+        final int hash = r.hashCode;
+        final List<Color> coresDisponiveis = [
+          Colors.blue.shade700,
+          Colors.green.shade700,
+          Colors.red.shade700,
+          Colors.purple.shade700,
+          Colors.amber.shade800,
+          Colors.teal.shade700,
+          Colors.indigo.shade700,
+          Colors.pink.shade700,
+          Colors.cyan.shade800,
+          Colors.deepOrange.shade700,
+          Colors.brown.shade600,
+          Colors.blueGrey.shade700,
+        ];
+        return coresDisponiveis[hash.abs() % coresDisponiveis.length];
+    }
+  }
+  // ===============================================
 
   @override
   void dispose() {
@@ -1555,6 +1616,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     }
   }
 
+  // ==== MODIFICADO: EXPORTAÇÃO DO PDF DE PENDÊNCIAS COM TABELAS SEPARADAS E CORES ====
   Future<void> _exportarPendenciasPDF(
     Map<String, Map<int, Set<String>>> vistoriasDiarias,
     Map<String, int> totaisPorRota,
@@ -1574,32 +1636,188 @@ class _RelatoriosPageState extends State<RelatoriosPage>
       ).format(DateTime.now());
 
       await Printing.layoutPdf(
-        name: 'Acompanhamento_Diario_$mesFiltro.pdf',
+        name: 'Acompanhamento_Diario_${mesFiltro.replaceAll('/', '_')}.pdf',
         onLayout: (PdfPageFormat format) async {
           final pdf = pw.Document();
 
-          List<List<String>> dadosTabela = [];
           var rotasOrdenadas = vistoriasDiarias.keys.toList()
             ..sort(
               (a, b) => (int.tryParse(a) ?? 0).compareTo(int.tryParse(b) ?? 0),
             );
 
+          // Montando os blocos da página dinamicamente
+          List<pw.Widget> elementosPDF = [
+            pw.Header(
+              level: 0,
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    'Relatório de Acompanhamento Diário',
+                    style: pw.TextStyle(
+                      fontSize: 18,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.SizedBox(height: 4),
+                  pw.Text(
+                    'Mês de referência: $mesFiltro',
+                    style: const pw.TextStyle(
+                      fontSize: 12,
+                      color: PdfColors.grey700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 16),
+          ];
+
+          // Cria uma tabela SEPARADA para cada rota
           for (String r in rotasOrdenadas) {
             int meta = totaisPorRota[r] ?? 0;
+
+            // Puxa a cor exata da rota e converte para o padrão PdfColor
+            Color corFlutter = _obterCorDaRota(r);
+            PdfColor corPdfRota = PdfColor.fromInt(corFlutter.value);
+
+            // Cabeçalho da Rota (Fora da tabela)
+            elementosPDF.add(
+              pw.Text(
+                'ROTA $r (Quantidade de semáforos da rota: $meta)',
+                style: pw.TextStyle(
+                  color: corPdfRota,
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            );
+            elementosPDF.add(pw.SizedBox(height: 6));
+
+            List<pw.TableRow> linhasTabela = [];
+
+            // Adiciona a linha do Cabeçalho da Tabela
+            linhasTabela.add(
+              pw.TableRow(
+                decoration: pw.BoxDecoration(color: corPdfRota),
+                children: ['Data', 'Vistoriados', 'Pendentes', 'Concluído']
+                    .map(
+                      (h) => pw.Padding(
+                        padding: const pw.EdgeInsets.symmetric(vertical: 6),
+                        child: pw.Text(
+                          h,
+                          textAlign: pw.TextAlign.center,
+                          style: pw.TextStyle(
+                            color: PdfColors.white,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            );
+
+            // Adiciona os dias do mês
             for (int d = 1; d <= daysInMonth; d++) {
               int vistoriados = vistoriasDiarias[r]![d]?.length ?? 0;
               int pendentes = meta - vistoriados;
               double perc = meta == 0 ? 0.0 : (vistoriados / meta) * 100;
 
-              dadosTabela.add([
-                'Rota $r',
-                '${d.toString().padLeft(2, '0')}/$mesFiltro',
-                meta.toString(),
-                vistoriados.toString(),
-                pendentes.toString(),
-                '${perc.toStringAsFixed(1)}%',
-              ]);
+              // Lógica da regra de cores das fontes
+              PdfColor corTexto;
+              if (perc == 0) {
+                corTexto = PdfColors.grey500;
+              } else if (perc < 100) {
+                corTexto = PdfColors.red700;
+              } else {
+                corTexto = PdfColors.green700;
+              }
+
+              PdfColor corPendente = pendentes > 0
+                  ? PdfColors.red700
+                  : PdfColors.grey800;
+              PdfColor corZebra = d % 2 == 0
+                  ? PdfColors.white
+                  : PdfColors.grey100;
+
+              linhasTabela.add(
+                pw.TableRow(
+                  decoration: pw.BoxDecoration(color: corZebra),
+                  children: [
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.symmetric(vertical: 4),
+                      child: pw.Text(
+                        '${d.toString().padLeft(2, '0')}/$mesFiltro',
+                        textAlign: pw.TextAlign.center,
+                        style: pw.TextStyle(
+                          color: corTexto,
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.symmetric(vertical: 4),
+                      child: pw.Text(
+                        '$vistoriados',
+                        textAlign: pw.TextAlign.center,
+                        style: pw.TextStyle(
+                          color: corTexto,
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.symmetric(vertical: 4),
+                      child: pw.Text(
+                        '$pendentes',
+                        textAlign: pw.TextAlign.center,
+                        style: pw.TextStyle(
+                          color: corPendente,
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.symmetric(vertical: 4),
+                      child: pw.Text(
+                        '${perc.toStringAsFixed(0)}%',
+                        textAlign: pw.TextAlign.center,
+                        style: pw.TextStyle(
+                          color: corTexto,
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
             }
+
+            // Adiciona a tabela finalizada na lista de elementos da página
+            elementosPDF.add(
+              pw.Table(
+                border: pw.TableBorder.all(
+                  color: PdfColors.grey400,
+                  width: 0.5,
+                ),
+                columnWidths: {
+                  0: const pw.FlexColumnWidth(2),
+                  1: const pw.FlexColumnWidth(2),
+                  2: const pw.FlexColumnWidth(2),
+                  3: const pw.FlexColumnWidth(2),
+                },
+                children: linhasTabela,
+              ),
+            );
+
+            // Quebra de espaço para a próxima rota
+            elementosPDF.add(pw.SizedBox(height: 24));
           }
 
           pdf.addPage(
@@ -1613,57 +1831,10 @@ class _RelatoriosPageState extends State<RelatoriosPage>
               ),
               footer: (pw.Context context) =>
                   _buildRodapePDF(context, dataHoraAtual),
-              build: (pw.Context context) {
-                return [
-                  pw.Header(
-                    level: 0,
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text(
-                          'Relatório de Acompanhamento Diário por Rota',
-                          style: pw.TextStyle(
-                            fontSize: 18,
-                            fontWeight: pw.FontWeight.bold,
-                            color: PdfColors.red800,
-                          ),
-                        ),
-                        pw.SizedBox(height: 4),
-                        pw.Text(
-                          'Mês de referência: $mesFiltro',
-                          style: const pw.TextStyle(
-                            fontSize: 12,
-                            color: PdfColors.grey700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  pw.SizedBox(height: 16),
-                  pw.TableHelper.fromTextArray(
-                    context: context,
-                    headers: [
-                      'Rota',
-                      'Data',
-                      'Meta',
-                      'Vistoriados',
-                      'Não Vistoriados',
-                      'Concluído',
-                    ],
-                    data: dadosTabela,
-                    headerStyle: pw.TextStyle(
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.white,
-                    ),
-                    headerDecoration: const pw.BoxDecoration(
-                      color: PdfColors.red700,
-                    ),
-                    cellAlignment: pw.Alignment.center,
-                  ),
-                ];
-              },
+              build: (pw.Context context) => elementosPDF,
             ),
           );
+
           return pdf.save();
         },
       );
@@ -1678,6 +1849,7 @@ class _RelatoriosPageState extends State<RelatoriosPage>
     }
   }
 
+  // ==== MODIFICADO: EXCEL DE PENDÊNCIAS COM CORES CORRIGIDAS ====
   Future<void> _exportarPendenciasExcel(
     Map<String, Map<int, Set<String>>> vistoriasDiarias,
     Map<String, int> totaisPorRota,
@@ -1692,9 +1864,14 @@ class _RelatoriosPageState extends State<RelatoriosPage>
       ),
     );
     try {
-      String csv = '\uFEFF';
-      csv += 'Mês do Filtro:;$mesFiltro\n\n';
-      csv += 'ROTA;DATA;META DIARIA;VISTORIADOS;NAO VISTORIADOS;PERCENTUAL\n';
+      StringBuffer excelBuffer = StringBuffer();
+      excelBuffer.write(
+        '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body>',
+      );
+
+      excelBuffer.write(
+        '<h2>Acompanhamento Diário - Mês: $mesFiltro</h2><br/>',
+      );
 
       var rotasOrdenadas = vistoriasDiarias.keys.toList()
         ..sort(
@@ -1703,21 +1880,64 @@ class _RelatoriosPageState extends State<RelatoriosPage>
 
       for (String r in rotasOrdenadas) {
         int meta = totaisPorRota[r] ?? 0;
+
+        Color corDaRota = _obterCorDaRota(r);
+        String hexColor =
+            '#${corDaRota.value.toRadixString(16).substring(2, 8)}';
+
+        excelBuffer.write(
+          '<h3 style="color: $hexColor;">ROTA $r (Meta: $meta)</h3>',
+        );
+        excelBuffer.write('<table border="1">');
+
+        excelBuffer.write(
+          '<tr style="background-color: $hexColor; color: white; text-align: center; font-weight: bold;">'
+          '<td>DATA</td><td>VISTORIADOS</td><td>PENDENTES</td><td>CONCLUÍDO</td></tr>',
+        );
+
         for (int d = 1; d <= daysInMonth; d++) {
           int vistoriados = vistoriasDiarias[r]![d]?.length ?? 0;
           int pendentes = meta - vistoriados;
           double perc = meta == 0 ? 0.0 : (vistoriados / meta) * 100;
 
-          csv +=
-              'Rota $r;${d.toString().padLeft(2, '0')}/$mesFiltro;$meta;$vistoriados;$pendentes;${perc.toStringAsFixed(1)}%\n';
+          // ==== NOVA LÓGICA DE CORES DA LINHA NO EXCEL ====
+          String corLinha;
+          if (vistoriados == 0) {
+            corLinha = 'grey';
+          } else if (pendentes > 0) {
+            corLinha = 'red';
+          } else {
+            corLinha = 'green';
+          }
+
+          String corZebra = d % 2 == 0 ? '#FFFFFF' : '#F5F5F5';
+
+          excelBuffer.write('<tr style="background-color: $corZebra;">');
+          excelBuffer.write(
+            '<td style="text-align: center; color: $corLinha; font-weight: bold;">${d.toString().padLeft(2, '0')}/$mesFiltro</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; color: $corLinha; font-weight: bold;">$vistoriados</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; color: $corLinha; font-weight: bold;">$pendentes</td>',
+          );
+          excelBuffer.write(
+            '<td style="text-align: center; color: $corLinha; font-weight: bold;">${perc.toStringAsFixed(1)}%</td>',
+          );
+          excelBuffer.write('</tr>');
         }
+        excelBuffer.write('</table><br/><br/>');
       }
+
+      excelBuffer.write('</body></html>');
 
       final dir = await getTemporaryDirectory();
       final file = File(
-        '${dir.path}/Acompanhamento_Diario_${mesFiltro.replaceAll('/', '-')}.xls',
+        '${dir.path}/Acompanhamento_Diario_${mesFiltro.replaceAll('/', '_')}.xls',
       );
-      await file.writeAsBytes(utf8.encode(csv));
+      await file.writeAsBytes(utf8.encode(excelBuffer.toString()));
+
       await Share.shareXFiles([
         XFile(file.path),
       ], text: 'Acompanhamento Diário de Semáforos - $mesFiltro.');
@@ -2440,78 +2660,90 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                   Container(
                     color: Colors.red.shade50,
                     padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Acompanhamento Diário por Rota',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Colors.red,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Selecione o mês para ver a produtividade dia a dia de cada rota.',
-                          style: TextStyle(fontSize: 12, color: Colors.black54),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
+                    child: Center(
+                      // Centraliza no PC
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxWidth: 1000,
+                        ), // Limita a largura no PC
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildBotaoData(
-                              'Mês',
-                              _mesPendencia,
-                              () => _selecionarMesAnoDialog(context),
-                              formato: 'MM/yyyy',
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: InputDecorator(
-                                decoration: InputDecoration(
-                                  labelText: 'Rota',
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 4,
-                                  ),
-                                ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<String>(
-                                    isExpanded: true,
-                                    value:
-                                        listaRotasOptions.contains(
-                                          _rotaPendencia,
-                                        )
-                                        ? _rotaPendencia
-                                        : 'Todas',
-                                    items: listaRotasOptions
-                                        .map(
-                                          (r) => DropdownMenuItem(
-                                            value: r,
-                                            child: Text(
-                                              r == 'Todas'
-                                                  ? 'Todas Rotas'
-                                                  : 'Rota $r',
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                    onChanged: (val) => setState(() {
-                                      _rotaPendencia = val!;
-                                    }),
-                                  ),
-                                ),
+                            const Text(
+                              'Acompanhamento Diário por Rota',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.red,
                               ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Selecione o mês para ver a produtividade dia a dia de cada rota.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.black54,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                _buildBotaoData(
+                                  'Mês',
+                                  _mesPendencia,
+                                  () => _selecionarMesAnoDialog(context),
+                                  formato: 'MM/yyyy',
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: InputDecorator(
+                                    decoration: InputDecoration(
+                                      labelText: 'Rota',
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 4,
+                                          ),
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        isExpanded: true,
+                                        value:
+                                            listaRotasOptions.contains(
+                                              _rotaPendencia,
+                                            )
+                                            ? _rotaPendencia
+                                            : 'Todas',
+                                        items: listaRotasOptions
+                                            .map(
+                                              (r) => DropdownMenuItem(
+                                                value: r,
+                                                child: Text(
+                                                  r == 'Todas'
+                                                      ? 'Todas Rotas'
+                                                      : 'Rota $r',
+                                                ),
+                                              ),
+                                            )
+                                            .toList(),
+                                        onChanged: (val) => setState(() {
+                                          _rotaPendencia = val!;
+                                        }),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
 
@@ -2556,7 +2788,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                           '',
                         );
 
-                        // 1. Descobre a meta (total de semáforos) de cada rota
                         Map<String, int> totalSemaforosPorRota = {};
                         for (var sem in todosSemaforosData) {
                           String rotaSem = (sem['rota'] ?? '')
@@ -2568,7 +2799,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                           }
                         }
 
-                        // 2. Cria o mapa tridimensional: Rota -> Dia -> Set de IDs Vistoriados
                         Map<String, Map<int, Set<String>>> vistoriasDiarias =
                             {};
                         for (String r in totalSemaforosPorRota.keys) {
@@ -2580,7 +2810,6 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                           }
                         }
 
-                        // 3. Preenche os dias que tiveram vistorias
                         for (var doc in snapshotVistoriasDoMes.data!.docs) {
                           var v = doc.data() as Map<String, dynamic>;
                           Timestamp? t = v['criado_em'] as Timestamp?;
@@ -2605,321 +2834,417 @@ class _RelatoriosPageState extends State<RelatoriosPage>
                           'MM/yyyy',
                         ).format(_mesPendencia);
 
-                        return Column(
-                          children: [
-                            Expanded(
-                              child: rotasOrdenadas.isEmpty
-                                  ? const Center(
-                                      child: Text(
-                                        'Nenhuma rota encontrada.',
-                                        style: TextStyle(color: Colors.grey),
-                                      ),
-                                    )
-                                  : ListView.builder(
-                                      padding: const EdgeInsets.all(12),
-                                      itemCount: rotasOrdenadas.length,
-                                      itemBuilder: (context, index) {
-                                        String rota = rotasOrdenadas[index];
-                                        int totalMeta =
-                                            totalSemaforosPorRota[rota] ?? 0;
-                                        var diasMap = vistoriasDiarias[rota]!;
-
-                                        return Card(
-                                          margin: const EdgeInsets.only(
-                                            bottom: 12,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
+                        return Center(
+                          // Centraliza a lista inteira no PC
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxWidth: 1000,
+                            ), // MaxWidth para não estourar na horizontal no PC
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: rotasOrdenadas.isEmpty
+                                      ? const Center(
+                                          child: Text(
+                                            'Nenhuma rota encontrada.',
+                                            style: TextStyle(
+                                              color: Colors.grey,
                                             ),
                                           ),
-                                          child: ExpansionTile(
-                                            leading: CircleAvatar(
-                                              backgroundColor:
-                                                  Colors.red.shade50,
-                                              child: Text(
-                                                rota,
-                                                style: TextStyle(
-                                                  color: Colors.red.shade900,
-                                                  fontWeight: FontWeight.bold,
+                                        )
+                                      : ListView.builder(
+                                          padding: const EdgeInsets.all(16),
+                                          itemCount: rotasOrdenadas.length,
+                                          itemBuilder: (context, index) {
+                                            String rota = rotasOrdenadas[index];
+                                            int totalMeta =
+                                                totalSemaforosPorRota[rota] ??
+                                                0;
+                                            var diasMap =
+                                                vistoriasDiarias[rota]!;
+
+                                            // Coleta a cor baseada na função
+                                            Color corDaRota = _obterCorDaRota(
+                                              rota,
+                                            );
+
+                                            return Card(
+                                              margin: const EdgeInsets.only(
+                                                bottom: 16,
+                                              ),
+                                              elevation: 3,
+                                              shadowColor: corDaRota
+                                                  .withOpacity(0.3),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                                side: BorderSide(
+                                                  color: corDaRota.withOpacity(
+                                                    0.5,
+                                                  ),
+                                                  width: 1.5,
                                                 ),
                                               ),
-                                            ),
-                                            title: Text(
-                                              'Rota $rota',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            subtitle: Text(
-                                              'Meta Diária: $totalMeta semáforos',
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.blueGrey,
-                                              ),
-                                            ),
-                                            children: [
-                                              Container(
-                                                color: Colors.grey.shade50,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 16,
-                                                      vertical: 12,
+                                              child: ExpansionTile(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                collapsedShape:
+                                                    RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
                                                     ),
-                                                child: Column(
-                                                  children: [
-                                                    const Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
+                                                leading: CircleAvatar(
+                                                  backgroundColor: corDaRota
+                                                      .withOpacity(0.15),
+                                                  child: Text(
+                                                    rota,
+                                                    style: TextStyle(
+                                                      color: corDaRota,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                                title: Text(
+                                                  'Rota $rota',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                    color: corDaRota,
+                                                  ),
+                                                ),
+                                                subtitle: Text(
+                                                  'Quantidade de semáforos da rota $rota: $totalMeta semáforos',
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    color: Colors.blueGrey,
+                                                  ),
+                                                ),
+                                                children: [
+                                                  Container(
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          const BorderRadius.vertical(
+                                                            bottom:
+                                                                Radius.circular(
+                                                                  12,
+                                                                ),
+                                                          ),
+                                                    ),
+                                                    child: Column(
                                                       children: [
-                                                        Expanded(
-                                                          flex: 2,
-                                                          child: Text(
-                                                            'Dia',
-                                                            style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 12,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        Expanded(
-                                                          flex: 3,
-                                                          child: Text(
-                                                            'Vistoriados',
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 12,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        Expanded(
-                                                          flex: 3,
-                                                          child: Text(
-                                                            'Pendentes',
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 12,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        Expanded(
-                                                          flex: 2,
-                                                          child: Text(
-                                                            '%',
-                                                            textAlign:
-                                                                TextAlign.right,
-                                                            style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 12,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const Divider(),
-                                                    ...List.generate(daysInMonth, (
-                                                      i,
-                                                    ) {
-                                                      int dia = i + 1;
-                                                      int vistoriados =
-                                                          diasMap[dia]
-                                                              ?.length ??
-                                                          0;
-                                                      int pendentes =
-                                                          totalMeta -
-                                                          vistoriados;
-                                                      double perc =
-                                                          totalMeta == 0
-                                                          ? 0.0
-                                                          : (vistoriados /
-                                                                    totalMeta) *
-                                                                100;
-
-                                                      Color corTexto =
-                                                          perc >= 100
-                                                          ? Colors
-                                                                .green
-                                                                .shade700
-                                                          : (perc > 0
-                                                                ? Colors
-                                                                      .orange
-                                                                      .shade700
-                                                                : Colors
-                                                                      .red
-                                                                      .shade700);
-
-                                                      return Padding(
-                                                        padding:
-                                                            const EdgeInsets.symmetric(
-                                                              vertical: 4.0,
-                                                            ),
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Expanded(
-                                                              flex: 2,
-                                                              child: Text(
-                                                                '${dia.toString().padLeft(2, '0')}/${_mesPendencia.month.toString().padLeft(2, '0')}',
-                                                                style:
-                                                                    const TextStyle(
-                                                                      fontSize:
-                                                                          13,
+                                                        Container(
+                                                          padding:
+                                                              const EdgeInsets.symmetric(
+                                                                horizontal: 16,
+                                                                vertical: 12,
+                                                              ),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                color: corDaRota
+                                                                    .withOpacity(
+                                                                      0.1,
                                                                     ),
                                                               ),
-                                                            ),
-                                                            Expanded(
-                                                              flex: 3,
-                                                              child: Text(
-                                                                '$vistoriados',
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .center,
-                                                                style: TextStyle(
-                                                                  fontSize: 13,
-                                                                  color:
-                                                                      corTexto,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Expanded(
+                                                                flex: 2,
+                                                                child: Text(
+                                                                  'Data',
+                                                                  style: TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    fontSize:
+                                                                        13,
+                                                                    color:
+                                                                        corDaRota,
+                                                                  ),
                                                                 ),
                                                               ),
-                                                            ),
-                                                            Expanded(
-                                                              flex: 3,
-                                                              child: Text(
-                                                                '$pendentes',
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .center,
-                                                                style: TextStyle(
-                                                                  fontSize: 13,
-                                                                  color:
-                                                                      pendentes >
-                                                                          0
-                                                                      ? Colors
-                                                                            .red
-                                                                      : Colors
-                                                                            .black87,
+                                                              Expanded(
+                                                                flex: 3,
+                                                                child: Text(
+                                                                  'Vistoriados',
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .center,
+                                                                  style: TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    fontSize:
+                                                                        13,
+                                                                    color:
+                                                                        corDaRota,
+                                                                  ),
                                                                 ),
                                                               ),
-                                                            ),
-                                                            Expanded(
-                                                              flex: 2,
-                                                              child: Text(
-                                                                '${perc.toStringAsFixed(0)}%',
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .right,
-                                                                style: TextStyle(
-                                                                  fontSize: 13,
-                                                                  color:
-                                                                      corTexto,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
+                                                              Expanded(
+                                                                flex: 3,
+                                                                child: Text(
+                                                                  'Pendentes',
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .center,
+                                                                  style: TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    fontSize:
+                                                                        13,
+                                                                    color:
+                                                                        corDaRota,
+                                                                  ),
                                                                 ),
                                                               ),
-                                                            ),
-                                                          ],
+                                                              Expanded(
+                                                                flex: 2,
+                                                                child: Text(
+                                                                  '%',
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .right,
+                                                                  style: TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    fontSize:
+                                                                        13,
+                                                                    color:
+                                                                        corDaRota,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
-                                                      );
-                                                    }),
-                                                  ],
-                                                ),
+                                                        // Lista os dias do mês
+                                                        ...List.generate(daysInMonth, (
+                                                          i,
+                                                        ) {
+                                                          int dia = i + 1;
+                                                          int vistoriados =
+                                                              diasMap[dia]
+                                                                  ?.length ??
+                                                              0;
+                                                          int pendentes =
+                                                              totalMeta -
+                                                              vistoriados;
+                                                          double perc =
+                                                              totalMeta == 0
+                                                              ? 0.0
+                                                              : (vistoriados /
+                                                                        totalMeta) *
+                                                                    100;
+
+                                                          // ==== LÓGICA DE CORES DA FONTE ====
+                                                          Color corTexto;
+                                                          if (perc == 0) {
+                                                            corTexto = Colors
+                                                                .grey
+                                                                .shade500; // Cinza (Nenhuma vistoria)
+                                                          } else if (perc <
+                                                              100) {
+                                                            corTexto = Colors
+                                                                .red
+                                                                .shade600; // Vermelho (Incompleto)
+                                                          } else {
+                                                            corTexto = Colors
+                                                                .green
+                                                                .shade700; // Verde (100% Completo)
+                                                          }
+
+                                                          // ==== FUNDO ZEBRA ====
+                                                          Color corFundoLinha =
+                                                              i % 2 == 0
+                                                              ? Colors.white
+                                                              : Colors
+                                                                    .grey
+                                                                    .shade100;
+
+                                                          return Container(
+                                                            color:
+                                                                corFundoLinha,
+                                                            padding:
+                                                                const EdgeInsets.symmetric(
+                                                                  vertical:
+                                                                      10.0,
+                                                                  horizontal:
+                                                                      16.0,
+                                                                ),
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Expanded(
+                                                                  flex: 2,
+                                                                  child: Text(
+                                                                    '${dia.toString().padLeft(2, '0')}/${_mesPendencia.month.toString().padLeft(2, '0')}',
+                                                                    style: TextStyle(
+                                                                      fontSize:
+                                                                          14,
+                                                                      color:
+                                                                          corTexto,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Expanded(
+                                                                  flex: 3,
+                                                                  child: Text(
+                                                                    '$vistoriados',
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .center,
+                                                                    style: TextStyle(
+                                                                      fontSize:
+                                                                          14,
+                                                                      color:
+                                                                          corTexto,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Expanded(
+                                                                  flex: 3,
+                                                                  child: Text(
+                                                                    '$pendentes',
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .center,
+                                                                    style: TextStyle(
+                                                                      fontSize:
+                                                                          14,
+                                                                      color:
+                                                                          corTexto,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Expanded(
+                                                                  flex: 2,
+                                                                  child: Text(
+                                                                    '${perc.toStringAsFixed(0)}%',
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .right,
+                                                                    style: TextStyle(
+                                                                      fontSize:
+                                                                          14,
+                                                                      color:
+                                                                          corTexto,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          );
+                                                        }),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ),
-                            ),
-                            if (rotasOrdenadas.isNotEmpty)
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: ElevatedButton.icon(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              Colors.orange.shade700,
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 14,
-                                          ),
+                                            );
+                                          },
                                         ),
-                                        icon: const Icon(Icons.picture_as_pdf),
-                                        label: const Text(
-                                          'PDF',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        onPressed: () => _exportarPendenciasPDF(
-                                          vistoriasDiarias,
-                                          totalSemaforosPorRota,
-                                          mesFormatado,
-                                          daysInMonth,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: ElevatedButton.icon(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              Colors.green.shade700,
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 14,
-                                          ),
-                                        ),
-                                        icon: const Icon(Icons.grid_on),
-                                        label: const Text(
-                                          'Excel',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        onPressed: () =>
-                                            _exportarPendenciasExcel(
-                                              vistoriasDiarias,
-                                              totalSemaforosPorRota,
-                                              mesFormatado,
-                                              daysInMonth,
-                                            ),
-                                      ),
-                                    ),
-                                  ],
                                 ),
-                              ),
-                          ],
+                                if (rotasOrdenadas.isNotEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: ElevatedButton.icon(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  Colors.orange.shade700,
+                                              foregroundColor: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 14,
+                                                  ),
+                                            ),
+                                            icon: const Icon(
+                                              Icons.picture_as_pdf,
+                                            ),
+                                            label: const Text(
+                                              'Exportar PDF Geral',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            onPressed: () =>
+                                                _exportarPendenciasPDF(
+                                                  vistoriasDiarias,
+                                                  totalSemaforosPorRota,
+                                                  mesFormatado,
+                                                  daysInMonth,
+                                                ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: ElevatedButton.icon(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  Colors.green.shade700,
+                                              foregroundColor: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 14,
+                                                  ),
+                                            ),
+                                            icon: const Icon(Icons.grid_on),
+                                            label: const Text(
+                                              'Exportar Excel Geral',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            onPressed: () =>
+                                                _exportarPendenciasExcel(
+                                                  vistoriasDiarias,
+                                                  totalSemaforosPorRota,
+                                                  mesFormatado,
+                                                  daysInMonth,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
                         );
                       },
                     ),
