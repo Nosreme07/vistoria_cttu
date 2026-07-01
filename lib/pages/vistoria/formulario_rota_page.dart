@@ -2833,7 +2833,7 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
     }
   }
 
-  Widget _buildVisaoListaAdmin() {
+Widget _buildVisaoListaAdmin() {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -2903,38 +2903,34 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                         );
                       }
 
+                      // ==== AQUI COMEÇA O NOVO LAYOUT DO CARD ====
                       return ListView.builder(
                         padding: const EdgeInsets.all(12),
                         itemCount: _todasAsRotasAcervo.length,
                         itemBuilder: (context, index) {
                           String rota = _todasAsRotasAcervo[index];
                           bool estaEmUso = rotasAtivasMap.containsKey(rota);
-                          var t = estaEmUso
-                              ? rotasAtivasMap[rota]!.data()
-                                    as Map<String, dynamic>
-                              : null;
+                          
+                          var turnoDoc = estaEmUso ? rotasAtivasMap[rota]! : null;
+                          var t = estaEmUso ? turnoDoc!.data() as Map<String, dynamic> : null;
 
-                          String horaInicio =
-                              (t != null && t['data_inicio'] != null)
+                          String horaInicio = (t != null && t['data_inicio'] != null)
                               ? DateFormat('dd/MM/yy - HH:mm').format(
                                   (t['data_inicio'] as Timestamp).toDate(),
                                 )
                               : '';
 
-                          // ==== BUSCA INTELIGENTE DA URL DA FOTO NO DOCUMENTO DO TURNO ====
                           String? fotoUrl = t != null
                               ? (t['vistoriador_foto_url'] ??
-                                        t['foto_url'] ??
-                                        t['vistoriador_foto'])
-                                    ?.toString()
+                                      t['foto_url'] ??
+                                      t['vistoriador_foto'])
+                                  ?.toString()
                               : null;
 
                           return Card(
                             elevation: 2,
                             margin: const EdgeInsets.only(bottom: 12),
-                            color: estaEmUso
-                                ? Colors.white
-                                : Colors.green.shade50,
+                            color: estaEmUso ? Colors.white : Colors.green.shade50,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                               side: BorderSide(
@@ -2943,87 +2939,94 @@ class _FormularioRotaPageState extends State<FormularioRotaPage>
                                     : Colors.green.shade200,
                               ),
                             ),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.all(16),
-                              // ==== ALTERADO AQUI: EXIBE A FOTO SE TIVER URL E A ROTA ESTIVER EM USO ====
-                              leading: CircleAvatar(
-                                radius: 28,
-                                backgroundColor: estaEmUso
-                                    ? Colors.orange.shade100
-                                    : Colors.green.shade100,
-                                backgroundImage:
-                                    (estaEmUso &&
-                                        fotoUrl != null &&
-                                        fotoUrl.isNotEmpty)
-                                    ? NetworkImage(fotoUrl)
-                                    : null,
-                                child:
-                                    (estaEmUso &&
-                                        fotoUrl != null &&
-                                        fotoUrl.isNotEmpty)
-                                    ? null // Oculta o texto se a imagem de fundo carregar
-                                    : Text(
-                                        rota,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: estaEmUso
-                                              ? Colors.orange.shade900
-                                              : Colors.green.shade800,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                              ),
-                              title: Text(
-                                estaEmUso
-                                    ? 'Em Vistoria: ${t!['vistoriador_nome']}'
-                                    : 'Rota Livre',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: estaEmUso
-                                      ? Colors.black87
-                                      : Colors.green.shade700,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              // Transforma o card inteiro no botão de "Acompanhar"
+                              onTap: estaEmUso
+                                  ? () {
+                                      setState(() => _turnoSelecionadoAdmin = turnoDoc);
+                                    }
+                                  : null, 
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    // 1. FOTO DO VISTORIADOR OU ÍCONE
+                                    CircleAvatar(
+                                      radius: 30,
+                                      backgroundColor: estaEmUso ? Colors.orange.shade100 : Colors.green.shade100,
+                                      backgroundImage: (estaEmUso && fotoUrl != null && fotoUrl.isNotEmpty) ? NetworkImage(fotoUrl) : null,
+                                      child: (estaEmUso && fotoUrl != null && fotoUrl.isNotEmpty)
+                                          ? null // Esconde o texto/ícone se tiver foto
+                                          : Text(
+                                              estaEmUso ? '' : rota,
+                                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green.shade800, fontSize: 18),
+                                            ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    
+                                    // 2. TEXTOS E PERCENTUAL
+                                    Expanded(
+                                      child: estaEmUso
+                                          ? Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'ROTA $rota EM ANDAMENTO - ${t!['vistoriador_nome']?.toString().toUpperCase() ?? 'DESCONHECIDO'}',
+                                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.orange.shade900),
+                                                ),
+                                                const SizedBox(height: 6),
+                                                Text(
+                                                  'Placa da moto: ${t['placa'] ?? 'S/P'} | Início: $horaInicio',
+                                                  style: const TextStyle(color: Colors.black87, fontSize: 13),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                // CÁLCULO DO PERCENTUAL EM TEMPO REAL
+                                                StreamBuilder<QuerySnapshot>(
+                                                  stream: FirebaseFirestore.instance.collection('vistorias').where('turno_id', isEqualTo: turnoDoc!.id).snapshots(),
+                                                  builder: (context, snapVistorias) {
+                                                    if (snapVistorias.connectionState == ConnectionState.waiting) {
+                                                      return const Text('Percentual de rota concluída: Calculando...', style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.bold));
+                                                    }
+
+                                                    String rotaNumerica = rota.replaceAll(RegExp(r'[^0-9]'), '');
+                                                    int meta = _todosSemaforosAcervo.where((s) {
+                                                      String r = (s['rota'] ?? '').toString().replaceAll(RegExp(r'[^0-9]'), '');
+                                                      return r == rotaNumerica && r.isNotEmpty;
+                                                    }).length;
+
+                                                    if (meta == 0) return Text('Percentual de rota concluída: 0%', style: TextStyle(color: Colors.orange.shade900, fontSize: 13, fontWeight: FontWeight.bold));
+
+                                                    Set<String> vistoriados = snapVistorias.data?.docs.map((d) => (d.data() as Map<String, dynamic>)['semaforo_id'].toString()).toSet() ?? {};
+                                                    double perc = (vistoriados.length / meta) * 100;
+                                                    if (perc > 100) perc = 100;
+
+                                                    return Text(
+                                                      'Percentual de rota concluída: ${perc.toStringAsFixed(0)}%', 
+                                                      style: TextStyle(color: Colors.orange.shade900, fontSize: 13, fontWeight: FontWeight.bold)
+                                                    );
+                                                  }
+                                                ),
+                                              ],
+                                            )
+                                          : Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text('ROTA $rota LIVRE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.green.shade700)),
+                                                const SizedBox(height: 4),
+                                                const Text('Disponível para os vistoriadores.', style: TextStyle(fontSize: 12, color: Colors.black54)),
+                                              ],
+                                            ),
+                                    ),
+                                    
+                                    // 3. SETA OU STATUS FINAL
+                                    estaEmUso 
+                                      ? const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey)
+                                      : const Icon(Icons.check_circle_outline, color: Colors.green, size: 28),
+                                  ],
                                 ),
                               ),
-                              subtitle: estaEmUso
-                                  ? Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(height: 8),
-                                        Text('Moto: ${t!['placa'] ?? 'N/A'}'),
-                                        Text(
-                                          'Início: $horaInicio',
-                                          style: TextStyle(
-                                            color: Colors.grey.shade600,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : const Text(
-                                      'Disponível para os vistoriadores.',
-                                      style: TextStyle(fontSize: 12),
-                                    ),
-                              trailing: estaEmUso
-                                  ? ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.orange.shade100,
-                                        foregroundColor: Colors.orange.shade900,
-                                        elevation: 0,
-                                      ),
-                                      onPressed: () {
-                                        setState(
-                                          () => _turnoSelecionadoAdmin =
-                                              rotasAtivasMap[rota],
-                                        );
-                                      },
-                                      child: const Text('Acompanhar'),
-                                    )
-                                  : const Icon(
-                                      Icons.check_circle_outline,
-                                      color: Colors.green,
-                                    ),
                             ),
                           );
                         },

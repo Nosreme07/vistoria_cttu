@@ -45,9 +45,13 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
 
   // Variáveis para carregar o acervo mestre de rotas via Planilha
   List<String> _todasAsRotasDaPlanilha = [];
+  
+  // ==== ADICIONADO: Lista para guardar o acervo e conseguir calcular as Metas (%) ====
+  List<Map<String, dynamic>> _todosSemaforosAcervo = [];
+  
   bool _carregandoRotas = true;
 
-// Filtros da aba administrativa (Concluídos)
+  // Filtros da aba administrativa (Concluídos)
   DateTime? _dataInicioFiltro;
   DateTime? _dataFimFiltro;
   String _rotaFiltro = 'Todas';
@@ -73,21 +77,17 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
   // BUSCA DE FOTO INTELIGENTE (COLEÇÃO USUÁRIOS OU HISTÓRICO DO TURNO)
   // ========================================================================
   Future<String?> _buscarFotoVistoriador(String uid, Map<String, dynamic> turnoData) async {
-    // 1. Verifica se o documento do turno já possui a foto armazenada nele
     String? fotoTurno = (turnoData['vistoriador_foto_url'] ?? turnoData['foto_url'])?.toString();
     if (fotoTurno != null && fotoTurno.isNotEmpty) return fotoTurno;
 
     if (uid.isEmpty) return null;
-
-    // 2. Se não possuir, confere se já armazenamos essa foto no cache local da memória
     if (_cacheFotos.containsKey(uid)) return _cacheFotos[uid];
 
-    // 3. Caso contrário, vai até a coleção "usuarios" buscar a foto do perfil
     try {
       var doc = await FirebaseFirestore.instance.collection('usuarios').doc(uid).get();
       if (doc.exists && doc.data() != null) {
         String? url = doc.data()!['foto_url']?.toString();
-        _cacheFotos[uid] = url; // Alimenta o cache
+        _cacheFotos[uid] = url; 
         return url;
       }
     } catch (e) {
@@ -105,7 +105,6 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
     if (user == null) return;
 
     try {
-      // 1. Identifica os privilégios e dados de identificação do usuário logado
       final docUser = await FirebaseFirestore.instance.collection('usuarios').doc(user.uid).get();
       if (docUser.exists) {
         final dataUser = docUser.data()!;
@@ -118,7 +117,6 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
         }
       }
 
-      // 2. Busca se o vistoriador possui algum turno ativo registrado
       if (!_isAdmin) {
         final turnoAtivoQuery = await FirebaseFirestore.instance
             .collection('turnos')
@@ -133,11 +131,12 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
         }
       }
 
-      // 3. Sincroniza e extrai as rotas cadastradas da Planilha Google Drive
       const url = 'https://docs.google.com/spreadsheets/d/1fUpL6AOxFmk_RI66E09asktSYi4vyoRQ2P8ivcfiivI/export?format=tsv&gid=1606226965';
       final resposta = await http.get(Uri.parse(url));
       
       Set<String> rotasExtraidas = {};
+      List<Map<String, dynamic>> acervoTemporario = []; // Auxiliar para popular o Acervo
+
       if (resposta.statusCode == 200) {
         final tsvString = utf8.decode(resposta.bodyBytes);
         List<String> linhas = tsvString.split('\n');
@@ -154,6 +153,8 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
               if (j < valores.length) item[cabecalhos[j]] = valores[j].trim();
             }
 
+            acervoTemporario.add(item); // Salva o item para calcular % depois
+
             String rotaLimpa = (item['rota'] ?? '').toString().replaceFirst(RegExp(r'^0+'), '');
             if (rotaLimpa.isNotEmpty && rotaLimpa != 'S/R') {
               rotasExtraidas.add(rotaLimpa);
@@ -162,7 +163,6 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
         }
       }
 
-      // Ordenação numérica e alfabética das rotas mapeadas
       List<String> listaRotas = rotasExtraidas.toList();
       listaRotas.sort((a, b) {
         int numA = int.tryParse(a.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
@@ -175,6 +175,7 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
       if (mounted) {
         setState(() {
           _todasAsRotasDaPlanilha = listaRotas;
+          _todosSemaforosAcervo = acervoTemporario; // Atualiza o Acervo Mestre
           _carregandoRotas = false;
           _carregandoInicial = false;
         });
@@ -210,7 +211,6 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
     try {
       final user = FirebaseAuth.instance.currentUser!;
 
-      // Envia os dados do turno gravando também a URL estável da foto de perfil
       final novoTurnoRef = await FirebaseFirestore.instance.collection('turnos').add({
         'vistoriador_uid': user.uid,
         'vistoriador_nome': _nomeVistoriador,
@@ -224,7 +224,6 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
         'data_inicio': FieldValue.serverTimestamp(),
       });
 
-      // Vincula tranca de uso ao veículo selecionado
       await FirebaseFirestore.instance.collection('veiculos').doc(_veiculoSelecionadoId).update({'em_uso': true});
 
       final turnoCriado = await novoTurnoRef.get();
@@ -316,6 +315,24 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
     );
   }
 
+// ==== ADICIONADO: FUNÇÃO PARA CALCULAR O PERCENTUAL DURANTE A EXPORTAÇÃO ====
+  Future<String> _calcularPercentualExportacao(String turnoId, String rotaNumero) async {
+    String rotaNumerica = rotaNumero.replaceAll(RegExp(r'[^0-9]'), '');
+    int meta = _todosSemaforosAcervo.where((s) {
+      String r = (s['rota'] ?? '').toString().replaceAll(RegExp(r'[^0-9]'), '');
+      return r == rotaNumerica && r.isNotEmpty;
+    }).length;
+    
+    if (meta == 0) return '0%';
+
+    var snap = await FirebaseFirestore.instance.collection('vistorias').where('turno_id', isEqualTo: turnoId).get();
+    Set<String> vistoriados = snap.docs.map((d) => (d.data() as Map<String, dynamic>)['semaforo_id'].toString()).toSet();
+    
+    double perc = (vistoriados.length / meta) * 100;
+    if (perc > 100) perc = 100; // Evita passar de 100% se houver vistorias extras
+    return '${perc.toStringAsFixed(0)}%';
+  }
+
   // ========================================================================
   // EXPORTAÇÃO COMPLETA EM PDF GLOBAL DOS TURNOS FINALIZADOS (ADMIN)
   // ========================================================================
@@ -333,6 +350,28 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
         if (tempoA == null) return 1; if (tempoB == null) return -1;
         return tempoA.compareTo(tempoB);
       });
+
+      // Busca o percentual de todos os itens antes de gerar o PDF
+      List<List<String>> dadosDaTabela = [];
+      for (var doc in turnosOrdenados) {
+        var t = doc.data() as Map<String, dynamic>;
+        String inicio = t['data_inicio'] != null ? DateFormat('dd/MM/yyyy HH:mm:ss').format((t['data_inicio'] as Timestamp).toDate()) : '-';
+        String fim = t['data_fim'] != null ? DateFormat('dd/MM/yyyy HH:mm:ss').format((t['data_fim'] as Timestamp).toDate()) : '-';
+        
+        // Chama a nova função para pegar a porcentagem exata deste turno
+        String perc = await _calcularPercentualExportacao(doc.id, t['rota_numero']?.toString() ?? '');
+
+        dadosDaTabela.add([
+          (t['rota_numero'] ?? '-').toString().toUpperCase(),
+          (t['vistoriador_nome'] ?? '-').toString().toUpperCase(),
+          (t['placa'] ?? '-').toString().toUpperCase(),
+          (t['km_inicial'] ?? '-').toString().toUpperCase(),
+          (t['km_final'] ?? '-').toString().toUpperCase(),
+          inicio, 
+          fim,
+          perc // Adiciona a porcentagem na linha
+        ]);
+      }
 
       final pdf = pw.Document();
       String dataHoraAtual = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now()).toUpperCase();
@@ -373,25 +412,14 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
               pw.SizedBox(height: 16),
               pw.TableHelper.fromTextArray(
                 context: context,
-                headers: ['ROTA', 'VISTORIADOR', 'MOTO', 'KM INICIAL', 'KM FINAL', 'INÍCIO', 'FIM'],
-                data: turnosOrdenados.map((doc) {
-                  var t = doc.data() as Map<String, dynamic>;
-                  String inicio = t['data_inicio'] != null ? DateFormat('dd/MM/yyyy HH:mm:ss').format((t['data_inicio'] as Timestamp).toDate()) : '-';
-                  String fim = t['data_fim'] != null ? DateFormat('dd/MM/yyyy HH:mm:ss').format((t['data_fim'] as Timestamp).toDate()) : '-';
-                  return [
-                    (t['rota_numero'] ?? '-').toString().toUpperCase(),
-                    (t['vistoriador_nome'] ?? '-').toString().toUpperCase(),
-                    (t['placa'] ?? '-').toString().toUpperCase(),
-                    (t['km_inicial'] ?? '-').toString().toUpperCase(),
-                    (t['km_final'] ?? '-').toString().toUpperCase(),
-                    inicio, fim
-                  ];
-                }).toList(),
+                // ==== MODIFICADO: COLUNA DE CONCLUSÃO ADICIONADA AO CABEÇALHO ====
+                headers: ['ROTA', 'VISTORIADOR', 'MOTO', 'KM INICIAL', 'KM FINAL', 'INÍCIO', 'FIM', 'CONCLUÍDO'],
+                data: dadosDaTabela,
                 headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 10),
                 headerDecoration: const pw.BoxDecoration(color: PdfColors.teal700),
                 cellStyle: const pw.TextStyle(fontSize: 9),
-                cellAlignment: pw.Alignment.center,     // Alinhamento centralizado em todas as dimensões da célula
-                headerAlignment: pw.Alignment.center,   // Alinhamento do cabeçalho centralizado
+                cellAlignment: pw.Alignment.center,     
+                headerAlignment: pw.Alignment.center,   
               ),
             ];
           }
@@ -410,14 +438,29 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
     if (turnos.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('GERANDO PLANILHA EXCEL...'), backgroundColor: Colors.green));
     try {
+      
+      // Ordena também para o Excel
+      List<DocumentSnapshot> turnosOrdenados = List.from(turnos);
+      turnosOrdenados.sort((a, b) {
+        var dataA = a.data() as Map<String, dynamic>; var dataB = b.data() as Map<String, dynamic>;
+        Timestamp? tempoA = dataA['data_inicio'] as Timestamp?; Timestamp? tempoB = dataB['data_inicio'] as Timestamp?;
+        if (tempoA == null && tempoB == null) return 0;
+        if (tempoA == null) return 1; if (tempoB == null) return -1;
+        return tempoA.compareTo(tempoB);
+      });
+
       StringBuffer excelBuffer = StringBuffer();
       excelBuffer.write('<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><table border="1">');
-      excelBuffer.write('<tr style="background-color: #00796B; color: white; font-weight: bold; text-align: center;"><td>ROTA</td><td>VISTORIADOR</td><td>MOTO</td><td>KM INICIAL</td><td>KM FINAL</td><td>INÍCIO</td><td>FIM</td></tr>');
+      // ==== MODIFICADO: COLUNA DE CONCLUSÃO ADICIONADA AO CABEÇALHO ====
+      excelBuffer.write('<tr style="background-color: #00796B; color: white; font-weight: bold; text-align: center;"><td>ROTA</td><td>VISTORIADOR</td><td>MOTO</td><td>KM INICIAL</td><td>KM FINAL</td><td>INÍCIO</td><td>FIM</td><td>CONCLUÍDO</td></tr>');
       
-      for (var doc in turnos) {
+      for (var doc in turnosOrdenados) {
         var t = doc.data() as Map<String, dynamic>;
         String inicio = t['data_inicio'] != null ? DateFormat('dd/MM/yyyy HH:mm:ss').format((t['data_inicio'] as Timestamp).toDate()) : '-';
         String fim = t['data_fim'] != null ? DateFormat('dd/MM/yyyy HH:mm:ss').format((t['data_fim'] as Timestamp).toDate()) : '-';
+        
+        // Chama a nova função para calcular
+        String perc = await _calcularPercentualExportacao(doc.id, t['rota_numero']?.toString() ?? '');
         
         excelBuffer.write('<tr>');
         excelBuffer.write('<td style="text-align: center; vertical-align: middle;">${(t['rota_numero'] ?? '-').toString().toUpperCase()}</td>');
@@ -427,6 +470,8 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
         excelBuffer.write('<td style="text-align: center; vertical-align: middle;">${(t['km_final'] ?? '-').toString().toUpperCase()}</td>');
         excelBuffer.write('<td style="text-align: center; vertical-align: middle;">$inicio</td>');
         excelBuffer.write('<td style="text-align: center; vertical-align: middle;">$fim</td>');
+        // ==== MODIFICADO: ADICIONADA CÉLULA COM A PORCENTAGEM ====
+        excelBuffer.write('<td style="text-align: center; vertical-align: middle; color: green; font-weight: bold;">$perc</td>');
         excelBuffer.write('</tr>');
       }
       excelBuffer.write('</table></body></html>');
@@ -529,16 +574,19 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
   }
 
   // ==========================================
-  // CONSTRUÇÃO COMPLETA DA VISTA DE EM ANDAMENTO
+  // ABA 1 DO ADMIN: EM ANDAMENTO
   // ==========================================
   Widget _buildAbaEmAndamento() {
     return Column(
       children: [
         Container(
-          width: double.infinity, padding: const EdgeInsets.all(16), color: Colors.teal.shade50,
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          color: Colors.teal.shade50,
           child: const Column(
             children: [
-              Icon(Icons.directions_run, size: 48, color: Colors.teal), const SizedBox(height: 8),
+              Icon(Icons.directions_run, size: 48, color: Colors.teal),
+              SizedBox(height: 8),
               Text('Vistoriadores em Rota', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal)),
               Text('Acompanhamento em tempo real', style: TextStyle(color: Colors.black54)),
             ],
@@ -554,19 +602,24 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
               final turnos = snapshot.data!.docs.toList();
               
               turnos.sort((a, b) {
-                var dataA = a.data() as Map<String, dynamic>; var dataB = b.data() as Map<String, dynamic>;
-                Timestamp? tempoA = dataA['data_inicio'] as Timestamp?; Timestamp? tempoB = dataB['data_inicio'] as Timestamp?;
+                var dataA = a.data() as Map<String, dynamic>;
+                var dataB = b.data() as Map<String, dynamic>;
+                Timestamp? tempoA = dataA['data_inicio'] as Timestamp?;
+                Timestamp? tempoB = dataB['data_inicio'] as Timestamp?;
                 if (tempoA == null && tempoB == null) return 0;
-                if (tempoA == null) return 1; if (tempoB == null) return -1;
+                if (tempoA == null) return 1;
+                if (tempoB == null) return -1;
                 return tempoB.compareTo(tempoA); 
               });
 
               if (turnos.isEmpty) return const Center(child: Text('Nenhum vistoriador em campo no momento.', style: TextStyle(color: Colors.grey, fontSize: 16)));
 
               return ListView.builder(
-                padding: const EdgeInsets.all(16), itemCount: turnos.length,
+                padding: const EdgeInsets.all(16),
+                itemCount: turnos.length,
                 itemBuilder: (context, index) {
-                  final t = turnos[index].data() as Map<String, dynamic>;
+                  final turnoDoc = turnos[index];
+                  final t = turnoDoc.data() as Map<String, dynamic>;
                   String uidVistoriador = t['vistoriador_uid']?.toString() ?? '';
                   String horaInicio = t['data_inicio'] != null ? DateFormat('dd/MM/yy - HH:mm').format((t['data_inicio'] as Timestamp).toDate()) : 'Aguardando...';
 
@@ -578,23 +631,68 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
                       return Card(
                         elevation: 2, margin: const EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        child: ListTile(
+                        child: InkWell(
                           onTap: () => _mostrarDetalhesTurnoAdmin(t, 'EM ANDAMENTO', fotoUrl),
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.teal.shade100, 
-                            backgroundImage: fotoUrl != null && fotoUrl.isNotEmpty ? NetworkImage(fotoUrl) : null,
-                            child: fotoUrl == null || fotoUrl.isEmpty ? const Icon(Icons.person, color: Colors.teal) : null,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                CircleAvatar(
+                                  radius: 35,
+                                  backgroundColor: Colors.teal.shade100, 
+                                  backgroundImage: fotoUrl != null && fotoUrl.isNotEmpty ? NetworkImage(fotoUrl) : null,
+                                  child: fotoUrl == null || fotoUrl.isEmpty ? const Icon(Icons.person, color: Colors.teal, size: 35) : null,
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        t['vistoriador_nome']?.toString().toUpperCase() ?? 'DESCONHECIDO', 
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text('Rota ${t['rota_numero'] ?? 'S/R'} | Placa da moto: ${t['placa'] ?? 'S/P'}', style: const TextStyle(color: Colors.black87, fontSize: 13)),
+                                      const SizedBox(height: 2),
+                                      Text('Início: $horaInicio', style: const TextStyle(color: Colors.black87, fontSize: 13)),
+                                      const SizedBox(height: 2),
+                                      
+                                      // Calcula a porcentagem em tempo real de forma segura
+                                      StreamBuilder<QuerySnapshot>(
+                                        stream: FirebaseFirestore.instance.collection('vistorias').where('turno_id', isEqualTo: turnoDoc.id).snapshots(),
+                                        builder: (context, snapVistorias) {
+                                          if (snapVistorias.connectionState == ConnectionState.waiting) {
+                                            return const Text('Percentual de rota concluída: Calculando...', style: TextStyle(color: Colors.grey, fontSize: 13));
+                                          }
+                                          if (snapVistorias.hasError || !snapVistorias.hasData) {
+                                            return const Text('Percentual de rota concluída: N/A', style: TextStyle(color: Colors.grey, fontSize: 13));
+                                          }
+
+                                          String rotaNumerica = (t['rota_numero']?.toString() ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                                          int meta = _todosSemaforosAcervo.where((s) {
+                                            String r = (s['rota'] ?? '').toString().replaceAll(RegExp(r'[^0-9]'), '');
+                                            return r == rotaNumerica && r.isNotEmpty;
+                                          }).length;
+
+                                          if (meta == 0) return Text('Percentual de rota concluída: 0%', style: TextStyle(color: Colors.teal.shade700, fontSize: 13, fontWeight: FontWeight.bold));
+
+                                          Set<String> vistoriados = snapVistorias.data!.docs.map((d) => (d.data() as Map<String, dynamic>)['semaforo_id'].toString()).toSet();
+                                          double perc = (vistoriados.length / meta) * 100;
+                                          if (perc > 100) perc = 100;
+
+                                          return Text('Percentual de rota concluída: ${perc.toStringAsFixed(0)}%', style: TextStyle(color: Colors.teal.shade700, fontSize: 13, fontWeight: FontWeight.bold));
+                                        }
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                              ],
+                            ),
                           ),
-                          title: Text(t['vistoriador_nome'] ?? 'Desconhecido', style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 4),
-                              Text('Rota: ${t['rota_numero'] ?? 'S/R'} | Moto: ${t['placa'] ?? 'S/P'}'),
-                              Text('Início: $horaInicio', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-                            ],
-                          ),
-                          trailing: const Icon(Icons.motorcycle, color: Colors.teal),
                         ),
                       );
                     }
@@ -608,7 +706,7 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
     );
   }
 
-// ==========================================
+  // ==========================================
   // ABA 2 DO ADMIN: CONCLUÍDOS
   // ==========================================
   Widget _buildAbaConcluidos() {
@@ -645,7 +743,6 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
 
               const SizedBox(height: 16),
               
-              // ==== ADICIONADO: BOTÃO APLICAR FILTROS ====
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -661,7 +758,6 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
                 ),
               ),
 
-              // ==== ADICIONADO: BOTÃO LIMPAR FILTROS FICA VISÍVEL APÓS APLICAR ====
               if (_dataInicioFiltro != null || _dataFimFiltro != null || _rotaFiltro != 'Todas' || _filtrosAplicadosConcluidos) ...[
                 const SizedBox(height: 8),
                 Align(
@@ -674,7 +770,7 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
                       _dataInicioFiltro = null; 
                       _dataFimFiltro = null; 
                       _rotaFiltro = 'Todas'; 
-                      _filtrosAplicadosConcluidos = false; // Esconde a lista novamente
+                      _filtrosAplicadosConcluidos = false; 
                     }),
                   ),
                 ),
@@ -754,9 +850,11 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
                               padding: const EdgeInsets.all(12),
                               itemCount: turnosFiltrados.length,
                               itemBuilder: (context, index) {
-                                final t = turnosFiltrados[index].data() as Map<String, dynamic>;
+                                final turnoDoc = turnosFiltrados[index];
+                                final t = turnoDoc.data() as Map<String, dynamic>;
                                 String uidVistoriador = t['vistoriador_uid']?.toString() ?? '';
-                                String horaFim = t['data_fim'] != null ? DateFormat('dd/MM/yy HH:mm').format((t['data_fim'] as Timestamp).toDate()) : '-';
+                                String horaInicio = t['data_inicio'] != null ? DateFormat('dd/MM/yy - HH:mm').format((t['data_inicio'] as Timestamp).toDate()) : '-';
+                                String horaFim = t['data_fim'] != null ? DateFormat('dd/MM/yy - HH:mm').format((t['data_fim'] as Timestamp).toDate()) : '-';
                                 String kmRodado = 'N/A';
                                 
                                 try {
@@ -775,23 +873,67 @@ class _IniciarTurnoPageState extends State<IniciarTurnoPage> {
                                     return Card(
                                       elevation: 1, margin: const EdgeInsets.only(bottom: 8),
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                      child: ListTile(
+                                      child: InkWell(
                                         onTap: () => _mostrarDetalhesTurnoAdmin(t, 'CONCLUÍDO', fotoUrl),
-                                        leading: CircleAvatar(
-                                          backgroundColor: Colors.green.shade100, 
-                                          backgroundImage: fotoUrl != null && fotoUrl.isNotEmpty ? NetworkImage(fotoUrl) : null,
-                                          child: fotoUrl == null || fotoUrl.isEmpty ? const Icon(Icons.check, color: Colors.green) : null,
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(16.0),
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 35,
+                                                backgroundColor: Colors.green.shade100, 
+                                                backgroundImage: fotoUrl != null && fotoUrl.isNotEmpty ? NetworkImage(fotoUrl) : null,
+                                                child: fotoUrl == null || fotoUrl.isEmpty ? const Icon(Icons.check, color: Colors.green, size: 35) : null,
+                                              ),
+                                              const SizedBox(width: 16),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      t['vistoriador_nome']?.toString().toUpperCase() ?? 'DESCONHECIDO', 
+                                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)
+                                                    ),
+                                                    const SizedBox(height: 4),
+                                                    Text('Rota ${t['rota_numero'] ?? 'S/R'} | Placa da moto: ${t['placa'] ?? 'S/P'}', style: const TextStyle(color: Colors.black87, fontSize: 13)),
+                                                    const SizedBox(height: 2),
+                                                    Text('Início: $horaInicio', style: const TextStyle(color: Colors.black87, fontSize: 13)),
+                                                    const SizedBox(height: 2),
+                                                    // CÁLCULO SEGURO E EM TEMPO REAL
+                                                    StreamBuilder<QuerySnapshot>(
+                                                      stream: FirebaseFirestore.instance.collection('vistorias').where('turno_id', isEqualTo: turnoDoc.id).snapshots(),
+                                                      builder: (context, snapVistorias) {
+                                                        if (snapVistorias.connectionState == ConnectionState.waiting) {
+                                                          return const Text('Percentual de rota concluída: Calculando...', style: TextStyle(color: Colors.grey, fontSize: 13));
+                                                        }
+                                                        if (snapVistorias.hasError || !snapVistorias.hasData) {
+                                                          return const Text('Percentual de rota concluída: N/A', style: TextStyle(color: Colors.grey, fontSize: 13));
+                                                        }
+
+                                                        String rotaNumerica = (t['rota_numero']?.toString() ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                                                        int meta = _todosSemaforosAcervo.where((s) {
+                                                          String r = (s['rota'] ?? '').toString().replaceAll(RegExp(r'[^0-9]'), '');
+                                                          return r == rotaNumerica && r.isNotEmpty;
+                                                        }).length;
+
+                                                        if (meta == 0) return Text('Percentual de rota concluída: 0%', style: TextStyle(color: Colors.green.shade700, fontSize: 13, fontWeight: FontWeight.bold));
+
+                                                        Set<String> vistoriados = snapVistorias.data!.docs.map((d) => (d.data() as Map<String, dynamic>)['semaforo_id'].toString()).toSet();
+                                                        double perc = (vistoriados.length / meta) * 100;
+                                                        if (perc > 100) perc = 100;
+
+                                                        return Text('Percentual de rota concluída: ${perc.toStringAsFixed(0)}%', style: TextStyle(color: Colors.green.shade700, fontSize: 13, fontWeight: FontWeight.bold));
+                                                      }
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                                            ],
+                                          ),
                                         ),
-                                        title: Text(t['vistoriador_nome'] ?? 'Desconhecido', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                                        subtitle: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const SizedBox(height: 4),
-                                            Text('Rota: ${t['rota_numero'] ?? 'S/R'} | Moto: ${t['placa'] ?? 'S/P'}', style: const TextStyle(color: Colors.black87)),
-                                            Text('Encerrado: $horaFim', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-                                          ],
-                                        ),
-                                        trailing: Text(kmRodado, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey, fontSize: 12)),
                                       ),
                                     );
                                   }
